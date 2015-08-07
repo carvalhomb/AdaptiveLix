@@ -73,6 +73,7 @@ CRO_WINDRES = i586-mingw32msvc-windres
 CRO_MINGDIR  = /usr/i586-mingw32msvc
 
 CRO_LDALLEG  = -L$(CRO_MINGDIR)/lib --subsystem,windows -mwindows -lalleg44.dll
+#CRO_LDALLEG  = -L$(CRO_MINGDIR)/lib -mwindows -lalleg44.dll
 CRO_LDENET   = -L$(CRO_MINGDIR)/lib -lenet -lws2_32 -lwinmm
 CRO_LDPNG    = -L$(CRO_MINGDIR)/lib -lpng -lz
 CRO_CPPFLAGS = -I$(CRO_MINGDIR)/include
