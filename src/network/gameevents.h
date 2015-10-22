@@ -10,6 +10,11 @@
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <libconfig.h++>
+
 class GameEvents
 {
     public:
@@ -18,4 +23,5 @@ class GameEvents
         int test_connection();
     protected:
     private:
+
 };
