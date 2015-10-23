@@ -1,3 +1,22 @@
+#pragma once
+
+//#include "../other/myalleg.h" //needs to come first
+
+#include "../other/lmain.h" // Main object to manage the different parts of the program
+#include "../other/user.h"
+#include "../other/verify.h"
+#include "../other/file/log.h"
+#include "../other/language.h"
+
+#include "../lix/lix_enum.h" // initialize strings
+#include "../graphic/png/loadpng.h"
+
+
+
+#include "../other/user.h"
+#include "../other/verify.h"
+#include "../other/globals.h"
+
 #include <algorithm>  // for copy
 #include <iterator>
 #include <string>
@@ -15,12 +34,24 @@
 #include <cstdlib>
 #include <libconfig.h++>
 
+
+#include "../other/file/log.h"
+
+
 class GameEvents
 {
     public:
-        GameEvents();
-        virtual ~GameEvents();
-        int test_connection();
+        //GameEvents();
+        //virtual ~GameEvents();
+        static bool configure();
+        static int init_connection();
+        static int send_event();
+        static int close_connection();
+        static int mymain();
+        static std::string service_endpoint;
+        static std::string clientid;
+        static std::string apikey;
+        static std::string token;
     protected:
     private:
 

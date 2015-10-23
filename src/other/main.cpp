@@ -49,6 +49,8 @@
 #include "../lix/lix_enum.h" // initialize strings
 #include "../graphic/png/loadpng.h"
 
+#include "../network/gameevents.h"
+
 struct MainArgs {
     bool print_version_and_exit;
     bool print_help_and_exit;
@@ -68,7 +70,7 @@ static void     print_usage();
 
 
 
-int main(int argc, char* argv[])
+int oldmain(int argc, char* argv[])
 {
     MainArgs margs = parse_main_arguments(argc, argv);
 
@@ -154,9 +156,12 @@ int main(int argc, char* argv[])
         Network::initialize();
 
         // Main loop. See other/lmain.cpp for this.
-        LMain* l_main = new LMain;
+        /*LMain* l_main = new LMain;
         l_main->main_loop();
-        delete l_main;
+        delete l_main;*/
+        GameEvents *ge = new GameEvents();
+        ge->mymain();
+        delete ge;
 
         // Clean up
         useR->save();
@@ -174,6 +179,66 @@ int main(int argc, char* argv[])
         Verifier(margs.replays_to_verify);
     }
 
+    Log::deinitialize();
+    Globals::deinitialize();
+
+    // don't call allegro_exit(), doing that causes the program
+    // to not terminate in rare cases
+    return 0;
+}
+//END_OF_MAIN()
+
+int main(int argc, char* argv[]) //temp main
+{
+
+    MainArgs margs = parse_main_arguments(argc, argv);
+
+    if (margs.print_version_and_exit) {
+        std::cout << Help::version_to_string(Globals::version) << std::endl;
+        return 0;
+    }
+    else if (margs.print_help_and_exit) {
+        print_usage();
+        return 0;
+    }
+
+    setenv_allegro_modules();
+    allegro_init();
+    unsetenv_allegro_modules();
+
+    Help::timer_start();
+
+    Globals::initialize();
+    User::initialize();
+    Log::initialize();
+    //LixEn::initialize();
+
+    // Check whether the Globals decided we're in one of the accepted
+    // working directories, so all files are found. Otherwise, exit with error.
+    if (! Help::dir_exists(gloB->dir_data_bitmap)) {
+        allegro_message("%s", gloB->error_wrong_working_dir.c_str());
+        Log::deinitialize();
+        Globals::deinitialize();
+        return -1;
+    }
+
+    gloB->load();
+    gloB->user_name = "";
+
+    useR->load();
+
+    Network::initialize();
+    Log::log("Hello world!");
+    GameEvents::mymain();
+    Log::log("Goodbye world!");
+
+    // Clean up
+    //Log::log("Going to save useR");
+    //useR->save(); <<- this function in giving me trouble
+    //Log::log("Going to save gloB");
+    //gloB->save();
+
+    Network::deinitialize();
     Log::deinitialize();
     Globals::deinitialize();
 
