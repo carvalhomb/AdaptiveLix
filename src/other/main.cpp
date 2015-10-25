@@ -211,7 +211,7 @@ int main(int argc, char* argv[]) //temp main
     Globals::initialize();
     User::initialize();
     Log::initialize();
-    //LixEn::initialize();
+    LixEn::initialize();
 
     // Check whether the Globals decided we're in one of the accepted
     // working directories, so all files are found. Otherwise, exit with error.
@@ -233,10 +233,10 @@ int main(int argc, char* argv[]) //temp main
     Log::log("Goodbye world!");
 
     // Clean up
-    //Log::log("Going to save useR");
-    //useR->save(); <<- this function in giving me trouble
-    //Log::log("Going to save gloB");
-    //gloB->save();
+    Log::log("Going to save useR");
+    useR->save(); // <<- this function in giving me trouble
+    Log::log("Going to save gloB");
+    gloB->save();
 
     Network::deinitialize();
     Log::deinitialize();
