@@ -23,6 +23,8 @@
 #include <iostream>   // for cout, istream
 
 #include <Poco/Exception.h>
+#include <Poco/JSON/Parser.h>
+#include <Poco/Dynamic/Var.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>

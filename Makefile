@@ -10,8 +10,8 @@ LDALLEG  = $(shell allegro-config --libs) -Wl,-rpath,./bin/lib:./lib
 LDENET   = $(shell $(PKG_CONFIG) --libs libenet 2>/dev/null || echo "-L/usr/local/lib -lenet")
 LDPNG    = $(shell $(PKG_CONFIG) --libs libpng zlib 2>/dev/null || echo "-lpng -lz")
 LDCONFIG    = $(shell $(PKG_CONFIG) --libs libconfig++ 2>/dev/null || echo "-lconfig++")
-LDPOCO    = $(shell $(PKG_CONFIG) --libs libPoco 2>/dev/null || echo "-lPocoNet -lPocoUtil -lPocoFoundation")
-CPPFLAGS += $(shell $(PKG_CONFIG) --cflags libpng zlib libenet libPocoNet libPocoUtil libPocoFoundation libconfig++ 2>/dev/null) $(shell allegro-config --cflags)
+LDPOCO    = $(shell $(PKG_CONFIG) --libs libPoco 2>/dev/null || echo "-L/usr/local/lib -lPocoNet -lPocoJSON -lPocoUtil -lPocoFoundation")
+CPPFLAGS += $(shell $(PKG_CONFIG) --cflags libpng zlib libenet libPocoJSON libPocoNet libPocoUtil libPocoFoundation libconfig++ 2>/dev/null) $(shell allegro-config --cflags)
 
 STRIP    = strip
 
@@ -118,7 +118,7 @@ cross: $(CRO_CLIENT_BIN) $(CRO_SERVER_BIN)
 $(CLIENT_BIN): $(CLIENT_OBJS)
 	$(Q)$(MKDIR) $(BINDIR)
 	@echo Linking the game \`$(CLIENT_BIN)\' with \
-		$(LDALLEG) $(LDENET) $(LDPNG)
+		$(LDALLEG) $(LDENET) $(LDPNG) $(LDPOCO)
 	$(Q)$(LD) $(CXXFLAGS) $(CPPFLAGS) $(LDALLEG) $(LDENET) $(LDPNG) $(LDCONFIG) $(LDPOCO) \
 		$(CLIENT_OBJS) -o $(CLIENT_BIN) > /dev/null
 	$(Q)$(STRIP) $(CLIENT_BIN)

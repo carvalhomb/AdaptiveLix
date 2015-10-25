@@ -8,6 +8,7 @@ using namespace std;
 string GameEvents::service_endpoint = "";
 string GameEvents::clientid = "";
 string GameEvents::apikey = "";
+string GameEvents::token = "";
 
 bool GameEvents::configure()
 {
@@ -119,6 +120,12 @@ int GameEvents::init_connection()
             //ostream_iterator<char>(response_body) );
             Log::log(Log::INFO, "Body of the response:");
             Log::log(Log::INFO, response_body.str());
+
+            Poco::JSON::Parser parser;
+            Poco::Dynamic::Var result = parser.parse(response_body.str());
+            Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+            string msg = object->get("token");
+            Log::log(Log::INFO, msg);
             //ostream_iterator<char>(cout));
             return(EXIT_SUCCESS);
         }

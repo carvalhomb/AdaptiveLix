@@ -228,14 +228,11 @@ int main(int argc, char* argv[]) //temp main
     useR->load();
 
     Network::initialize();
-    Log::log("Hello world!");
-    GameEvents::mymain();
-    Log::log("Goodbye world!");
+    GameEvents::mymain(); //Here I call my module
+
 
     // Clean up
-    Log::log("Going to save useR");
-    useR->save(); // <<- this function in giving me trouble
-    Log::log("Going to save gloB");
+    useR->save();
     gloB->save();
 
     Network::deinitialize();

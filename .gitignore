@@ -6,7 +6,8 @@
 # also all binaries, including Windows ones
 obj/*
 deps/*
-bin/*
+bin/lix*
+bin/test*
 *.layout
 *.depend
 
