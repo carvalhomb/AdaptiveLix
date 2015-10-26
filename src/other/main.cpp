@@ -40,6 +40,8 @@
 
 #include <iostream>
 
+#include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
+
 #include "lmain.h" // Main object to manage the different parts of the program
 #include "user.h"
 #include "verify.h"

@@ -122,30 +122,9 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option projectCompilerOptionsRelation="1" />
-				<Option projectLinkerOptionsRelation="1" />
-				<Option projectIncludeDirsRelation="1" />
 				<Compiler>
 					<Add option="-O3" />
-					<Add option="-Wall" />
-					<Add option="-ansi" />
-					<Add option="-W" />
-					<Add option="-D__NO_INLINE__" />
-					<Add option="-D_WIN32_WINNT=0x0501" />
 				</Compiler>
-				<Linker>
-					<Add option="-lalleg44" />
-					<Add option="-mwindows" />
-					<Add option="-lenet" />
-					<Add option="-lpng -lz" />
-					<Add option="-lwinmm" />
-					<Add option="-lPocoNet" />
-					<Add option="-lPocoUtil" />
-					<Add option="-lPocoFoundation" />
-					<Add option="-liphlpapi" />
-					<Add option="-lws2_32" />
-					<Add option="-lconfig++" />
-				</Linker>
 			</Target>
 			<Target title="TestNetworkDebug">
 				<Option platforms="Windows;" />
@@ -176,144 +155,716 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 					<Add option="-lconfig++" />
 				</Linker>
 			</Target>
+			<Target title="SmallTest">
+				<Option platforms="Windows;" />
+				<Option output="../bin/networktest.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../" />
+				<Option object_output="../obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Option projectCompilerOptionsRelation="1" />
+				<Option projectLinkerOptionsRelation="1" />
+				<Option projectIncludeDirsRelation="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-W" />
+					<Add option="-nostdinc" />
+					<Add option="-D__NO_INLINE__" />
+					<Add directory="c:/mingw/bin/../include" />
+					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++" />
+					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++/mingw32" />
+					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++/backward" />
+					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include" />
+					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include-fixed" />
+					<Add directory="c:/mingw/bin/../mingw32/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-lalleg44" />
+					<Add option="-liphlpapi" />
+					<Add option="-lwinmm" />
+					<Add option="-lws2_32" />
+					<Add option="-mwindows" />
+					<Add option="-lenet" />
+					<Add option="-lpng" />
+					<Add option="-lz" />
+					<Add option="-lPocoNet" />
+					<Add option="-lPocoUtil" />
+					<Add option="-lPocoFoundation" />
+					<Add option="-lPocoJSON" />
+					<Add option="-lconfig++" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add option="-ansi" />
 			<Add option="-W" />
+			<Add option="-nostdinc" />
 			<Add option="-D__NO_INLINE__" />
+			<Add directory="c:/mingw/bin/../include" />
+			<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++" />
+			<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++/mingw32" />
+			<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++/backward" />
+			<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include" />
+			<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include-fixed" />
+			<Add directory="c:/mingw/bin/../mingw32/include" />
 		</Compiler>
 		<Linker>
 			<Add option="-lalleg44" />
 			<Add option="-mwindows" />
 			<Add option="-lenet" />
-			<Add option="-lpng -lz" />
-			<Add option="-lws2_32" />
+			<Add option="-lpng" />
+			<Add option="-lz" />
 			<Add option="-lwinmm" />
+			<Add option="-lPocoNet" />
+			<Add option="-lPocoJSON" />
+			<Add option="-lPocoUtil" />
+			<Add option="-lPocoFoundation" />
+			<Add option="-liphlpapi" />
+			<Add option="-lws2_32" />
+			<Add option="-lconfig++" />
 		</Linker>
-		<Unit filename="api/brow_sav.cpp" />
+		<Unit filename="api/brow_sav.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/brow_sav.h" />
-		<Unit filename="api/button/b_bitmap.cpp" />
+		<Unit filename="api/button/b_bitmap.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/b_bitmap.h" />
-		<Unit filename="api/button/b_combin.cpp" />
+		<Unit filename="api/button/b_combin.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/b_combin.h" />
-		<Unit filename="api/button/b_enum.cpp" />
+		<Unit filename="api/button/b_enum.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/b_enum.h" />
-		<Unit filename="api/button/b_key.cpp" />
+		<Unit filename="api/button/b_key.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/b_key.h" />
-		<Unit filename="api/button/b_skill.cpp" />
+		<Unit filename="api/button/b_skill.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/b_skill.h" />
-		<Unit filename="api/button/b_spawn.cpp" />
+		<Unit filename="api/button/b_spawn.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/b_spawn.h" />
-		<Unit filename="api/button/b_text.cpp" />
+		<Unit filename="api/button/b_text.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/b_text.h" />
-		<Unit filename="api/button/button.cpp" />
+		<Unit filename="api/button/button.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/button/button.h" />
-		<Unit filename="api/element.cpp" />
+		<Unit filename="api/element.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/element.h" />
-		<Unit filename="api/frame.cpp" />
+		<Unit filename="api/frame.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/frame.h" />
-		<Unit filename="api/label.cpp" />
+		<Unit filename="api/label.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/label.h" />
-		<Unit filename="api/labeltwo.cpp" />
+		<Unit filename="api/labeltwo.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/labeltwo.h" />
-		<Unit filename="api/list_dir.cpp" />
+		<Unit filename="api/list_dir.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/list_dir.h" />
-		<Unit filename="api/list_fil.cpp" />
+		<Unit filename="api/list_fil.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/list_fil.h" />
-		<Unit filename="api/list_lev.cpp" />
+		<Unit filename="api/list_lev.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/list_lev.h" />
-		<Unit filename="api/manager.cpp" />
+		<Unit filename="api/manager.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/manager.h" />
-		<Unit filename="api/message.cpp" />
+		<Unit filename="api/message.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/message.h" />
-		<Unit filename="api/number.cpp" />
+		<Unit filename="api/number.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/number.h" />
-		<Unit filename="api/texttype.cpp" />
+		<Unit filename="api/texttype.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/texttype.h" />
-		<Unit filename="api/window.cpp" />
+		<Unit filename="api/window.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="api/window.h" />
-		<Unit filename="editor/bit_brow.cpp" />
+		<Unit filename="editor/bit_brow.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="editor/bit_brow.h" />
 		<Unit filename="editor/button_k.h" />
-		<Unit filename="editor/editor.cpp" />
+		<Unit filename="editor/editor.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="editor/editor.h" />
-		<Unit filename="editor/editor_c.cpp" />
-		<Unit filename="editor/editor_d.cpp" />
-		<Unit filename="editor/editor_f.cpp" />
-		<Unit filename="editor/graph_ed.cpp" />
+		<Unit filename="editor/editor_c.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="editor/editor_d.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="editor/editor_f.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="editor/graph_ed.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="editor/graph_ed.h" />
-		<Unit filename="editor/win_scro.cpp" />
+		<Unit filename="editor/win_scro.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="editor/win_scro.h" />
-		<Unit filename="editor/win_size.cpp" />
+		<Unit filename="editor/win_size.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="editor/win_size.h" />
-		<Unit filename="editor/win_skil.cpp" />
+		<Unit filename="editor/win_skil.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="editor/win_skil.h" />
-		<Unit filename="editor/win_var.cpp" />
+		<Unit filename="editor/win_var.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="editor/win_var.h" />
-		<Unit filename="gameplay/effect.cpp" />
+		<Unit filename="gameplay/effect.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/effect.h" />
-		<Unit filename="gameplay/gamepl_a.cpp" />
-		<Unit filename="gameplay/gamepl_c.cpp" />
-		<Unit filename="gameplay/gamepl_d.cpp" />
-		<Unit filename="gameplay/gamepl_u.cpp" />
-		<Unit filename="gameplay/gameplay.cpp" />
+		<Unit filename="gameplay/gamepl_a.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="gameplay/gamepl_c.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="gameplay/gamepl_d.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="gameplay/gamepl_u.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="gameplay/gameplay.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/gameplay.h" />
-		<Unit filename="gameplay/goal.cpp" />
+		<Unit filename="gameplay/goal.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/goal.h" />
-		<Unit filename="gameplay/gui/arrow.cpp" />
+		<Unit filename="gameplay/gui/arrow.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/gui/arrow.h" />
-		<Unit filename="gameplay/gui/chat.cpp" />
+		<Unit filename="gameplay/gui/chat.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/gui/chat.h" />
-		<Unit filename="gameplay/gui/pan_i_tr.cpp" />
-		<Unit filename="gameplay/gui/pan_info.cpp" />
+		<Unit filename="gameplay/gui/pan_i_tr.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="gameplay/gui/pan_info.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/gui/pan_info.h" />
-		<Unit filename="gameplay/gui/panel.cpp" />
+		<Unit filename="gameplay/gui/panel.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/gui/panel.h" />
-		<Unit filename="gameplay/gui/tutorial.cpp" />
-		<Unit filename="gameplay/gui/win_game.cpp" />
+		<Unit filename="gameplay/gui/tutorial.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="gameplay/gui/win_game.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/gui/win_game.h" />
-		<Unit filename="gameplay/hatch.cpp" />
+		<Unit filename="gameplay/hatch.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/hatch.h" />
-		<Unit filename="gameplay/lookup.cpp" />
+		<Unit filename="gameplay/lookup.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/lookup.h" />
-		<Unit filename="gameplay/replay.cpp" />
+		<Unit filename="gameplay/replay.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/replay.h" />
-		<Unit filename="gameplay/state.cpp" />
+		<Unit filename="gameplay/state.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/state.h" />
-		<Unit filename="gameplay/state_ma.cpp" />
+		<Unit filename="gameplay/state_ma.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/state_ma.h" />
-		<Unit filename="gameplay/tribe.cpp" />
+		<Unit filename="gameplay/tribe.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/tribe.h" />
-		<Unit filename="gameplay/trigger.cpp" />
+		<Unit filename="gameplay/trigger.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="gameplay/trigger.h" />
-		<Unit filename="graphic/bitlist.cpp" />
-		<Unit filename="graphic/cutbit.cpp" />
+		<Unit filename="graphic/bitlist.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="graphic/cutbit.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/cutbit.h" />
-		<Unit filename="graphic/glob_gfx.cpp" />
+		<Unit filename="graphic/glob_gfx.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/glob_gfx.h" />
-		<Unit filename="graphic/gra_lib.cpp" />
+		<Unit filename="graphic/gra_lib.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/gra_lib.h" />
-		<Unit filename="graphic/graph_bg.cpp" />
+		<Unit filename="graphic/graph_bg.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/graph_bg.h" />
-		<Unit filename="graphic/graphic.cpp" />
+		<Unit filename="graphic/graphic.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/graphic.h" />
-		<Unit filename="graphic/map.cpp" />
+		<Unit filename="graphic/map.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/map.h" />
-		<Unit filename="graphic/map_d.cpp" />
+		<Unit filename="graphic/map_d.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/png/loadpng.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
 		</Unit>
 		<Unit filename="graphic/png/loadpng.h" />
 		<Unit filename="graphic/png/regpng.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
 		</Unit>
 		<Unit filename="graphic/png/savepng.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
 		</Unit>
-		<Unit filename="graphic/sound.cpp" />
+		<Unit filename="graphic/sound.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/sound.h" />
-		<Unit filename="graphic/torbit.cpp" />
+		<Unit filename="graphic/torbit.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="graphic/torbit.h" />
 		<Unit filename="icon.rc">
 			<Option compilerVar="WINDRES" />
@@ -323,90 +874,524 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 			<Option target="TestNetwork" />
 			<Option target="TestNetworkDebug" />
 		</Unit>
-		<Unit filename="level/crunch.cpp" />
+		<Unit filename="level/crunch.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/crunch.h" />
-		<Unit filename="level/graset.cpp" />
+		<Unit filename="level/graset.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/graset.h" />
-		<Unit filename="level/graset_1.cpp" />
+		<Unit filename="level/graset_1.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/graset_1.h" />
-		<Unit filename="level/graset_2.cpp" />
+		<Unit filename="level/graset_2.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/graset_2.h" />
-		<Unit filename="level/level.cpp" />
+		<Unit filename="level/level.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/level.h" />
-		<Unit filename="level/level_bi.cpp" />
-		<Unit filename="level/level_dr.cpp" />
-		<Unit filename="level/level_io.cpp" />
-		<Unit filename="level/level_me.cpp" />
+		<Unit filename="level/level_bi.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="level/level_dr.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="level/level_io.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="level/level_me.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/level_me.h" />
-		<Unit filename="level/level_ni.cpp" />
-		<Unit filename="level/obj_lib.cpp" />
+		<Unit filename="level/level_ni.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="level/obj_lib.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/obj_lib.h" />
-		<Unit filename="level/obj_repl.cpp" />
-		<Unit filename="level/object.cpp" />
+		<Unit filename="level/obj_repl.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="level/object.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="level/object.h" />
 		<Unit filename="lix/ac.h" />
-		<Unit filename="lix/ac_func.cpp" />
+		<Unit filename="lix/ac_func.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="lix/ac_func.h" />
-		<Unit filename="lix/ascender.cpp" />
-		<Unit filename="lix/basher.cpp" />
-		<Unit filename="lix/batter.cpp" />
-		<Unit filename="lix/blocker.cpp" />
-		<Unit filename="lix/builder.cpp" />
-		<Unit filename="lix/climber.cpp" />
-		<Unit filename="lix/cuber.cpp" />
-		<Unit filename="lix/deaths.cpp" />
-		<Unit filename="lix/digger.cpp" />
-		<Unit filename="lix/exiter.cpp" />
-		<Unit filename="lix/exploder.cpp" />
-		<Unit filename="lix/faller.cpp" />
-		<Unit filename="lix/floater.cpp" />
-		<Unit filename="lix/init.cpp" />
-		<Unit filename="lix/jumper.cpp" />
-		<Unit filename="lix/lander.cpp" />
-		<Unit filename="lix/lix.cpp" />
+		<Unit filename="lix/ascender.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/basher.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/batter.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/blocker.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/builder.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/climber.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/cuber.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/deaths.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/digger.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/exiter.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/exploder.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/faller.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/floater.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/init.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/jumper.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/lander.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/lix.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="lix/lix.h" />
-		<Unit filename="lix/lix_ac.cpp" />
-		<Unit filename="lix/lix_enum.cpp" />
+		<Unit filename="lix/lix_ac.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/lix_enum.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="lix/lix_enum.h" />
-		<Unit filename="lix/lix_upd.cpp" />
-		<Unit filename="lix/miner.cpp" />
-		<Unit filename="lix/platform.cpp" />
-		<Unit filename="lix/runner.cpp" />
-		<Unit filename="lix/stunner.cpp" />
-		<Unit filename="lix/tumbler.cpp" />
-		<Unit filename="lix/walker.cpp" />
-		<Unit filename="menu/brow_big.cpp" />
+		<Unit filename="lix/lix_upd.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/miner.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/platform.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/runner.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/stunner.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/tumbler.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="lix/walker.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="menu/brow_big.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/brow_big.h" />
-		<Unit filename="menu/brow_net.cpp" />
-		<Unit filename="menu/brow_rep.cpp" />
-		<Unit filename="menu/brow_sin.cpp" />
+		<Unit filename="menu/brow_net.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="menu/brow_rep.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="menu/brow_sin.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/browsers.h" />
-		<Unit filename="menu/little.cpp" />
+		<Unit filename="menu/little.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/little.h" />
-		<Unit filename="menu/lobby.cpp" />
+		<Unit filename="menu/lobby.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/lobby.h" />
-		<Unit filename="menu/lobby_li.cpp" />
+		<Unit filename="menu/lobby_li.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/lobby_li.h" />
-		<Unit filename="menu/lobby_ro.cpp" />
+		<Unit filename="menu/lobby_ro.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/lobby_ro.h" />
-		<Unit filename="menu/main_men.cpp" />
+		<Unit filename="menu/main_men.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/main_men.h" />
-		<Unit filename="menu/menu.cpp" />
+		<Unit filename="menu/menu.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/menu.h" />
-		<Unit filename="menu/options.cpp" />
+		<Unit filename="menu/options.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/options.h" />
-		<Unit filename="menu/preview.cpp" />
+		<Unit filename="menu/preview.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="menu/preview.h" />
-		<Unit filename="network/client.cpp" />
+		<Unit filename="network/client.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="network/client.h" />
-		<Unit filename="network/client_c.cpp" />
+		<Unit filename="network/client_c.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="network/gameevents.cpp">
 			<Option target="TestNetwork" />
 			<Option target="TestNetworkDebug" />
+			<Option target="SmallTest" />
 		</Unit>
 		<Unit filename="network/gameevents.h">
 			<Option target="TestNetwork" />
 			<Option target="TestNetworkDebug" />
+			<Option target="SmallTest" />
 		</Unit>
 		<Unit filename="network/net_t.cpp" />
 		<Unit filename="network/net_t.h" />
@@ -414,26 +1399,106 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 		<Unit filename="network/network.h" />
 		<Unit filename="network/permu.cpp" />
 		<Unit filename="network/permu.h" />
-		<Unit filename="network/server.cpp" />
+		<Unit filename="network/server.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="network/server.h" />
-		<Unit filename="network/server_c.cpp" />
-		<Unit filename="other/console.cpp" />
+		<Unit filename="network/server_c.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
+		<Unit filename="other/console.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/console.h" />
-		<Unit filename="other/file/date.cpp" />
+		<Unit filename="other/file/date.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/file/date.h" />
-		<Unit filename="other/file/filename.cpp" />
+		<Unit filename="other/file/filename.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/file/filename.h" />
-		<Unit filename="other/file/io.cpp" />
+		<Unit filename="other/file/io.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/file/io.h" />
-		<Unit filename="other/file/log.cpp" />
+		<Unit filename="other/file/log.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/file/log.h" />
 		<Unit filename="other/globals.cpp" />
 		<Unit filename="other/globals.h" />
-		<Unit filename="other/hardware.cpp" />
+		<Unit filename="other/hardware.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/hardware.h" />
-		<Unit filename="other/help.cpp" />
+		<Unit filename="other/help.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/help.h" />
-		<Unit filename="other/language.cpp" />
+		<Unit filename="other/language.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/language.h" />
 		<Unit filename="other/lmain.cpp">
 			<Option weight="60" />
@@ -444,9 +1509,25 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 		</Unit>
 		<Unit filename="other/myalleg.h" />
 		<Unit filename="other/types.h" />
-		<Unit filename="other/user.cpp" />
+		<Unit filename="other/user.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/user.h" />
-		<Unit filename="other/verify.cpp" />
+		<Unit filename="other/verify.cpp">
+			<Option target="Debug" />
+			<Option target="Debug (Fenstermodus)" />
+			<Option target="Release" />
+			<Option target="Release (Linux)" />
+			<Option target="Debug (Linux)" />
+			<Option target="TestNetwork" />
+			<Option target="TestNetworkDebug" />
+		</Unit>
 		<Unit filename="other/verify.h" />
 		<Extensions>
 			<code_completion />
