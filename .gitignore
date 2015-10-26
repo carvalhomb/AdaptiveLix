@@ -32,8 +32,9 @@ levels/network/*oldgfx/*
 # exclude test levels
 levels/test/*
 
-#TestNetwork build dir
-TestNetwork/*
+#build dir
+BuildMinGW/*
 
 #Eclipse prefs
 *.prefs
+/BuildMinGW/
