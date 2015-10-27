@@ -45,16 +45,19 @@ class GameEvents
     public:
         //GameEvents();
         //virtual ~GameEvents();
-        static bool configure();
-        static int init_connection();
-        static int send_event();
-        static int close_connection();
+
+        static bool send_event(std::string event);
+        static bool close_connection();
         static int mymain();
+
+    protected:
+    private:
+        static void configure();
+        static std::string get_token();
         static std::string service_endpoint;
         static std::string clientid;
         static std::string apikey;
         static std::string token;
-    protected:
-    private:
+        static bool connection_is_setup;
 
 };

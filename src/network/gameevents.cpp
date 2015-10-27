@@ -1,6 +1,7 @@
 #include "gameevents.h"
 
 #include <sstream>
+#include <ctime>
 
 using namespace std;
 //using namespace libconfig;
@@ -9,78 +10,82 @@ string GameEvents::service_endpoint = "";
 string GameEvents::clientid = "";
 string GameEvents::apikey = "";
 string GameEvents::token = "";
+bool GameEvents::connection_is_setup = false;
 
-bool GameEvents::configure()
+void GameEvents::configure()
 {
-    libconfig::Config cfg;
+    if ( GameEvents::connection_is_setup == false ) {
+        libconfig::Config cfg;
+        //Try to open the config file
+        try {
+            cfg.readFile("config.cfg");
+        }
+        catch(const libconfig::FileIOException &fioex)
+        {
+            Log::log(Log::ERROR, "I/O error while reading file.");
+        }
+        catch(const libconfig::ParseException &pex)
+        {
+            //string msg = "Parse error at " << string(pex.getFile()) << ":" << pex.getLine() << " - " << pex.getError();
+            ostringstream msg;
+            msg << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError();
+            Log::log(Log::ERROR, msg.str());
+        }
+
+        //try to read the service endpoint
+
+        try
+        {
+            string tmp = cfg.lookup("service.endpoint");
+            GameEvents::service_endpoint = tmp;
+            if (GameEvents::service_endpoint.empty() || GameEvents::service_endpoint.size()==0) {
+                Log::log(Log::ERROR, "Could not find configuration for service endpoint.");
+            }
+            else {
+                //Make sure there's no trailing space in the service_endpoint string
+                if ( GameEvents::service_endpoint[service_endpoint.size()-1] == '/' )
+                    GameEvents::service_endpoint = GameEvents::service_endpoint.substr(0, GameEvents::service_endpoint.size()-1);
+            }
 
 
+            string tmp2 = cfg.lookup("auth.clientid");
+            GameEvents::clientid = tmp2;
 
-    //Try to open the config file
-    try {
-        cfg.readFile("config.cfg");
-    }
-    catch(const libconfig::FileIOException &fioex)
-    {
-        Log::log(Log::ERROR, "I/O error while reading file.");
-        return false;
-    }
-    catch(const libconfig::ParseException &pex)
-    {
-        //string msg = "Parse error at " << string(pex.getFile()) << ":" << pex.getLine() << " - " << pex.getError();
-        ostringstream msg;
-        msg << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError();
-        Log::log(Log::ERROR, msg.str());
-        return false;
-    }
+            string tmp3 = cfg.lookup("auth.apikey");
+            GameEvents::apikey = tmp3;
 
-    //try to read the service endpoint
-
-    try
-    {
-
-        string tmp = cfg.lookup("service.endpoint");
-        GameEvents::service_endpoint = tmp;
-
-        string tmp2 = cfg.lookup("auth.clientid");
-        GameEvents::clientid = tmp2;
-
-        string tmp3 = cfg.lookup("auth.apikey");
-        GameEvents::apikey = tmp3;
-
-        return true;
-    }
-    catch(const libconfig::SettingNotFoundException &nfex)
-    {
-        Log::log(Log::ERROR, "Required settings not found.");
-        return false;
-    }
-
-
+            connection_is_setup = true;
+        }
+        catch(const libconfig::SettingNotFoundException &nfex)
+        {
+            Log::log(Log::ERROR, "Required settings not found.");
+        }
+    } else {} //Connection is already set up, skipping...
 
 }
 
-int GameEvents::init_connection()
+string GameEvents::get_token()
 {
-    const string handshake_method = "token";
 
+    //TODO: send a session id when creating the token so that the service can associate
+    // the game events to the correct session id. I need to decide the format of this
+    // session id.
+    const string method = "token";
     //try to connect to the service
     try
     {
-        // Initialize session
-        if (service_endpoint.empty() || service_endpoint.size()==0) {
+        //Is the connection set up? If not, run configure()
+        if (connection_is_setup == false) {
+            Log::log(Log::ERROR, "Connection is not set up. Running 'configure()'...");
+            GameEvents::configure();
+        }
 
-            Log::log(Log::ERROR, "Could not find configuration for service endpoint.");
-            return(EXIT_FAILURE);
+        //And now, is the connection set up? And is the token empty?
+        if (connection_is_setup == true && (GameEvents::token.empty() || GameEvents::token.size()==0) ) {
 
-        } else {
-
-            //Make sure there's no trailing space in the service_endpoint string
-            if ( service_endpoint[service_endpoint.size()-1] == '/' )
-                service_endpoint = service_endpoint.substr(0, service_endpoint.size()-1);
-
+            // Call the service to get a token
             string url = "";
-            url = service_endpoint + "/" + handshake_method;
+            url = service_endpoint + "/" + method;
 
             Log::log(Log::INFO, "Trying to connect to: " + url);
             Poco::URI uri(url);
@@ -93,7 +98,7 @@ int GameEvents::init_connection()
             Poco::Net::initializeNetwork();
 
             // Get response
-            Poco::Net::HTTPResponse res;
+            Poco::Net::HTTPResponse response;
 
             //Make a post request
             Poco::Net::HTTPRequest req2(Poco::Net::HTTPRequest::HTTP_POST, path);
@@ -106,70 +111,176 @@ int GameEvents::init_connection()
             client_session.sendRequest(req2) << reqBody;
 
             //Receive response
-            istream& is = client_session.receiveResponse(res);
+            istream& is = client_session.receiveResponse(response);
 
             // Print to standard output
             ostringstream response_body;
-            Log::log(Log::INFO, "Body of the request:");
-            Log::log(Log::INFO, reqBody);
+            Log::log(Log::INFO, "Sending request for a token...");
+            //Log::log(Log::INFO, reqBody);
 
             response_body << is.rdbuf();
 
-            //copy(istream_iterator<char>(is),
-            //istream_iterator<char>(),
-            //ostream_iterator<char>(response_body) );
-            Log::log(Log::INFO, "Body of the response:");
-            Log::log(Log::INFO, response_body.str());
+            Log::log(Log::INFO, "Received response.");
+            //Log::log(Log::INFO, response_body.str());
 
-            Poco::JSON::Parser parser;
-            Poco::Dynamic::Var result = parser.parse(response_body.str());
-            Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
-            string msg = object->get("token");
-            Log::log(Log::INFO, msg);
-            //ostream_iterator<char>(cout));
-            return(EXIT_SUCCESS);
+            Poco::Net::HTTPResponse::HTTPStatus status;
+            status = response.getStatus();
+
+            if (status == Poco::Net::HTTPResponse::HTTP_OK) {
+                //response: OK
+                Poco::JSON::Parser parser;
+                Poco::Dynamic::Var result = parser.parse(response_body.str());
+                Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+                string tmptoken = object->get("token");
+                GameEvents::token = tmptoken;
+                //Log::log(Log::INFO, "Received token: " + GameEvents::token);
+                Log::log(Log::INFO, "Received authentication token.");
+
+            }
+            else {
+                //response failed
+                string msg;
+                msg = response.getReason();
+                Log::log(Log::INFO, "Failed to get authentication token. Reason: " + msg);
+            }
         }
     }
     catch (Poco::Exception& e) {
         ostringstream msg;
         msg << "Exception: " << e.what() << ". Message: " << e.message() ;
         Log::log(Log::ERROR, msg.str());
-        return(EXIT_FAILURE);
+    }
+
+    return GameEvents::token;
+}
+
+
+
+
+bool GameEvents::send_event(string event)
+{
+    string method = "commitevent";
+    GameEvents::token = GameEvents::get_token();
+
+    if (connection_is_setup == false) {
+        Log::log(Log::ERROR, "Could not set up the connection.");
+        return(false);
+    }
+    else {
+        if (GameEvents::token.empty() || GameEvents::token.size()==0) {
+            Log::log(Log::ERROR, "Could not get a token.");
+            return(false);
+        }
+        else
+        {
+            try {
+                // prepare session
+                string request_url = "";
+                request_url = GameEvents::service_endpoint + "/" + method;
+                Poco::URI request_uri(request_url);
+                Poco::Net::HTTPClientSession client_session(request_uri.getHost(), request_uri.getPort());
+
+                // prepare path
+                string request_path(request_uri.getPathAndQuery());
+                if (request_path.empty()) request_path = "/";
+
+                //In Windows we need to initialize the network
+                Poco::Net::initializeNetwork();
+
+                //prepare request body
+                time_t timestamp = time(0);
+                ostringstream request_body_ss;
+                //ss << seconds;
+                //std::string ts = ss.str();
+                request_body_ss << "{\"token\" : \"" << GameEvents::token << "\", ";
+                request_body_ss << "\"timestamp\" : \"" << timestamp << "\", ";
+                request_body_ss << "\"gameevent\" : \"" << event << "\"";
+                request_body_ss << "}";
+
+                string request_body;
+                request_body = request_body_ss.str();
+
+
+                // send request
+                Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, request_path);
+                request.setContentType("application/json");
+                request.setKeepAlive(true);
+                request.setContentLength( request_body.length() );
+                //client_session.sendRequest(request);
+                Log::log(Log::INFO, "Sending request to commit a game event...");
+                //Log::log(Log::INFO, "Request body:" + request_body);
+                client_session.sendRequest(request) << request_body;
+
+                // get response into a variable
+                Poco::Net::HTTPResponse response;
+                istream& is = client_session.receiveResponse(response);
+                ostringstream response_body;
+                response_body << is.rdbuf();
+                string response_string;
+                response_string = response_body.str();
+                //cout << response.getStatus() << " " << response.getReason() << endl;
+
+                Poco::Net::HTTPResponse::HTTPStatus status;
+                status = response.getStatus();
+
+                if (status == Poco::Net::HTTPResponse::HTTP_OK || status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
+                    //response: OK
+                    /*Poco::JSON::Parser parser;
+                    Poco::Dynamic::Var result = parser.parse(response_body.str());
+                    Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+                    string tmptoken = object->get("token");
+                    GameEvents::token = tmptoken;
+                    //Log::log(Log::INFO, "Received token: " + GameEvents::token);*/
+                    Log::log(Log::INFO, "Successfully sent game event.");
+                    return(true);
+                }
+                else {
+                    //response failed
+                    string msg;
+                    msg = response.getReason();
+                    Log::log(Log::INFO, "Failed to commit game event... Reason: " + msg);
+                    return(false);
+                }
+
+            }
+            catch (Poco::Exception &ex)
+            {
+                Log::log(Log::ERROR, "Exception: " + ex.displayText());
+            }
+
+        }
     }
 }
 
-
-int GameEvents::send_event()
+bool GameEvents::close_connection()
 {
-    return(EXIT_SUCCESS);
-}
-
-int GameEvents::close_connection()
-{
-    return(EXIT_SUCCESS);
+    return(true);
 }
 
 int GameEvents::mymain()
 {
-    int response;
+    bool response;
 
     Log::log(Log::INFO, "Reading configuration file... ");
 
-    bool success_config = GameEvents::configure();
+    GameEvents::configure();
 
-    if (success_config) {
-        Log::log(Log::INFO,"Starting connection... ");
-        response = GameEvents::init_connection();
-        ostringstream msg;
-        msg << "Completed communication, returned " << response << ".";
-        Log::log(Log::INFO, msg.str());
+    Log::log(Log::INFO,"Starting connection... ");
+    //string tokentmp = GameEvents::get_token();
+    string event = "<xml>test</xml>";
+    response = GameEvents::send_event(event);
 
+    string return_status;
+    if (response) {
+        return_status = "successful";
     } else {
-        return(EXIT_FAILURE);
+        return_status = "failed";
     }
 
-    //delete ge;
-    //Log::deinitialize();
-    return response;
+    ostringstream msg;
+    msg << "Program finished. Return status: " << return_status << ".";
+    Log::log(Log::INFO, msg.str());
+
+    return(0);
 }
 
