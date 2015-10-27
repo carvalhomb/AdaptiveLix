@@ -10,6 +10,7 @@ string GameEvents::service_endpoint = "";
 string GameEvents::clientid = "";
 string GameEvents::apikey = "";
 string GameEvents::token = "";
+string GameEvents::sessionid = "";
 bool GameEvents::connection_is_setup = false;
 
 void GameEvents::configure()
@@ -54,6 +55,9 @@ void GameEvents::configure()
             string tmp3 = cfg.lookup("auth.apikey");
             GameEvents::apikey = tmp3;
 
+            string tmp4 = cfg.lookup("auth.sessionid");
+            GameEvents::sessionid = tmp4;
+
             connection_is_setup = true;
         }
         catch(const libconfig::SettingNotFoundException &nfex)
@@ -69,7 +73,8 @@ string GameEvents::get_token()
 
     //TODO: send a session id when creating the token so that the service can associate
     // the game events to the correct session id. I need to decide the format of this
-    // session id.
+    // session id. get from UP service?
+
     const string method = "token";
     //try to connect to the service
     try
@@ -101,14 +106,24 @@ string GameEvents::get_token()
             Poco::Net::HTTPResponse response;
 
             //Make a post request
-            Poco::Net::HTTPRequest req2(Poco::Net::HTTPRequest::HTTP_POST, path);
-            req2.setContentType("application/json");
-            req2.setKeepAlive(true);
-            string reqBody("{\"clientid\":\""+ GameEvents::clientid +"\",\"apikey\":\""+ GameEvents::apikey +"\"}");
-            req2.setContentLength( reqBody.length() );
+            Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, path);
+            request.setContentType("application/json");
+            request.setKeepAlive(true);
+
+            //prepare request body
+            ostringstream request_body_ss;
+            request_body_ss << "{\"clientid\" : \"" << GameEvents::clientid << "\", ";
+            request_body_ss << "\"apikey\" : \"" << GameEvents::apikey << "\", ";
+            request_body_ss << "\"sessionid\" : \"" << GameEvents::sessionid << "\"";
+            request_body_ss << "}";
+
+            string request_body;
+            request_body = request_body_ss.str();
+
+            request.setContentLength( request_body.length() );
 
             //Send request
-            client_session.sendRequest(req2) << reqBody;
+            client_session.sendRequest(request) << request_body;
 
             //Receive response
             istream& is = client_session.receiveResponse(response);

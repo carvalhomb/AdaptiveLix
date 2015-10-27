@@ -58,6 +58,7 @@ class GameEvents
         static std::string clientid;
         static std::string apikey;
         static std::string token;
+        static std::string sessionid;
         static bool connection_is_setup;
 
 };
