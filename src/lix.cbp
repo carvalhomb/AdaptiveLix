@@ -57,18 +57,12 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 			</Target>
 			<Target title="Release">
 				<Option platforms="Windows;" />
-				<Option output="../bin/lix.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="../bin/lix_full.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="../" />
 				<Option object_output="../obj/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Compiler>
-					<Add option="-O3" />
-				</Compiler>
-				<Linker>
-					<Add option="-s" />
-				</Linker>
 			</Target>
 			<Target title="Release (Linux)">
 				<Option platforms="Unix;" />
@@ -116,15 +110,12 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 			</Target>
 			<Target title="TestNetwork">
 				<Option platforms="Windows;" />
-				<Option output="../bin/networktest.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="../bin/testnetwork.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="../" />
 				<Option object_output="../obj/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Compiler>
-					<Add option="-O3" />
-				</Compiler>
 			</Target>
 			<Target title="TestNetworkDebug">
 				<Option platforms="Windows;" />
@@ -134,26 +125,12 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option projectLinkerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-W" />
 					<Add option="-D__NO_INLINE__" />
 					<Add option="-D_WIN32_WINNT=0x0501" />
 				</Compiler>
-				<Linker>
-					<Add option="-lalleg44" />
-					<Add option="-mwindows" />
-					<Add option="-lenet" />
-					<Add option="-lpng -lz" />
-					<Add option="-lwinmm" />
-					<Add option="-lPocoNet" />
-					<Add option="-lPocoUtil" />
-					<Add option="-lPocoFoundation" />
-					<Add option="-liphlpapi" />
-					<Add option="-lws2_32" />
-					<Add option="-lconfig++" />
-				</Linker>
 			</Target>
 			<Target title="SmallTest">
 				<Option platforms="Windows;" />
@@ -163,15 +140,9 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
-				<Option projectCompilerOptionsRelation="1" />
-				<Option projectLinkerOptionsRelation="1" />
 				<Option projectIncludeDirsRelation="1" />
 				<Compiler>
 					<Add option="-O3" />
-					<Add option="-Wall" />
-					<Add option="-W" />
-					<Add option="-nostdinc" />
-					<Add option="-D__NO_INLINE__" />
 					<Add directory="c:/mingw/bin/../include" />
 					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++" />
 					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include/c++/mingw32" />
@@ -180,24 +151,10 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 					<Add directory="c:/mingw/bin/../lib/gcc/mingw32/4.8.1/include-fixed" />
 					<Add directory="c:/mingw/bin/../mingw32/include" />
 				</Compiler>
-				<Linker>
-					<Add option="-lalleg44" />
-					<Add option="-liphlpapi" />
-					<Add option="-lwinmm" />
-					<Add option="-lws2_32" />
-					<Add option="-mwindows" />
-					<Add option="-lenet" />
-					<Add option="-lpng" />
-					<Add option="-lz" />
-					<Add option="-lPocoNet" />
-					<Add option="-lPocoUtil" />
-					<Add option="-lPocoFoundation" />
-					<Add option="-lPocoJSON" />
-					<Add option="-lconfig++" />
-				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-O3" />
 			<Add option="-Wall" />
 			<Add option="-W" />
 			<Add option="-nostdinc" />
@@ -1387,11 +1344,13 @@ Man untersuche, ob statt #ifdef _WIN32 #include <winalleg.h> auch das hier geht:
 			<Option target="TestNetwork" />
 			<Option target="TestNetworkDebug" />
 			<Option target="SmallTest" />
+			<Option target="Release" />
 		</Unit>
 		<Unit filename="network/gameevents.h">
 			<Option target="TestNetwork" />
 			<Option target="TestNetworkDebug" />
 			<Option target="SmallTest" />
+			<Option target="Release" />
 		</Unit>
 		<Unit filename="network/net_t.cpp" />
 		<Unit filename="network/net_t.h" />

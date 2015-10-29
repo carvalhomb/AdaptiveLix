@@ -4,7 +4,7 @@
 
 # exclude all object files due to compiling code,
 # also all binaries, including Windows ones
-obj/*
+**/obj/*
 deps/*
 bin/lix*
 bin/test*
@@ -37,4 +37,3 @@ BuildMinGW/*
 
 #Eclipse prefs
 *.prefs
-/BuildMinGW/
