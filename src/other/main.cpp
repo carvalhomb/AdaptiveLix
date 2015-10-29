@@ -72,7 +72,7 @@ static void     print_usage();
 
 
 
-int oldmain(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     MainArgs margs = parse_main_arguments(argc, argv);
 
@@ -157,13 +157,27 @@ int oldmain(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
+
+        Log::log(Log::INFO,"Starting connection... ");
+        std::string startevent = "start game";
+        std::string formatted_startevent = GameEvents::format_event(startevent);
+        bool response1;
+        response1 = GameEvents::send_event(formatted_startevent);
+
+
         // Main loop. See other/lmain.cpp for this.
-        /*LMain* l_main = new LMain;
+        LMain* l_main = new LMain;
         l_main->main_loop();
-        delete l_main;*/
-        GameEvents *ge = new GameEvents();
+        delete l_main;
+        /*GameEvents *ge = new GameEvents();
         ge->mymain();
-        delete ge;
+        delete ge;*/
+
+        std::string endevent = "end game";
+        std::string formatted_endevent = GameEvents::format_event(endevent);
+        bool response2;
+        response2 = GameEvents::send_event(formatted_endevent);
+
 
         // Clean up
         useR->save();
@@ -188,64 +202,9 @@ int oldmain(int argc, char* argv[])
     // to not terminate in rare cases
     return 0;
 }
-//END_OF_MAIN()
-
-int main(int argc, char* argv[]) //temp main
-{
-
-    MainArgs margs = parse_main_arguments(argc, argv);
-
-    if (margs.print_version_and_exit) {
-        std::cout << Help::version_to_string(Globals::version) << std::endl;
-        return 0;
-    }
-    else if (margs.print_help_and_exit) {
-        print_usage();
-        return 0;
-    }
-
-    setenv_allegro_modules();
-    allegro_init();
-    unsetenv_allegro_modules();
-
-    Help::timer_start();
-
-    Globals::initialize();
-    User::initialize();
-    Log::initialize();
-    LixEn::initialize();
-
-    // Check whether the Globals decided we're in one of the accepted
-    // working directories, so all files are found. Otherwise, exit with error.
-    if (! Help::dir_exists(gloB->dir_data_bitmap)) {
-        allegro_message("%s", gloB->error_wrong_working_dir.c_str());
-        Log::deinitialize();
-        Globals::deinitialize();
-        return -1;
-    }
-
-    gloB->load();
-    gloB->user_name = "";
-
-    useR->load();
-
-    Network::initialize();
-    GameEvents::mymain(); //Here I call my module
-
-
-    // Clean up
-    useR->save();
-    gloB->save();
-
-    Network::deinitialize();
-    Log::deinitialize();
-    Globals::deinitialize();
-
-    // don't call allegro_exit(), doing that causes the program
-    // to not terminate in rare cases
-    return 0;
-}
 END_OF_MAIN()
+
+
 
 
 
