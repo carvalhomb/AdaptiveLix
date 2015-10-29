@@ -10,6 +10,7 @@
 #include "language.h"
 #include "help.h"
 #include "./file/io.h"
+#include "../network/gameevents.h"
 
 #include "../lix/lix_enum.h" // LixEn::AC_MAX
 #include "../network/net_t.h" // PlayerData::name_max_length
@@ -688,6 +689,6 @@ void User::save() const
                 itr->second.skills_used,
                 itr->second.updates_used, bstr);
     }
-
+    bool success = GameEvents::send_event("saved something in the file.");
     file.close();
 }
