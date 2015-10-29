@@ -47,8 +47,8 @@ class GameEvents
         //virtual ~GameEvents();
 
         static bool send_event(std::string event);
-        static bool close_connection();
-        static int mymain();
+        static std::string format_event(std::string event);
+//        static int mymain();
 
     protected:
     private:

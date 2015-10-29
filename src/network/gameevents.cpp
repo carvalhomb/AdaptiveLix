@@ -148,8 +148,8 @@ string GameEvents::get_token()
                 Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
                 string tmptoken = object->get("token");
                 GameEvents::token = tmptoken;
-                //Log::log(Log::INFO, "Received token: " + GameEvents::token);
-                Log::log(Log::INFO, "Received authentication token.");
+                Log::log(Log::INFO, "Received token: " + GameEvents::token);
+                //Log::log(Log::INFO, "Received authentication token.");
 
             }
             else {
@@ -158,6 +158,10 @@ string GameEvents::get_token()
                 msg = response.getReason();
                 Log::log(Log::INFO, "Failed to get authentication token. Reason: " + msg);
             }
+        }
+        else {
+        	Log::log(Log::INFO, "I already have a token. Returning existing one...");
+        	return GameEvents::token;
         }
     }
     catch (Poco::Exception& e) {
@@ -174,6 +178,8 @@ string GameEvents::get_token()
 
 bool GameEvents::send_event(string event)
 {
+	//TODO: if token is refused, try to get a new one and try once again
+
     string method = "commitevent";
     GameEvents::token = GameEvents::get_token();
 
@@ -240,14 +246,26 @@ bool GameEvents::send_event(string event)
 
                 if (status == Poco::Net::HTTPResponse::HTTP_OK || status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
                     //response: OK
-                    /*Poco::JSON::Parser parser;
+                	Log::log(Log::INFO, "Successfully sent game event.");
+
+                	//Try to extract returned message
+                    Poco::JSON::Parser parser;
                     Poco::Dynamic::Var result = parser.parse(response_body.str());
                     Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
-                    string tmptoken = object->get("token");
-                    GameEvents::token = tmptoken;
-                    //Log::log(Log::INFO, "Received token: " + GameEvents::token);*/
-                    Log::log(Log::INFO, "Successfully sent game event.");
+                    try {
+                    	string tmpmsg = object->get("message");
+                    	Log::log(Log::INFO, "Message returned: ");
+                    	Log::log(Log::INFO, tmpmsg);
+                    }
+                    catch (Poco::Exception &ex)
+					{
+                    	Log::log(Log::ERROR, "Exception: " + ex.displayText());
+					}
                     return(true);
+                }
+                else if (status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
+                	Log::log(Log::INFO, "Token unauthorized. Unsetting the token variable and exiting.");
+                	GameEvents::token = "";
                 }
                 else {
                     //response failed
@@ -260,42 +278,55 @@ bool GameEvents::send_event(string event)
             }
             catch (Poco::Exception &ex)
             {
-                Log::log(Log::ERROR, "Exception: " + ex.displayText());
+            	Log::log(Log::ERROR, "Exception: " + ex.displayText());
             }
 
         }
     }
 }
 
-bool GameEvents::close_connection()
+string GameEvents::format_event(string event)
 {
-    return(true);
+
+	//prepare request body
+	time_t timestamp = time(0);
+	ostringstream request_body_ss;
+	request_body_ss << "<xml>";
+	request_body_ss << "<timestamp>" << timestamp << "</timestamp>";
+	request_body_ss << "<event>" << event << "</event>";
+	request_body_ss << "</xml>";
+
+	string output;
+	output = request_body_ss.str();
+    return(output);
+
 }
 
-int GameEvents::mymain()
-{
-    bool response;
-
-    Log::log(Log::INFO, "Reading configuration file... ");
-
-    GameEvents::configure();
-
-    Log::log(Log::INFO,"Starting connection... ");
-    //string tokentmp = GameEvents::get_token();
-    string event = "<xml>test</xml>";
-    response = GameEvents::send_event(event);
-
-    string return_status;
-    if (response) {
-        return_status = "successful";
-    } else {
-        return_status = "failed";
-    }
-
-    ostringstream msg;
-    msg << "Program finished. Return status: " << return_status << ".";
-    Log::log(Log::INFO, msg.str());
-
-    return(0);
-}
+//int GameEvents::mymain()
+//{
+//    bool response;
+//
+//    Log::log(Log::INFO, "Reading configuration file... ");
+//
+//    GameEvents::configure();
+//
+//    Log::log(Log::INFO,"Starting connection... ");
+//    //string tokentmp = GameEvents::get_token();
+//    string event = "start game";
+//    string formatted_event = GameEvents::format_event(event);
+//    response = GameEvents::send_event(formatted_event);
+//
+//    string return_status;
+//    if (response) {
+//        return_status = "successful";
+//    } else {
+//        return_status = "failed";
+//    }
+//
+//    ostringstream msg;
+//    msg << "Program finished. Return status: " << return_status << ".";
+//    Log::log(Log::INFO, msg.str());
+//
+//    return(0);
+//}
 
