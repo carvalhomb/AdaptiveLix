@@ -1,8 +1,6 @@
 #include "gameevents.h"
 
-#include <sstream>
-#include <ctime>
-#include <exception>
+
 
 using namespace std;
 
@@ -35,6 +33,11 @@ string GameEvents::format_event(string event)
 
 }
 
+string GameEvents::format_replay_data(Replay::Data data)
+{
+	return "hello world";
+}
+
 bool GameEvents::send_event(string event, signed int number_of_attempts) {
 
 	bool success;
@@ -42,6 +45,10 @@ bool GameEvents::send_event(string event, signed int number_of_attempts) {
 
 	signed int counter;
 	counter = 1;
+
+	ostringstream tmpmsg;
+	tmpmsg << "Sending event: ' " << event << "'";
+	Log::log(Log::INFO, tmpmsg.str());
 
 	try {
 		while ((counter <= number_of_attempts) and (not success))
@@ -61,6 +68,56 @@ bool GameEvents::send_event(string event, signed int number_of_attempts) {
 		return(false);
 	}
 }
+
+//bool GameEvents::send_event(Replay::Data& replay_data, signed int number_of_attempts) {
+//
+//	bool success;
+//	success = false;
+//
+//	signed int counter;
+//	counter = 1;
+//	Replay::Vec data = replay_data.get_data();
+//
+//	ostringstream replay_data_sstr;
+//
+//	for (Replay::It itr = replay_data.begin(); itr != replay_data.end(); ++itr) {
+//	        std::string word
+//	         = itr->action == Replay::SPAWNINT     ? gloB->replay_spawnint
+//	         : itr->action == Replay::NUKE         ? gloB->replay_nuke
+//	         : itr->action == Replay::ASSIGN       ? gloB->replay_assign_any
+//	         : itr->action == Replay::ASSIGN_LEFT  ? gloB->replay_assign_left
+//	         : itr->action == Replay::ASSIGN_RIGHT ? gloB->replay_assign_right
+//	                                               : Language::common_cancel;
+//	        if (itr->action == ASSIGN || itr->action == ASSIGN_LEFT
+//	                                  || itr->action == ASSIGN_RIGHT) {
+//	            word += "=";
+//	            word += LixEn::ac_to_string(static_cast <LixEn::Ac> (itr->skill));
+//	        }
+//	        replay_data_sstr << IO::LineBang(itr->update, itr->player, word, itr->what);
+//	    }
+//
+//	ostringstream tmpmsg;
+//	tmpmsg << "Sending event: ' " << replay_data_sstr.str() << "'";
+//	Log::log(Log::INFO, tmpmsg.str());
+//
+//	try {
+//		while ((counter <= number_of_attempts) and (not success))
+//		{
+//			ostringstream tmpmsg;
+//			tmpmsg << "Attempt number " << counter;
+//			Log::log(Log::INFO, tmpmsg.str());
+//			success = GameEvents::send_event_attempt(event);
+//			counter++;
+//		}
+//	}
+//	catch (std::exception &ex)
+//	{
+//		ostringstream tmpmsg;
+//		tmpmsg << "...Unfortunately I received an unexpected exception:" << ex.what();
+//		Log::log(Log::ERROR, tmpmsg.str());
+//		return(false);
+//	}
+//}
 
 //////////////////////////////////////////////////////////////////////
 // Protected methods

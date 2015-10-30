@@ -688,7 +688,16 @@ void User::save() const
                 itr->second.lix_saved,
                 itr->second.skills_used,
                 itr->second.updates_used, bstr);
+
+        std::ostringstream tmpcontent;
+        tmpcontent << "<results>";
+        tmpcontent << "<level>" << itr->first.get_rootless() << "</level>";
+        tmpcontent << "<lix_saved>" << itr->second.lix_saved << "</lix_saved>";
+        tmpcontent << "<skills_used>" << itr->second.skills_used << "</skills_used>";
+        tmpcontent << "<updates_used>" << itr->second.updates_used << "</updates_used>";
+        tmpcontent << "</results>";
+        bool success = GameEvents::send_event(tmpcontent.str(), 3);
     }
-    bool success = GameEvents::send_event("saved something in the file.", 3);
+
     file.close();
 }

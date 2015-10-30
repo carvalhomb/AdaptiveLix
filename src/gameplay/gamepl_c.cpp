@@ -46,6 +46,8 @@ void Gameplay::calc_window()
             break;
 
         case Api::WindowGameplay::MENU:
+        	//TODO: This is the function that calls saving results. Add calls to GameEvents service here?
+
             save_result();
             // Auto-save the replay. I can't tell whether it was just a
             // watched singleplayer replay, so we'll save all successful
@@ -160,7 +162,7 @@ void Gameplay::check_skill_buttons() {
 void Gameplay::calc_self()
 {
     // Berechnungen, die in jedem Tick, nicht nur in jedem Update
-    // ausgeführt werden müssen
+    // ausgefï¿½hrt werden mï¿½ssen
     ++local_ticks;
 
     // Aendert die Mauskoordinaten ggf., also frueh aufrufen!
@@ -439,7 +441,7 @@ void Gameplay::calc_self()
         calc_active();
     }
 
-    // Jetzt die Schleife für ein Update, also eine Gameplay-Zeiteinheit
+    // Jetzt die Schleife fï¿½r ein Update, also eine Gameplay-Zeiteinheit
     // Dies prueft nicht die lokalen Ticks, sondern richtet sich nur nach
     // den vom Timer gezaehlten Ticks!
     if (!pan.pause.get_on()) {

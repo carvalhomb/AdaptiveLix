@@ -1,8 +1,8 @@
 /*
  * gameplay/gameplay.h
  *
- * Gameplay ist die Klasse, die das eigentliche Spiel beschreibt. Es werden
- * einige grosse Codestuecke in separate CPP-Dateien ausgelagert.
+ * Gameplay is the class, which describes the actual game. There will be
+ * some large pieces of code into separate CPP files swapped out.
  *
  */
 
@@ -27,6 +27,10 @@
 #include "../network/network.h"
 #include "../other/console.h"
 #include "../other/user.h" // returning game results
+#include "../other/file/log.h"
+
+//#include "../network/gameevents.h"
+
 
 class Gameplay {
 
@@ -132,7 +136,7 @@ private:
 
     // Calculate-Subroutinen
     void calc_window(); // Fuers Unterfenster, ansonsten:
-    void calc_self  (); // Wird sonst in jedem Tick ausgeführt
+    void calc_self  (); // Wird sonst in jedem Tick ausgefï¿½hrt
     void calc_active(); // "Aktiv" == kein Replay abzuspielen
     void restart_level();
     void load_state (const GameState&);

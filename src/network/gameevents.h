@@ -32,13 +32,17 @@
 #include <Poco/URI.h>
 #include <Poco/StreamCopier.h>
 
-#include <iostream>
 #include <iomanip>
 #include <cstdlib>
 #include <libconfig.h++>
 
+#include <sstream>
+#include <exception>
+#include <ctime>
+
 
 #include "../other/file/log.h"
+#include "../gameplay/replay.h"
 
 
 class GameEvents
@@ -46,8 +50,10 @@ class GameEvents
     public:
         //GameEvents();
         //virtual ~GameEvents();
+		static std::string format_replay_data(Replay::Data replay_data);
 		static std::string format_event(std::string event);
         static bool send_event(std::string event, signed int number_of_attempts);
+        //static bool send_event(Replay::Data replay_data, signed int number_of_attempts);
 
 
     protected:
