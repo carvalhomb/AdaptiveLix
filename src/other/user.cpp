@@ -689,6 +689,6 @@ void User::save() const
                 itr->second.skills_used,
                 itr->second.updates_used, bstr);
     }
-    bool success = GameEvents::send_event("saved something in the file.");
+    bool success = GameEvents::send_event("saved something in the file.", 3);
     file.close();
 }

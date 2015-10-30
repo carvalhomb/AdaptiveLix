@@ -30,6 +30,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Path.h>
 #include <Poco/URI.h>
+#include <Poco/StreamCopier.h>
 
 #include <iostream>
 #include <iomanip>
@@ -45,20 +46,24 @@ class GameEvents
     public:
         //GameEvents();
         //virtual ~GameEvents();
+		static std::string format_event(std::string event);
+        static bool send_event(std::string event, signed int number_of_attempts);
 
-        static bool send_event(std::string event);
-        static std::string format_event(std::string event);
-//        static int mymain();
 
     protected:
     private:
-        static void configure();
-        static std::string get_token();
         static std::string service_endpoint;
         static std::string clientid;
         static std::string apikey;
         static std::string token;
         static std::string sessionid;
+        static signed int max_number_attempts;
         static bool connection_is_setup;
 
+        static void configure();
+        static std::string get_token();
+        static Poco::Net::HTTPResponse::HTTPStatus do_request(std::string endpoint,
+        		std::string resource, std::string method, std::string request_body,
+				Poco::Net::HTTPResponse& response, std::ostringstream& output_stream);
+        static bool send_event_attempt(std::string event);
 };

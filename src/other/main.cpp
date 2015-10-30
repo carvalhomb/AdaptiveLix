@@ -159,10 +159,11 @@ int main(int argc, char* argv[])
 
 
         Log::log(Log::INFO,"Starting connection... ");
+        signed int number_of_attempts;
         std::string startevent = "start game";
         std::string formatted_startevent = GameEvents::format_event(startevent);
         bool response1;
-        response1 = GameEvents::send_event(formatted_startevent);
+        response1 = GameEvents::send_event(formatted_startevent, number_of_attempts);
 
 
         // Main loop. See other/lmain.cpp for this.
@@ -176,7 +177,8 @@ int main(int argc, char* argv[])
         std::string endevent = "end game";
         std::string formatted_endevent = GameEvents::format_event(endevent);
         bool response2;
-        response2 = GameEvents::send_event(formatted_endevent);
+
+        response2 = GameEvents::send_event(formatted_endevent, number_of_attempts);
 
 
         // Clean up
