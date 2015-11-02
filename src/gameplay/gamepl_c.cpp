@@ -46,7 +46,6 @@ void Gameplay::calc_window()
             break;
 
         case Api::WindowGameplay::MENU:
-        	//TODO: This is the function that calls saving results. Add calls to GameEvents service here?
 
             save_result();
             // Auto-save the replay. I can't tell whether it was just a

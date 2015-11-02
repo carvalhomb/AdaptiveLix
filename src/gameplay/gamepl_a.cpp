@@ -10,6 +10,9 @@
 #include "gameplay.h"
 #include "../other/user.h"
 
+#include "../network/gameevents.h"
+#include "../other/file/log.h"
+
 Replay::Data Gameplay::new_replay_data()
 {
     Replay::Data data;
@@ -67,9 +70,20 @@ void Gameplay::calc_active()
         pan.pause      .set_off();
         Replay::Data data = new_replay_data();
         data.action       = Replay::NUKE;
+
+        //Get level name
+        Filename mylevel = replay.get_level_filename();
+        std::string mylevel_name = mylevel.get_rootless();
+        //Load data in the object
+        //GameEvents::Data event_data;
+        GameEvents::Data event_data = GameEvents::Data();
+        event_data.load_event_data(data, mylevel_name);
+        //Send data
+        Log::log(Log::INFO, "Sending nuke game event...");
+        GameEvents::send_event(event_data);
+
         replay.add(data);
         Network::send_replay_data(data);
-        Log::log(Log::INFO, "Some send replay data here getting called");
         effect.add_sound(cs.update + 1, *trlo, 0, Sound::NUKE);
         Sound::play_loud(Sound::NUKE);
     }
@@ -262,8 +276,18 @@ if (priority > 1 && priority < 99999) {
                                   : Replay::ASSIGN;
                 data.skill        = skill_visible->get_skill();
                 data.what         = lem_id;
+
+                //Get level name
+                Filename mylevel = replay.get_level_filename();
+                std::string mylevel_name = mylevel.get_rootless();
+                //Load data in the object
+                GameEvents::Data event_data = GameEvents::Data();
+                event_data.load_event_data(data, mylevel_name);
+                //Send data
+                Log::log(Log::INFO, "Sending regular game event...");
+                GameEvents::send_event(event_data);
+
                 replay.add(data);
-                Log::log(Log::INFO, "Some send replay data here getting called too");
                 Network::send_replay_data(data);
             }
             else {

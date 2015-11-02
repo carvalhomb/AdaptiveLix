@@ -27,9 +27,9 @@
 #include "../network/network.h"
 #include "../other/console.h"
 #include "../other/user.h" // returning game results
-#include "../other/file/log.h"
+//
 
-//#include "../network/gameevents.h"
+
 
 
 class Gameplay {

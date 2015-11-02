@@ -159,26 +159,32 @@ int main(int argc, char* argv[])
 
 
         Log::log(Log::INFO,"Starting connection... ");
-        signed int number_of_attempts;
-        std::string startevent = "start game";
-        std::string formatted_startevent = GameEvents::format_event(startevent);
-        bool response1;
-        response1 = GameEvents::send_event(formatted_startevent, number_of_attempts);
+
+        //Load data in the object
+        //GameEvents::Data start_event_data;
+        GameEvents::Data start_event_data = GameEvents::Data();
+        start_event_data.action = "STARTGAME";
+        start_event_data.level = "0"; //not in a level
+        //Send data
+        Log::log(Log::INFO, "Sending start game event");
+        GameEvents::send_event(start_event_data);
 
 
         // Main loop. See other/lmain.cpp for this.
         LMain* l_main = new LMain;
         l_main->main_loop();
         delete l_main;
-        /*GameEvents *ge = new GameEvents();
-        ge->mymain();
-        delete ge;*/
 
-        std::string endevent = "end game";
-        std::string formatted_endevent = GameEvents::format_event(endevent);
-        bool response2;
+        Log::log(Log::INFO,"Starting connection... ");
 
-        response2 = GameEvents::send_event(formatted_endevent, number_of_attempts);
+        //Load data in the object
+        //GameEvents::Data end_event_data;
+        GameEvents::Data end_event_data = GameEvents::Data();
+        end_event_data.action = "ENDGAME";
+        end_event_data.level = "0"; //not in a level
+        //Send data
+        Log::log(Log::INFO, "Sending end game event");
+        GameEvents::send_event(end_event_data);
 
 
         // Clean up

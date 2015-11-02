@@ -1,59 +1,48 @@
+/*
+ * Gameevents manage the formatting and sending of the
+ * important game events to the external REST service
+ * listening.
+ */
+
 #pragma once
 
-//#include "../other/myalleg.h" //needs to come first
+#include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
 
-#include "../other/lmain.h" // Main object to manage the different parts of the program
-#include "../other/user.h"
-#include "../other/verify.h"
-#include "../other/file/log.h"
-#include "../other/language.h"
-
-#include "../lix/lix_enum.h" // initialize strings
-#include "../graphic/png/loadpng.h"
-
-
-
-#include "../other/user.h"
-#include "../other/verify.h"
-#include "../other/globals.h"
-
-#include <algorithm>  // for copy
-#include <iterator>
 #include <string>
-#include <iostream>   // for cout, istream
-
-#include <Poco/Exception.h>
-#include <Poco/JSON/Parser.h>
-#include <Poco/Dynamic/Var.h>
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/Path.h>
-#include <Poco/URI.h>
-#include <Poco/StreamCopier.h>
-
-#include <iomanip>
-#include <cstdlib>
-#include <libconfig.h++>
-
-#include <sstream>
-#include <exception>
-#include <ctime>
-
-
-#include "../other/file/log.h"
 #include "../gameplay/replay.h"
+#include "../level/level.h"
+#include "../other/user.h"
 
 
 class GameEvents
 {
     public:
+		struct Data {
+			std::string level;
+			std::string action;
+			signed long update;
+			signed long seconds;
+			signed long which_lix;
+			time_t timestamp;
+			int lix_required;
+			int lix_saved;
+			int skills_used;
+			int seconds_required;
+
+			Data();
+			//virtual ~Data();
+			void load_event_data(Replay::Data data, std::string level);
+			void load_result_data(Result result, Level level);
+		};
+
+
         //GameEvents();
         //virtual ~GameEvents();
-		static std::string format_replay_data(Replay::Data replay_data);
-		static std::string format_event(std::string event);
-        static bool send_event(std::string event, signed int number_of_attempts);
-        //static bool send_event(Replay::Data replay_data, signed int number_of_attempts);
+		static std::string format_event_data(GameEvents::Data event_data);
+        static void send_event(GameEvents::Data data);
+        static void send_event(GameEvents::Data data, signed int number_of_attempts);
+
 
 
     protected:

@@ -11,12 +11,17 @@
 #include "../graphic/sound.h"
 #include "../other/user.h"
 
+#include "../network/gameevents.h"
+#include "../other/file/log.h"
+
 void Gameplay::update()
 {
     // Noch schnell die Replaydaten mit der eingestellten Rate fertig machen:
     // Siehe Ratenbutton-Calculate fuer Kommentar, warum dies hier passiert.
+	//
 	// Yet quickly make the Replay data ready at the set rate:
 	// See installments Button Calculate for comment as to why this happened here.
+	//
     if (trlo && !replaying &&
         pan.spawnint_cur.get_spawnint() != trlo->spawnint
     ) {
@@ -26,6 +31,8 @@ void Gameplay::update()
         data.what         = trlo->spawnint;
         replay.add(data);
         Network::send_replay_data(data);
+        Log::log(Log::INFO, "Debug::: Gameplay::update() line 34");
+        //GameEvents::send_data(data, 3); //the number is the number of attempts
     }
 
     // Im Netzwerkspiel den Netzwerk-Replaydaten-Puffer nach neuen Ereignissen
@@ -35,6 +42,7 @@ void Gameplay::update()
     if (Network::get_started()) {
         Replay::Vec netdata = Network::get_replay_data();
         replay.add(netdata);
+        Log::log(Log::INFO, "Debug::: Gameplay::update() line 45");
         replay_recalc_from = cs.update;
         for (Replay::ConstIt i = netdata.begin(); i != netdata.end(); ++i) {
             // Das folgende <= statt <  behebt den lange quaelenden Netzwerkbug
@@ -192,6 +200,7 @@ void Gameplay::update_cs_once()
                 data.player = tr->masters.begin()->number;
                 data.action = Replay::NUKE;
                 replay.add(data);
+                Log::log(Log::INFO, "Debug::: Gameplay::update() line 203, after nuke?");
                 // Und sofort ausfuehren: Replay wurde ja schon ausgewertet
                 // And running immediately: Replay was already evaluated
                 tr->lix_hatch = 0;

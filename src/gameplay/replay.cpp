@@ -16,8 +16,6 @@
 #include "../other/file/io.h"
 #include "../other/language.h"
 
-#include "../network/gameevents.h"
-#include "../other/file/log.h"
 
 Replay::Replay()
 :
@@ -360,15 +358,6 @@ void Replay::save_to_file(const Filename& s, const Level* const lev)
         }
         file << IO::LineBang(itr->update, itr->player, word, itr->what);
 
-        Log::log(Log::INFO, "save_to_file replay data!");
-        //Sending to service
-        std::ostringstream tmpcontent;
-        tmpcontent << "<event>";
-        tmpcontent << "<update>" << itr->update << "</update>";
-        tmpcontent << "<word>" << word << "</word>";
-        tmpcontent << "<what>" << itr->what << "</what>";
-        tmpcontent << "</event>";
-        bool success = GameEvents::send_event(tmpcontent.str(), 3);
     }
 
     // save level into replay

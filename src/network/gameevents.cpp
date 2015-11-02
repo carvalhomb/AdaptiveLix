@@ -1,6 +1,38 @@
 #include "gameevents.h"
 
+//#include "../other/myalleg.h" //needs to come first
 
+#include <algorithm>  // for copy
+#include <iterator>
+#include <string>
+#include <iostream>   // for cout, istream
+#include <sstream>
+#include <exception>
+#include <ctime>
+#include <iomanip>
+#include <cstdlib>
+#include <libconfig.h++>
+
+#include <Poco/Exception.h>
+#include <Poco/JSON/Parser.h>
+#include <Poco/Dynamic/Var.h>
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Path.h>
+#include <Poco/URI.h>
+#include <Poco/StreamCopier.h>
+
+//#include "../other/user.h"
+//#include "../other/verify.h"
+#include "../other/globals.h"
+#include "../other/file/log.h"
+#include "../other/file/filename.h"
+#include "../other/language.h"
+
+#include "../lix/lix_enum.h" // initialize strings
+//#include "../graphic/png/loadpng.h"
+#include "../gameplay/replay.h"
 
 using namespace std;
 
@@ -16,38 +48,112 @@ signed int GameEvents::max_number_attempts = 3;
 // Public methods
 //////////////////////////////////////////////////////////////////////
 
-string GameEvents::format_event(string event)
-{
-
-	//prepare request body
-	time_t timestamp = time(0);
-	ostringstream request_body_ss;
-	request_body_ss << "<xml>";
-	request_body_ss << "<timestamp>" << timestamp << "</timestamp>";
-	request_body_ss << "<event>" << event << "</event>";
-	request_body_ss << "</xml>";
-
-	string output;
-	output = request_body_ss.str();
-    return(output);
-
+GameEvents::Data::Data() {
+	//Constructor, set the timestamp
+	time_t right_now= time(0);
+	this->timestamp = right_now;
+	this->action="";
+	this->level ="";
+	this->which_lix=-1;
+	this->update=-1;
+	this->seconds=-1;
+	this->lix_required=0;
+	this->lix_saved=0;
+	this->skills_used=0;
+	this->seconds_required=0;
 }
 
-string GameEvents::format_replay_data(Replay::Data data)
-{
-	return "hello world";
+void GameEvents::Data::load_event_data(Replay::Data data, std::string level) {
+
+	//GameEvent::Data event_data;
+
+	//Convert info in replay_data object into words to send to service
+	std::string action_word;
+	action_word = data.action == Replay::SPAWNINT ? gloB->replay_spawnint
+			: data.action == Replay::NUKE ? gloB->replay_nuke
+					: data.action == Replay::ASSIGN ? gloB->replay_assign_any
+							: data.action == Replay::ASSIGN_LEFT  ? gloB->replay_assign_left
+									: data.action == Replay::ASSIGN_RIGHT ? gloB->replay_assign_right
+											: Language::common_cancel;
+
+	if (data.action == Replay::ASSIGN || data.action == Replay::ASSIGN_LEFT
+			|| data.action == Replay::ASSIGN_RIGHT) {
+		action_word += "=";
+		action_word += LixEn::ac_to_string(static_cast <LixEn::Ac> (data.skill));
+	}
+
+	this->action = action_word;
+	this->level = level;
+	this->update = data.update;
+	this->which_lix = data.what;
+
+	//Convert update to seconds
+	this->seconds = this->update;
 }
 
-bool GameEvents::send_event(string event, signed int number_of_attempts) {
+void GameEvents::Data::load_result_data(Result result, Level level) {
 
+	this->action = "ENDLEVEL";
+	this->update = -1;
+	this->which_lix = -1;
+
+	this->lix_required = level.required;
+	this->lix_saved = result.lix_saved;
+	this->skills_used = result.skills_used;
+	this->seconds_required=level.seconds;
+
+
+	//Convert update to seconds
+	this->seconds = this->update;
+}
+
+
+string GameEvents::format_event_data(GameEvents::Data data)
+{
+	ostringstream replay_data_sstr;
+
+	replay_data_sstr << "<event>";
+	replay_data_sstr << "<timestamp>" << data.timestamp << "</timestamp>";
+	replay_data_sstr << "<action>" << data.action << "</action>";
+	if (data.level != "0") replay_data_sstr <<  "<level>" << data.level << "</level>";
+	if (data.update >= 0) replay_data_sstr << "<update>" << data.update << "</update>";
+	if (data.seconds >= 0) replay_data_sstr << "<seconds>" << data.seconds << "</seconds>";
+	if (data.which_lix >= 0 ) replay_data_sstr << "<which>" << data.which_lix << "</which>";
+	if (data.lix_required >= 0) replay_data_sstr << "<lix_required>" << data.lix_required << "</lix_required>";
+	if (data.lix_saved >= 0) replay_data_sstr << "<lix_saved>" << data.lix_saved << "</lix_saved>";
+	if (data.skills_used >= 0) replay_data_sstr << "<skills_used>" << data.skills_used << "</skills_used>";
+	if (data.seconds_required >= 0) replay_data_sstr << "<seconds_required>" << data.seconds_required << "</seconds_required>";
+	replay_data_sstr << "</event>";
+	return replay_data_sstr.str();
+}
+
+
+void GameEvents::send_event(GameEvents::Data data) {
+	if (not GameEvents::connection_is_setup) {
+		Log::log(Log::INFO, "Connection is not yet set up. Running 'configure()'...");
+		GameEvents::configure();
+		if (not GameEvents::max_number_attempts || GameEvents::max_number_attempts < 0 || GameEvents::max_number_attempts > 100) {
+				Log::log(Log::INFO, "Invalid value for max_number_attempts variable. Using '1' as default.");
+				GameEvents::max_number_attempts = 1;
+		}
+	}
+	GameEvents::send_event(data, GameEvents::max_number_attempts);
+}
+
+void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts) {
 	bool success;
 	success = false;
 
 	signed int counter;
 	counter = 1;
 
+	//Format data
+	std::string event;
+	event = GameEvents::format_event_data(data);
+
 	ostringstream tmpmsg;
-	tmpmsg << "Sending event: ' " << event << "'";
+	tmpmsg << "Sending event...'" << event.substr(0,50);
+
 	Log::log(Log::INFO, tmpmsg.str());
 
 	try {
@@ -65,59 +171,11 @@ bool GameEvents::send_event(string event, signed int number_of_attempts) {
 		ostringstream tmpmsg;
 		tmpmsg << "...Unfortunately I received an unexpected exception:" << ex.what();
 		Log::log(Log::ERROR, tmpmsg.str());
-		return(false);
 	}
+
 }
 
-//bool GameEvents::send_event(Replay::Data& replay_data, signed int number_of_attempts) {
-//
-//	bool success;
-//	success = false;
-//
-//	signed int counter;
-//	counter = 1;
-//	Replay::Vec data = replay_data.get_data();
-//
-//	ostringstream replay_data_sstr;
-//
-//	for (Replay::It itr = replay_data.begin(); itr != replay_data.end(); ++itr) {
-//	        std::string word
-//	         = itr->action == Replay::SPAWNINT     ? gloB->replay_spawnint
-//	         : itr->action == Replay::NUKE         ? gloB->replay_nuke
-//	         : itr->action == Replay::ASSIGN       ? gloB->replay_assign_any
-//	         : itr->action == Replay::ASSIGN_LEFT  ? gloB->replay_assign_left
-//	         : itr->action == Replay::ASSIGN_RIGHT ? gloB->replay_assign_right
-//	                                               : Language::common_cancel;
-//	        if (itr->action == ASSIGN || itr->action == ASSIGN_LEFT
-//	                                  || itr->action == ASSIGN_RIGHT) {
-//	            word += "=";
-//	            word += LixEn::ac_to_string(static_cast <LixEn::Ac> (itr->skill));
-//	        }
-//	        replay_data_sstr << IO::LineBang(itr->update, itr->player, word, itr->what);
-//	    }
-//
-//	ostringstream tmpmsg;
-//	tmpmsg << "Sending event: ' " << replay_data_sstr.str() << "'";
-//	Log::log(Log::INFO, tmpmsg.str());
-//
-//	try {
-//		while ((counter <= number_of_attempts) and (not success))
-//		{
-//			ostringstream tmpmsg;
-//			tmpmsg << "Attempt number " << counter;
-//			Log::log(Log::INFO, tmpmsg.str());
-//			success = GameEvents::send_event_attempt(event);
-//			counter++;
-//		}
-//	}
-//	catch (std::exception &ex)
-//	{
-//		ostringstream tmpmsg;
-//		tmpmsg << "...Unfortunately I received an unexpected exception:" << ex.what();
-//		Log::log(Log::ERROR, tmpmsg.str());
-//		return(false);
-//	}
-//}
+
 
 //////////////////////////////////////////////////////////////////////
 // Protected methods
@@ -406,6 +464,7 @@ bool GameEvents::send_event_attempt(string event)
 
         	string request_body;
         	request_body = request_body_ss.str();
+        	//Log::log(Log::INFO, request_body);
 
         	try
         	{
