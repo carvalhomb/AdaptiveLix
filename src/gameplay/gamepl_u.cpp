@@ -15,6 +15,8 @@ void Gameplay::update()
 {
     // Noch schnell die Replaydaten mit der eingestellten Rate fertig machen:
     // Siehe Ratenbutton-Calculate fuer Kommentar, warum dies hier passiert.
+	// Yet quickly make the Replay data ready at the set rate:
+	// See installments Button Calculate for comment as to why this happened here.
     if (trlo && !replaying &&
         pan.spawnint_cur.get_spawnint() != trlo->spawnint
     ) {
@@ -28,6 +30,8 @@ void Gameplay::update()
 
     // Im Netzwerkspiel den Netzwerk-Replaydaten-Puffer nach neuen Ereignissen
     // der anderen Spieler kontrollieren - die eigenen sind schon im Replay.
+    // In the network game network Replay data buffer for new events of the
+    // other players control - their own are already in the replay.
     if (Network::get_started()) {
         Replay::Vec netdata = Network::get_replay_data();
         replay.add(netdata);
@@ -36,9 +40,14 @@ void Gameplay::update()
             // Das folgende <= statt <  behebt den lange quaelenden Netzwerkbug
             // und ist sogar theoretisch korrekt: Wenn wir in Update N sind und
             // es kommt Data zu Upd. N, so muss N-1 -> N neu berechnet werden.
+        	// The following <= instead of <resolves the long torturous network
+        	// Bug and is even theoretically correct: If we are in Update N and
+        	// it comes to Data Upd. N, N-1 so must -> N be recalculated.
             if (i->update <= replay_recalc_from) {
                 // recalc_from ist inklusive: Es wird ein Stand geladen,
                 // der dieses Update noch nicht mitberechnet hat.
+            	// recalc_from is including: loading a state, which has
+            	// not yet included in the calculation of this update.
                 replay_recalc_need = true;
                 replay_recalc_from = i->update;
             }
@@ -47,11 +56,14 @@ void Gameplay::update()
     }
 
     // Updaten, entweder mehrmals oder nur einmal
+    // Updating, either repeatedly or only once
     if (replay_recalc_need) {
         GameState state = state_manager.get_auto(replay_recalc_from);
         if (state) {
             // Wir nutzen nicht load_state(), weil dies kein manuelles Laden
             // ist. Dies sollte das einizge nicht-manuelle Laden sein.
+        	// We do not use load_state (), because this is not a manual load.
+        	// This should be the einizge non-manual loading.
             unsigned long updates_to_calc_to = cs.update;
             cs = state;
             while (cs.update < updates_to_calc_to) update_cs_once();
@@ -64,6 +76,7 @@ void Gameplay::update()
     finalize_update_and_animate_gadgets();
 }
 // Ende des cs.update inkl. Neuladerei und Nachberechnung
+// End of cs.update incl. Neuladerei and recalculation
 
 
 
@@ -71,6 +84,7 @@ void Gameplay::finalize_update_and_animate_gadgets()
 {
     // Diese Dinge muessen nicht mehrfach gemacht werden, selbst wenn neu
     // geladen wird, weil Netzwerkpakete eintreffen.
+	// These things must not be done more than once, even if reloads because network packets arrive.
     for (IacIt i =  special[Object::DECO  ].begin();
                i != special[Object::DECO  ].end(); ++i) i->animate();
     for (IacIt i =  special[Object::WATER ].begin();
@@ -122,9 +136,13 @@ void Gameplay::go_back_updates(const int go_back_by)
 
 // upd ist, welches Update berechnet wird. Das Spiel beginnt etwa mit Update 0
 // und im ersten zu errechnenden Update setzt diese Funktion das auf 1.
+//
+// is upd which update is calculated. The game begins with about update 0
+// and the first to be calculated update this function sets to 1.
+//
 void Gameplay::update_cs_once()
 {
-    // Neues Update einleiten
+    // Neues Update einleiten. Initiate New Update
     ++cs.update;
     const Ulng& upd = cs.update;
 
@@ -133,6 +151,8 @@ void Gameplay::update_cs_once()
     // Erst den ersten Spieler, dann den zweiten usw. pro Update,
     // damit aequivalente Replays mit verschiedener Spielerreihenfolge pro
     // Update immer gleich verlaufen.
+    // Only the first player, then the second and so on per update,
+    // so equivalents replays with different order of play per update always run the same.
     for (Tribe::It tritr = cs.tribes.begin(); tritr!=cs.tribes.end();++tritr) {
         for (Replay::It i = data.begin(); i != data.end(); ++i) {
             std::list <Tribe::Master>::iterator mitr = tritr->masters.begin();
@@ -145,7 +165,7 @@ void Gameplay::update_cs_once()
 
 
 
-    // Kurzer Einschub: Uhrendinge.
+    // Kurzer Einschub: Uhrendinge. Short slot: clocks things.
     if (level.seconds > 0) {
         if (cs.clock_running && cs.clock > 0) --cs.clock;
         // Im Multiplayer:
@@ -155,17 +175,25 @@ void Gameplay::update_cs_once()
         // Spieler das Zeitsetzungs-Paket zum gleichen Update erhalten.
         // Wir muessen dies nach dem Replayauswerten machen, um festzustellen,
         // dass noch kein Nuke-Ereignis im Replay ist.
+        // In Multiplayer:
+        // Nuke through the closing seconds of the clock.
+        // This triggers no network packet! All players are genukt each locally.
+        // This leads yet all the same gameplay, as each player will receive the time step-down
+        // package for the same update. We need to do this after Replayauswerten
+        // to determine that there is still no nuke event in the replay.
         if (multiplayer && cs.clock_running &&
          cs.clock <= (unsigned long) Lixxie::updates_for_bomb)
          for (Tribe::It tr = cs.tribes.begin(); tr != cs.tribes.end(); ++tr) {
             if (!tr->nuke) {
-                // Paket anfertigen
+                // Paket anfertigen.
+            	// Customize package
                 Replay::Data  data;
                 data.update = upd;
                 data.player = tr->masters.begin()->number;
                 data.action = Replay::NUKE;
                 replay.add(data);
                 // Und sofort ausfuehren: Replay wurde ja schon ausgewertet
+                // And running immediately: Replay was already evaluated
                 tr->lix_hatch = 0;
                 tr->nuke           = true;
                 if (&*tr == trlo) {
@@ -187,14 +215,21 @@ void Gameplay::update_cs_once()
         // wird die Nachspielzeit angesetzt. Falls aber alle Spieler schon
         // genukt sind, dann setzen wir die Zeit nicht an, weil sie vermutlich
         // gerade schon ausgelaufen ist.
+        // Also something quiet: there are players with rescued Lixen,
+        // but have no more Lixen in the game or have to be? Then,
+        // the added time will be applied. However, if all
+        // the players are already genukt, then we set the time
+        // not to, because it's probably just been leaked.
         if (!cs.clock_running)
          for (Tribe::CIt i = cs.tribes.begin(); i != cs.tribes.end(); ++i)
          if (i->lix_saved > 0 && ! i->get_still_playing()) {
             // Suche nach Ungenuktem
+        	// Search Unused
             for (Tribe::CIt j = cs.tribes.begin(); j != cs.tribes.end(); ++j)
              if (! j->nuke && j->get_still_playing()) {
                 cs.clock_running = true;
                 // Damit die Meldung nicht mehrmals kommt bei hoher Netzlast
+                // Thus, the message is not repeatedly comes at a high network load
                 effect.add_overtime(upd, *i, cs.clock);
                 break;
             }
