@@ -90,7 +90,8 @@ void GameEvents::Data::load_event_data(Replay::Data data, std::string level) {
 	this->which_lix = data.what;
 
 	//Convert update to seconds
-	this->seconds = this->update;
+	signed long secs = this->update / gloB->updates_per_second;
+	this->seconds = secs;
 }
 
 void GameEvents::Data::load_result_data(Result result, Level level) {
@@ -369,7 +370,7 @@ string GameEvents::get_token()
         			else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
         				Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
         				GameEvents::token = "";
-        				throw Poco::Net::NotAuthenticatedException("Token expired");
+        				throw Poco::Net::NotAuthenticatedException("Token unauthorized");
         			}
         			else {
         				//response failed
@@ -437,6 +438,12 @@ void GameEvents::send_event_attempt(string event)
 		Log::log(Log::ERROR, tmpmsg.str());
 		GameEvents::offline_mode = true;
 	}
+//	catch (Poco::Net::NotAuthenticatedException& ex) {
+//			ostringstream tmpmsg;
+//			tmpmsg << "Not authenticated: " << ex.what();
+//			Log::log(Log::ERROR, tmpmsg.str());
+//			throw;
+//	}
 	catch (std::exception &ex)
 	{
 		ostringstream tmpmsg;
