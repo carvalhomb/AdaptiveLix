@@ -19,6 +19,7 @@
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/NetException.h>
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 #include <Poco/StreamCopier.h>
@@ -42,6 +43,7 @@ string GameEvents::apikey = "";
 string GameEvents::token = "";
 string GameEvents::sessionid = "";
 bool GameEvents::connection_is_setup = false;
+bool GameEvents::offline_mode = false;
 signed int GameEvents::max_number_attempts = 3;
 
 //////////////////////////////////////////////////////////////////////
@@ -141,6 +143,7 @@ void GameEvents::send_event(GameEvents::Data data) {
 }
 
 void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts) {
+
 	bool success;
 	success = false;
 
@@ -156,21 +159,52 @@ void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts
 
 	Log::log(Log::INFO, tmpmsg.str());
 
-	try {
+	if (not GameEvents::offline_mode) {
 		while ((counter <= number_of_attempts) and (not success))
 		{
 			ostringstream tmpmsg;
 			tmpmsg << "Attempt number " << counter;
 			Log::log(Log::INFO, tmpmsg.str());
-			success = GameEvents::send_event_attempt(event);
-			counter++;
+			try {
+				GameEvents::send_event_attempt(event);
+				success = true;
+			}
+			catch (Poco::Net::NotAuthenticatedException& ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "POCO not authenticated:" << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				counter++;
+			}
+			catch (Poco::Net::ConnectionRefusedException& ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "POCO connection refused:" << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				GameEvents::offline_mode = true;
+				break;
+			}
+			catch (Poco::Net::NetException& ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "POCO Net exception:" << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				break;
+			}
+			catch (Poco::Exception& ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "POCO exception:" << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				break;
+			}
+			catch (std::exception &ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "Unexpected exception:" << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				break;
+			}
 		}
 	}
-	catch (std::exception &ex)
-	{
-		ostringstream tmpmsg;
-		tmpmsg << "...Unfortunately I received an unexpected exception:" << ex.what();
-		Log::log(Log::ERROR, tmpmsg.str());
+	else {
+		//TODO: Implement an offline log file that can be uploaded later?
+		Log::log(Log::INFO, "Working in offline mode, not sending anything.");
 	}
 
 }
@@ -247,6 +281,7 @@ void GameEvents::configure()
 				ostringstream tmpmsg;
 				tmpmsg << "Could not read max_number_attempts, using default value 3. Exception: " << ex.what();
 				Log::log(Log::INFO, tmpmsg.str());
+				GameEvents::max_number_attempts = 3;
 			}
 
             connection_is_setup = true;
@@ -274,8 +309,8 @@ string GameEvents::get_token()
 
     const string resource = "token";
     //try to connect to the service
-    try
-    {
+//    try
+//    {
         //Is the connection set up? If not, run configure()
         if (connection_is_setup == false) {
             Log::log(Log::INFO, "Connection is not set up. Running 'configure()'...");
@@ -295,53 +330,72 @@ string GameEvents::get_token()
         		string request_body;
         		request_body = request_body_ss.str();
 
-        		// Prepare response object
-        		Poco::Net::HTTPResponse response;
 
-        		// Prepare response stream
-        		ostringstream response_stream;
+//        		try {
+        			string request_url = GameEvents::service_endpoint + "/" + resource;
 
-        		Poco::Net::HTTPResponse::HTTPStatus response_status;
-        		response_status = GameEvents::do_request(service_endpoint, resource,
-        				Poco::Net::HTTPRequest::HTTP_POST, request_body, response, response_stream);
+        			Poco::Net::HTTPResponse response;
+        			ostringstream response_stream;
+        			Poco::Net::HTTPResponse::HTTPStatus response_status;
+        			response_status = GameEvents::post(request_url, request_body, response_stream);
 
-        		if (response_status == Poco::Net::HTTPResponse::HTTP_OK ) {
-        			//response: OK
-        			ostringstream tmpmsg;
-        			tmpmsg << "Successfully sent token request, status " << response_status;
-        			Log::log(Log::INFO, tmpmsg.str());
 
-        			std::string response_body;
-        			response_body = response_stream.str();
+        			if (response_status == Poco::Net::HTTPResponse::HTTP_OK ) {
+        				//response: OK
+        			    ostringstream tmpmsg;
+        			    tmpmsg << "Successfully sent token request, status " << response_status;
+        			    Log::log(Log::INFO, tmpmsg.str());
 
-        			try
-        			{
-        				//Try to extract token
-        				Poco::JSON::Parser parser;
-        				Poco::Dynamic::Var result = parser.parse(response_body);
-        				Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
-        				string tmptoken = object->get("token");
-        				GameEvents::token = tmptoken;
-        				ostringstream tmpmsg;
-        				tmpmsg << " ===== Got a token: " << GameEvents::token;
-        				Log::log(Log::INFO, tmpmsg.str());
+        			    try
+        			    {
+        			    	//Try to extract token
+        			    	Poco::JSON::Parser parser;
+        			    	Poco::Dynamic::Var result = parser.parse(response_stream.str());
+        			    	Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+        			    	string tmptoken = object->get("token");
+        			    	GameEvents::token = tmptoken;
+        			    	ostringstream tmpmsg;
+        			    	tmpmsg << " ===== Got a token: " << GameEvents::token;
+        			    	Log::log(Log::INFO, tmpmsg.str());
+        			    }
+        			    catch (Poco::Exception &ex)
+        			    {
+        			    	ostringstream tmpmsg;
+        			    	tmpmsg << "Exception when trying to read token: " << ex.displayText();
+        			    	Log::log(Log::ERROR, tmpmsg.str());
+        			    	GameEvents::token = "";
+        			    }
         			}
-        			catch (Poco::Exception &ex)
-        			{
-        				ostringstream tmpmsg;
-        				tmpmsg << "Exception when trying to read token: " << ex.displayText();
-        				Log::log(Log::ERROR, tmpmsg.str());
+        			else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
+        				Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
         				GameEvents::token = "";
+        				throw Poco::Net::NotAuthenticatedException("Token expired");
         			}
-        		}
-        		else
-        		{
-        			//response failed
-        			ostringstream tmpmsg;
-        			tmpmsg << "Failed to get authentication token. Reason: " <<  response.getReason();
-        			Log::log(Log::INFO, tmpmsg.str());
-        			GameEvents::token = "";
-        		}
+        			else {
+        				//response failed
+        				ostringstream tmpmsg;
+        				tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
+        				Log::log(Log::INFO,  tmpmsg.str() );
+        				throw Poco::Net::NetException(response.getReason());
+        			}
+
+
+//        		}
+//    			catch (Poco::Net::ConnectionRefusedException& ex) {
+//    				ostringstream tmpmsg;
+//    				tmpmsg << "POCO connection refused, setting offline mode:" << ex.what();
+//    				Log::log(Log::ERROR, tmpmsg.str());
+//    				GameEvents::offline_mode = true;
+//    				throw;
+//    			}
+//        		catch  (Poco::Exception& ex)
+//				{
+//        			ostringstream tmpmsg;
+//        			tmpmsg << "Exception when trying to get a token: " << ex.displayText();
+//        			Log::log(Log::ERROR, tmpmsg.str());
+//        			throw;
+//				}
+
         	}
         	else
         	{
@@ -352,75 +406,19 @@ string GameEvents::get_token()
         {
         	Log::log(Log::INFO, "Could not set up the connection settings.");
         }
-    }
-    catch (Poco::Exception& e) {
-        ostringstream tmpmsg;
-        tmpmsg << "Exception: " << e.what() << ". Message: " << e.message() ;
-        Log::log(Log::ERROR, tmpmsg.str());
-    }
+//    }
+//    catch (Poco::Exception& e) {
+//        ostringstream tmpmsg;
+//        tmpmsg << "Exception: " << e.what() << ". Message: " << e.message() ;
+//        Log::log(Log::ERROR, tmpmsg.str());
+//    }
 
     return GameEvents::token;
 }
 
 
-Poco::Net::HTTPResponse::HTTPStatus GameEvents::do_request(string endpoint,
-		string resource, string method, string request_body,
-		Poco::Net::HTTPResponse& response, ostringstream& output_stream)
-{
-	// prepare session
-	string request_url = "";
-	request_url = endpoint + "/" + resource;
-	Poco::URI request_uri(request_url);
-	Poco::Net::HTTPClientSession client_session(request_uri.getHost(), request_uri.getPort());
 
-	// prepare path
-	string request_path(request_uri.getPathAndQuery());
-	if (request_path.empty()) request_path = "/";
-
-	//In Windows we need to initialize the network
-	//TODO: Do I need a check here to avoid problems in other OS's?
-	Poco::Net::initializeNetwork();
-
-	// send request
-	Poco::Net::HTTPRequest request(method, request_path);
-
-
-	//is it a POST query and a non-empty request body?
-	if (method==Poco::Net::HTTPRequest::HTTP_POST)
-	{
-		if  (not (request_body.empty() || request_body.size()==0))
-		{
-			request.setContentType("application/json");
-			request.setKeepAlive(true);
-			request.setContentLength( request_body.length() );
-			Log::log(Log::INFO, "Sending request...");
-			client_session.sendRequest(request) << request_body;
-
-		}
-		else {
-			//throw badly formatted request exception
-			throw Poco::Exception("Bad request");
-			client_session.reset();
-		}
-	}
-	else {
-		//non-POST query does not need a request body
-		client_session.sendRequest(request);
-	}
-
-	std::istream &is = client_session.receiveResponse(response);
-	Poco::StreamCopier::copyStream(is, output_stream);
-
-	Poco::Net::HTTPResponse::HTTPStatus status = response.getStatus();
-	ostringstream tmpmsg;
-	tmpmsg << " do_request(): Received response: " << status;
-	Log::log(Log::INFO, tmpmsg.str());
-
-	return(status);
-}
-
-
-bool GameEvents::send_event_attempt(string event)
+void GameEvents::send_event_attempt(string event)
 {
 	//TODO: if token is refused, try to get a new one and try once again
 
@@ -433,106 +431,135 @@ bool GameEvents::send_event_attempt(string event)
 		tmpmsg << "My current token is " << current_token;
 		Log::log(Log::INFO,  tmpmsg.str());
 	}
+	catch (Poco::Net::ConnectionRefusedException& ex) {
+		ostringstream tmpmsg;
+		tmpmsg << "POCO connection refused, setting offline mode:" << ex.what();
+		Log::log(Log::ERROR, tmpmsg.str());
+		GameEvents::offline_mode = true;
+	}
 	catch (std::exception &ex)
 	{
 		ostringstream tmpmsg;
 		tmpmsg << "Unexpected exception while trying to get token: " << ex.what();
 		Log::log(Log::ERROR,  tmpmsg.str());
-		return(false);
+		throw Poco::Net::NotAuthenticatedException("Could not get a token.");
 	}
 
-    if (connection_is_setup == false) {
-        Log::log(Log::ERROR, "Could not set up the connection.");
-        return(false);
-    }
-    else {
-        if (current_token.empty() || current_token.size()==0) {
-            Log::log(Log::ERROR, "Could not get a token.");
-            return(false);
-        }
-        else
-        {
-        	//OK, I have a non-empty token
+	if (connection_is_setup == false) {
+		Log::log(Log::ERROR, "Could not set up the connection.");
 
-        	//prepare request body
-        	time_t timestamp = time(0);
-        	ostringstream request_body_ss;
-        	request_body_ss << "{\"token\" : \"" << current_token << "\", ";
-        	request_body_ss << "\"timestamp\" : \"" << timestamp << "\", ";
-        	request_body_ss << "\"gameevent\" : \"" << event << "\"";
-        	request_body_ss << "}";
+	}
+	else {
+		if (current_token.empty() || current_token.size()==0) {
+			Log::log(Log::ERROR, "Could not get a token.");
+			throw Poco::Net::NotAuthenticatedException("Could not get a token.");
+		}
+		else
+		{
+			//OK, I have a non-empty token
 
-        	string request_body;
-        	request_body = request_body_ss.str();
-        	//Log::log(Log::INFO, request_body);
+			//prepare request body
+			time_t timestamp = time(0);
+			ostringstream request_body_ss;
+			request_body_ss << "{\"token\" : \"" << current_token << "\", ";
+			request_body_ss << "\"timestamp\" : \"" << timestamp << "\", ";
+			request_body_ss << "\"gameevent\" : \"" << event << "\"";
+			request_body_ss << "}";
 
-        	try
-        	{
-        		Poco::Net::HTTPResponse::HTTPStatus response_status;
+			string request_body;
+			request_body = request_body_ss.str();
+			//Log::log(Log::INFO, request_body);
 
-        		Poco::Net::HTTPResponse response;
-        		ostringstream response_stream;
+//			try
+//			{
+				string request_url = "";
+				request_url = GameEvents::service_endpoint + "/" + resource;
 
-        		response_status = GameEvents::do_request(GameEvents::service_endpoint,
-        				resource, Poco::Net::HTTPRequest::HTTP_POST, request_body,
-						response, response_stream);
+				Poco::Net::HTTPResponse response;
+				ostringstream response_stream;
+				Poco::Net::HTTPResponse::HTTPStatus response_status;
+				response_status = GameEvents::post(request_url, request_body, response_stream);
 
-        		if (response_status == Poco::Net::HTTPResponse::HTTP_OK ||
-        				response_status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
-        			//response: OK
-        			ostringstream tmpmsg;
-        			tmpmsg << "Successfully sent game event, status " << response_status;
-        			Log::log(Log::INFO, tmpmsg.str());
 
-        			std::string response_body;
-        			response_body = response_stream.str();
 
-        			try
-        			{
-        				//Try to extract returned message
-        				Poco::JSON::Parser parser;
-        				Poco::Dynamic::Var result = parser.parse(response_body);
-        				Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
-        				ostringstream tmpmsg;
-        				string msg = object->get("message");
-        				tmpmsg << "Returned message: " << msg;
-        				Log::log(Log::INFO,  tmpmsg.str());
-        				return(true);
-        			}
-        			catch (Poco::Exception &ex)
-        			{
-        				ostringstream tmpmsg;
-        				tmpmsg << "Exception when trying to read message: " << ex.displayText();
-        				Log::log(Log::ERROR,  tmpmsg.str() );
-        				return(false);
-        			}
+				if (response_status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
+					//response: OK
+					ostringstream tmpmsg;
+					tmpmsg << "Successfully sent game event, status " << response_status;
+					Log::log(Log::INFO, tmpmsg.str());
 
-        		}
-        		else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
-        			Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
-        			GameEvents::token = "";
-        			return(false);
-        		}
-        		else {
-        			//response failed
-        			ostringstream tmpmsg;
-        			tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
-        			Log::log(Log::INFO,  tmpmsg.str() );
-        			return(false);
-        		}
+				}
+				else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
+					Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
+					GameEvents::token = "";
+					throw Poco::Net::NotAuthenticatedException("Token expired");
+				}
+				else {
+					//response failed
+					ostringstream tmpmsg;
+					tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
+					Log::log(Log::INFO,  tmpmsg.str() );
+					throw Poco::Net::NetException(response.getReason());
+				}
 
-        	}
-        	catch (Poco::Exception &ex)
-			{
-        		ostringstream tmpmsg;
-        		tmpmsg << "Received unexpected exception: " << ex.displayText();
-            	Log::log(Log::ERROR, tmpmsg.str());
-            	ex.rethrow();
-            	//return(false);
-			}
+//			}
+//			catch (Poco::Exception &ex)
+//			{
+//				ostringstream tmpmsg;
+//				tmpmsg << "Received unexpected exception: " << ex.displayText();
+//				Log::log(Log::ERROR, tmpmsg.str());
+//				//ex.rethrow();
+//				throw;
+//				//return(false);
+//			}
 
-        }
-    }
+		}
+	}
 }
+
+
+Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload, ostringstream& output_stream) {
+	// prepare session
+	Poco::URI request_uri(url);
+	Poco::Net::HTTPClientSession client_session(request_uri.getHost(), request_uri.getPort());
+
+	// prepare path
+	string request_path(request_uri.getPathAndQuery());
+	if (request_path.empty()) request_path = "/";
+
+	//In Windows we need to initialize the network
+	//TODO: Do I need a check here to avoid problems in other OS's?
+	Poco::Net::initializeNetwork();
+
+	// prepare request
+	Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, request_path);
+	if  (not (payload.empty() || payload.size()==0))
+	{
+		request.setContentType("application/json");
+		request.setKeepAlive(true);
+		request.setContentLength( payload.length() );
+		Log::log(Log::INFO, "Sending request...");
+
+		//send request
+		client_session.sendRequest(request) << payload;
+
+		Poco::Net::HTTPResponse response;
+
+		std::istream &is = client_session.receiveResponse(response);
+		Poco::StreamCopier::copyStream(is, output_stream);
+
+		//response.getStatus();
+		return response.getStatus();
+	}
+	else {
+		//throw badly formatted request exception
+		client_session.reset();
+		throw Poco::Exception("Bad request");
+	}
+
+}
+
+
+
 
 

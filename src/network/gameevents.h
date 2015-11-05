@@ -54,11 +54,10 @@ class GameEvents
         static std::string sessionid;
         static signed int max_number_attempts;
         static bool connection_is_setup;
+        static bool offline_mode;
 
         static void configure();
         static std::string get_token();
-        static Poco::Net::HTTPResponse::HTTPStatus do_request(std::string endpoint,
-        		std::string resource, std::string method, std::string request_body,
-				Poco::Net::HTTPResponse& response, std::ostringstream& output_stream);
-        static bool send_event_attempt(std::string event);
+        static void send_event_attempt(std::string event);
+        static Poco::Net::HTTPResponse::HTTPStatus post(std::string url, std::string payload, std::ostringstream& output_stream);
 };
