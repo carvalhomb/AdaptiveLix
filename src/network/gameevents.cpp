@@ -122,10 +122,10 @@ string GameEvents::format_event_data(GameEvents::Data data)
 	if (data.update >= 0) replay_data_sstr << "<update>" << data.update << "</update>";
 	if (data.seconds >= 0) replay_data_sstr << "<seconds>" << data.seconds << "</seconds>";
 	if (data.which_lix >= 0 ) replay_data_sstr << "<which>" << data.which_lix << "</which>";
-	if (data.lix_required >= 0) replay_data_sstr << "<lix_required>" << data.lix_required << "</lix_required>";
-	if (data.lix_saved >= 0) replay_data_sstr << "<lix_saved>" << data.lix_saved << "</lix_saved>";
-	if (data.skills_used >= 0) replay_data_sstr << "<skills_used>" << data.skills_used << "</skills_used>";
-	if (data.seconds_required >= 0) replay_data_sstr << "<seconds_required>" << data.seconds_required << "</seconds_required>";
+	if (data.lix_required >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<lix_required>" << data.lix_required << "</lix_required>";
+	if (data.lix_saved >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<lix_saved>" << data.lix_saved << "</lix_saved>";
+	if (data.skills_used >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<skills_used>" << data.skills_used << "</skills_used>";
+	if (data.seconds_required >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<seconds_required>" << data.seconds_required << "</seconds_required>";
 	replay_data_sstr << "</event>";
 	return replay_data_sstr.str();
 }
