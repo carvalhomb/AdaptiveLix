@@ -146,7 +146,7 @@ struct Level {
     std::string author;
     std::string name_german;
     std::string name_english;
-    //std::string level_filename; //Records the full path of the level
+    std::string level_filename; //Records the full path of the level
 
     std::vector <std::string> hints_german;
     std::vector <std::string> hints_english;

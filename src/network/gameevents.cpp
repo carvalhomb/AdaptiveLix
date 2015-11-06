@@ -129,7 +129,7 @@ void GameEvents::Data::load_result_data(Result result, Level level) {
 	this->lix_saved = result.lix_saved;
 	this->skills_used = result.skills_used;
 	this->seconds_required=level.seconds;
-
+	this->level=level.level_filename;
 
 
 	//Convert update to seconds

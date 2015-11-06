@@ -71,14 +71,9 @@ void Gameplay::calc_active()
         Replay::Data data = new_replay_data();
         data.action       = Replay::NUKE;
 
-        //Get level name
-        //Filename mylevel = replay.get_level_filename();
-        //std::string mylevel_name = mylevel.get_rootless();
-        std::string mylevel_name = "level.filename";
         //Load data in the object
-        //GameEvents::Data event_data;
         GameEvents::Data event_data = GameEvents::Data();
-        event_data.load_event_data(data, mylevel_name);
+        event_data.load_event_data(data, level.level_filename);
         //Send data
         Log::log(Log::INFO, "Sending nuke game event...");
         GameEvents::send_event(event_data);
@@ -100,7 +95,7 @@ void Gameplay::calc_active()
 
     // mouse on the playing field, lixes are selectable
     if (! mouse_on_panel && trlo) {
-        // Bestimmte Richtung anw�hlen?
+        // Bestimmte Richtung anwahlen?
         bool only_dir_l = false;
         bool only_dir_r = false;
         if (  key[useR->key_force_left]
@@ -278,14 +273,9 @@ if (priority > 1 && priority < 99999) {
                 data.skill        = skill_visible->get_skill();
                 data.what         = lem_id;
 
-
-                //Get level name
-                //Filename mylevel = replay.get_level_filename();
-                //std::string mylevel_name = mylevel.get_rootless();
-                std::string mylevel_name = "level.filename";
                 //Load data in the object
                 GameEvents::Data event_data = GameEvents::Data();
-                event_data.load_event_data(data, mylevel_name);
+                event_data.load_event_data(data, level.level_filename);
                 //Send data
                 Log::log(Log::INFO, "Sending regular game event...");
                 GameEvents::send_event(event_data);
