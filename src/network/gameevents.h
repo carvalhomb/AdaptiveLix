@@ -24,7 +24,8 @@ class GameEvents
 			signed long update;
 			signed long seconds;
 			signed long which_lix;
-			time_t timestamp;
+			std::string timestamp;
+			//time_t timestamp;
 			int lix_required;
 			int lix_saved;
 			int skills_used;
@@ -34,12 +35,14 @@ class GameEvents
 			//virtual ~Data();
 			void load_event_data(Replay::Data data, std::string level);
 			void load_result_data(Result result, Level level);
+			//void prepare_event_data(std::string action_word, signed long update, std::string level);
 		};
 
 
         //GameEvents();
         //virtual ~GameEvents();
 		static std::string format_event_data(GameEvents::Data event_data);
+
         static void send_event(GameEvents::Data data);
         static void send_event(GameEvents::Data data, signed int number_of_attempts);
 
