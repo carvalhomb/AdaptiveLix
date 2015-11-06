@@ -55,10 +55,10 @@
  * void draw_to(BITMAP*, BITMAP* = 0)
  *
  *   Zeichnet die Landschaft des Levels (alle Elemente der Terrain-Liste) auf
- *   das erste der übergebenen Bitmaps. Falls auch ein zweites Bitmap über-
- *   geben wird, so wird dies als Stahlmaske benutzt. Wichtig: Für den Editor
+ *   das erste der -bergebenen Bitmaps. Falls auch ein zweites Bitmap uber-
+ *   geben wird, so wird dies als Stahlmaske benutzt. Wichtig: F-
  *   ist dieses Zeichnen nicht brauchbar, denn die Landschaftsobjekte werden
- *   zu einem einzigen großen Land-Klumpatsch verschmolzen.
+ *   zu einem einzigen grossen Land-Klumpatsch verschmolzen.
  *
  * void create_preview(unsigned w, unsigned h, int color)
  *
@@ -73,7 +73,7 @@
  *
  * void clear()
  *
- *   Versetzt die Datenstruktur in den jungfräulichen Zustand, den ein neues
+ *   Versetzt die Datenstruktur in den jungfraulichen Zustand, den ein neues
  *   Objekt, das ohne Laden eines Levels erschaffen worden ist, besitzt.
  *
  * static std::string get_name(const std::string&)
@@ -146,6 +146,7 @@ struct Level {
     std::string author;
     std::string name_german;
     std::string name_english;
+    //std::string level_filename; //Records the full path of the level
 
     std::vector <std::string> hints_german;
     std::vector <std::string> hints_english;
@@ -167,6 +168,7 @@ struct Level {
     int  required;
     int  spawnint_slow;
     int  spawnint_fast;
+
 
     bool      nuke_delayed; // true == nuke button triggers overtime if any
     LixEn::Ac nuke_skill;   // NOTHING == use most appropriate exploder
@@ -195,6 +197,7 @@ struct Level {
     inline       Status get_status() const { return status;         }
     inline       bool   get_good()   const { return status == GOOD; }
     const std::string&  get_name()   const;
+
 
     const std::vector <std::string>& get_hints()  const;
 

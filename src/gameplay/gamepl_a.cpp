@@ -72,8 +72,9 @@ void Gameplay::calc_active()
         data.action       = Replay::NUKE;
 
         //Get level name
-        Filename mylevel = replay.get_level_filename();
-        std::string mylevel_name = mylevel.get_rootless();
+        //Filename mylevel = replay.get_level_filename();
+        //std::string mylevel_name = mylevel.get_rootless();
+        std::string mylevel_name = "level.filename";
         //Load data in the object
         //GameEvents::Data event_data;
         GameEvents::Data event_data = GameEvents::Data();
@@ -277,9 +278,11 @@ if (priority > 1 && priority < 99999) {
                 data.skill        = skill_visible->get_skill();
                 data.what         = lem_id;
 
+
                 //Get level name
-                Filename mylevel = replay.get_level_filename();
-                std::string mylevel_name = mylevel.get_rootless();
+                //Filename mylevel = replay.get_level_filename();
+                //std::string mylevel_name = mylevel.get_rootless();
+                std::string mylevel_name = "level.filename";
                 //Load data in the object
                 GameEvents::Data event_data = GameEvents::Data();
                 event_data.load_event_data(data, mylevel_name);

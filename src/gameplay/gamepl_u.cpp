@@ -29,10 +29,21 @@ void Gameplay::update()
         Replay::Data data = new_replay_data();
         data.action       = Replay::SPAWNINT;
         data.what         = trlo->spawnint;
+
+        //Get level name
+        //Filename mylevel = replay.get_level_filename();
+        //std::string mylevel_name = mylevel.get_rootless();
+        //std::string mylevel_name = "level.filename";
+        //Load data in the object
+        //GameEvents::Data event_data;
+        //GameEvents::Data event_data = GameEvents::Data();
+        //event_data.load_event_data(data, mylevel_name);
+        //Send data
+        //Log::log(Log::INFO, "Sending spawn interval change game event...");
+        //GameEvents::send_event(event_data);
+
         replay.add(data);
         Network::send_replay_data(data);
-        Log::log(Log::INFO, "Debug::: Gameplay::update() line 34");
-        //GameEvents::send_data(data, 3); //the number is the number of attempts
     }
 
     // Im Netzwerkspiel den Netzwerk-Replaydaten-Puffer nach neuen Ereignissen

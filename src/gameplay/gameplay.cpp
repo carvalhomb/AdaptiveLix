@@ -91,9 +91,12 @@ Gameplay::Gameplay(
     }
 
     //Get Level name
-    std::string mylevel_name = filename.get_rootless();
+    //Log::log(Log::INFO, "Sending start level event-----");
+    //std::string mylevel_name = filename.get_rootless();
+    std::string mylevel_name = "level.filename";
     //Load data in the object
-    GameEvents::Data start_level_event_data;
+    //GameEvents::Data start_level_event_data;
+    GameEvents::Data start_level_event_data = GameEvents::Data();
     start_level_event_data.action = "STARTLEVEL";
     start_level_event_data.level = mylevel_name;
     //Send data
@@ -511,7 +514,7 @@ Result Gameplay::get_result()
 {
     // a Result will save the spent updates, not the current updates.
     // The main menu will convert the spent updates into seconds again.
-	Log::log(Log::INFO, "Debug::: Gameplay::get_result() line 501");
+	//Log::log(Log::INFO, "Debug::: Gameplay::get_result() line 501");
     return Result(level.built, trlo->lix_saved, trlo->skills_used,
         trlo->update_saved > 0
         ? trlo->update_saved - state_manager.get_zero().update
@@ -539,7 +542,8 @@ void Gameplay::save_result()
     	result = get_result();
 
     	//Get level name
-    	std::string mylevel_name = filename.get_rootless();
+    	//std::string mylevel_name = filename.get_rootless();
+    	std::string mylevel_name = "level.filename";
 
     	//Load data in the object
     	//GameEvents::Data end_level_event_data;

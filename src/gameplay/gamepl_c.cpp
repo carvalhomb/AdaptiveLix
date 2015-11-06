@@ -13,6 +13,9 @@
 #include "../api/manager.h"
 #include "../other/user.h"
 
+//#include "../network/gameevents.h"
+//#include "../other/file/log.h"
+
 void Gameplay::calc()
 {
     // Wenn nicht gestartet, macht dies nix
@@ -298,6 +301,18 @@ void Gameplay::calc_self()
         if (pan.state_save.get_clicked()) {
             state_manager.save_user(cs, replay);
             Sound::play_loud(Sound::DISKSAVE);
+
+            //Get level name
+            //Filename mylevel = replay.get_level_filename();
+            //std::string mylevel_name = level.filename;
+            //Load data in the object
+            //GameEvents::Data event_data;
+            //GameEvents::Data event_data = GameEvents::Data();
+            //event_data.prepare_event_data("SAVESTATE", 0, "level.filename");
+            //Send data
+            //Log::log(Log::INFO, "Sending save state game event...");
+            //GameEvents::send_event(event_data);
+
         }
 
         // Laden
@@ -316,6 +331,18 @@ void Gameplay::calc_self()
                 if (pan.get_speed() != GameplayPanel::SPEED_PAUSE)
                     pan.set_speed(GameplayPanel::SPEED_NORMAL);
                 load_state(sta);
+
+                //Get level name
+                //Filename mylevel = replay.get_level_filename();
+                //std::string mylevel_name = mylevel.get_rootless();
+                //Load data in the object
+                //GameEvents::Data event_data;
+                //GameEvents::Data event_data = GameEvents::Data();
+                //event_data.prepare_event_data("SAVESTATE", 0, "level.filename");
+                //Send data
+                //Log::log(Log::INFO, "Sending save state game event...");
+                //GameEvents::send_event(event_data);
+
             }
         }
 
