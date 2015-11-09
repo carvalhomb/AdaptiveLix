@@ -144,7 +144,7 @@ void GameEvents::send_event(GameEvents::Data event_data) {
 		Log::log(Log::INFO, "Connection is not yet set up. Running 'configure()'...");
 		GameEvents::configure();
 		if (not GameEvents::max_number_attempts || GameEvents::max_number_attempts < 0 || GameEvents::max_number_attempts > 100) {
-			Log::log(Log::INFO, "Invalid value for max_number_attempts variable. Using '1' as default.");
+			Log::log(Log::ERROR, "Invalid value for max_number_attempts variable. Using '1' as default.");
 			GameEvents::max_number_attempts = 1;
 		}
 	}
@@ -154,12 +154,12 @@ void GameEvents::send_event(GameEvents::Data event_data) {
 		GameEvents::send_event(event_data, GameEvents::max_number_attempts);
 	}
 	else {
-		Log::log(Log::INFO, "Running in offline mode.");
+		//Log::log(Log::INFO, "Running in offline mode.");
 	}
 
 
 	if (GameEvents::offline_mode || GameEvents::record_local_file) {
-		Log::log(Log::INFO, "Logging event offline.");
+		//Log::log(Log::INFO, "Logging event offline.");
 		GameEvents::log_event_locally(event_data);
 	}
 }
@@ -176,17 +176,16 @@ void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts
 	std::string event;
 	event = GameEvents::format_event_data(data);
 
-	ostringstream tmpmsg;
-	tmpmsg << "Sending event...'" << event.substr(0,70);
-
-	Log::log(Log::INFO, tmpmsg.str());
+	//ostringstream tmpmsg;
+	//tmpmsg << "Sending event...'" << event.substr(0,70);
+	//Log::log(Log::INFO, tmpmsg.str());
 
 	if (not GameEvents::offline_mode) {
-		while ((counter <= number_of_attempts) and (not success))
+		while ((counter <= number_of_attempts) and (not success) and (not GameEvents::offline_mode))
 		{
-			ostringstream tmpmsg;
-			tmpmsg << "Attempt number " << counter;
-			Log::log(Log::INFO, tmpmsg.str());
+			//ostringstream tmpmsg;
+			//tmpmsg << "Attempt number " << counter;
+			//Log::log(Log::INFO, tmpmsg.str());
 			try {
 				GameEvents::send_event_attempt(event);
 				success = true;
@@ -199,33 +198,33 @@ void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts
 			}
 			catch (Poco::Net::ConnectionRefusedException& ex) {
 				ostringstream tmpmsg;
-				tmpmsg << "POCO connection refused:" << ex.what();
+				tmpmsg << "POCO connection refused: " << ex.what();
 				Log::log(Log::ERROR, tmpmsg.str());
 				GameEvents::offline_mode = true;
 				break;
 			}
 			catch (Poco::Net::NetException& ex) {
 				ostringstream tmpmsg;
-				tmpmsg << "POCO Net exception:" << ex.what();
+				tmpmsg << "POCO Net exception: " << ex.what();
 				Log::log(Log::ERROR, tmpmsg.str());
 				break;
 			}
 			catch (Poco::Exception& ex) {
 				ostringstream tmpmsg;
-				tmpmsg << "POCO exception:" << ex.what();
+				tmpmsg << "POCO exception: " << ex.what();
 				Log::log(Log::ERROR, tmpmsg.str());
 				break;
 			}
 			catch (std::exception &ex) {
 				ostringstream tmpmsg;
-				tmpmsg << "Unexpected exception:" << ex.what();
+				tmpmsg << "Unexpected exception: " << ex.what();
 				Log::log(Log::ERROR, tmpmsg.str());
 				break;
 			}
 		}
 	}
 	else {
-		Log::log(Log::INFO, "Working in offline mode, not sending anything.");
+		Log::log(Log::INFO, "Working in offline mode.");
 	}
 
 }
@@ -303,7 +302,7 @@ void GameEvents::configure()
 			catch (std::exception &ex) {
 				ostringstream tmpmsg;
 				tmpmsg << "Could not read max_number_attempts, using default value 3. Exception: " << ex.what();
-				Log::log(Log::INFO, tmpmsg.str());
+				Log::log(Log::ERROR, tmpmsg.str());
 				GameEvents::max_number_attempts = 3;
 			}
 
@@ -367,9 +366,9 @@ string GameEvents::get_token()
 
     		if (response_status == Poco::Net::HTTPResponse::HTTP_OK ) {
     			//response: OK
-    			ostringstream tmpmsg;
-    			tmpmsg << "Successfully sent token request, status " << response_status;
-    			Log::log(Log::INFO, tmpmsg.str());
+    			//ostringstream tmpmsg;
+    			//tmpmsg << "Successfully sent token request, status " << response_status;
+    			//Log::log(Log::INFO, tmpmsg.str());
 
     			try
     			{
@@ -379,9 +378,9 @@ string GameEvents::get_token()
     				Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
     				string tmptoken = object->get("token");
     				GameEvents::token = tmptoken;
-    				ostringstream tmpmsg;
-    				tmpmsg << " ===== Got a token: " << GameEvents::token;
-    				Log::log(Log::INFO, tmpmsg.str());
+    				//ostringstream tmpmsg;
+    				//tmpmsg << " ===== Got a token: " << GameEvents::token;
+    				//Log::log(Log::INFO, tmpmsg.str());
     			}
     			catch (Poco::Exception &ex)
     			{
@@ -407,12 +406,12 @@ string GameEvents::get_token()
     	}
     	else
     	{
-    		Log::log(Log::INFO, "I already have a token. Continuing, so that I return the existing one...");
+    		//Log::log(Log::INFO, "I already have a token. Continuing, so that I return the existing one...");
     	}
     }
     else
     {
-    	Log::log(Log::INFO, "Could not set up the connection settings.");
+    	Log::log(Log::ERROR, "Could not set up the connection settings.");
     }
 
 
@@ -426,15 +425,15 @@ void GameEvents::send_event_attempt(string event)
 	string resource = "commitevent";
 	string current_token;
 	try {
-		Log::log(Log::INFO, "Send event attempt, first making sure I have a token.");
+		//Log::log(Log::INFO, "Send event attempt, first making sure I have a token.");
 		current_token = GameEvents::get_token();
-		ostringstream tmpmsg;
-		tmpmsg << "My current token is " << current_token;
-		Log::log(Log::INFO,  tmpmsg.str());
+		//ostringstream tmpmsg;
+		//tmpmsg << "My current token is " << current_token;
+		//Log::log(Log::INFO,  tmpmsg.str());
 	}
 	catch (Poco::Net::ConnectionRefusedException& ex) {
 		ostringstream tmpmsg;
-		tmpmsg << "POCO connection refused, setting offline mode:" << ex.what();
+		tmpmsg << "POCO connection refused: " << ex.what() << ". Setting offline mode. ";
 		Log::log(Log::ERROR, tmpmsg.str());
 		GameEvents::offline_mode = true;
 	}
@@ -482,13 +481,13 @@ void GameEvents::send_event_attempt(string event)
 
 			if (response_status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
 				//response: OK
-				ostringstream tmpmsg;
-				tmpmsg << "Successfully sent game event, status " << response_status;
-				Log::log(Log::INFO, tmpmsg.str());
+				//ostringstream tmpmsg;
+				//tmpmsg << "Successfully sent game event, status " << response_status;
+				//Log::log(Log::INFO, tmpmsg.str());
 
 			}
 			else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
-				Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
+				Log::log(Log::ERROR, "Token unauthorized. Resetting the token variable.");
 				GameEvents::token = "";
 				throw Poco::Net::NotAuthenticatedException("Token expired");
 			}
@@ -496,7 +495,7 @@ void GameEvents::send_event_attempt(string event)
 				//response failed
 				ostringstream tmpmsg;
 				tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
-				Log::log(Log::INFO,  tmpmsg.str() );
+				Log::log(Log::ERROR,  tmpmsg.str() );
 				throw Poco::Net::NetException(response.getReason());
 			}
 
@@ -525,7 +524,7 @@ Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload,
 		request.setContentType("application/json");
 		request.setKeepAlive(true);
 		request.setContentLength( payload.length() );
-		Log::log(Log::INFO, "Sending request...");
+		//Log::log(Log::INFO, "Sending request...");
 
 		//send request
 		client_session.sendRequest(request) << payload;
@@ -541,7 +540,7 @@ Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload,
 	else {
 		//throw badly formatted request exception
 		client_session.reset();
-		throw Poco::Exception("Bad request");
+		throw Poco::Exception("Bad request.");
 	}
 
 }
@@ -558,13 +557,13 @@ void GameEvents::log_event_locally(GameEvents::Data event_data) {
 	ofstream myfile;
 	try {
 		if (GameEvents::file_exists(filename)) {
-			Log::log(Log::INFO, "File exists, appending...");
+			//Log::log(Log::INFO, "File exists, appending...");
 			myfile.open(filename.c_str(), std::ios_base::app);
 			myfile << formatted_line;
 			myfile.close();
 		}
 		else {
-			Log::log(Log::INFO, "File does NOT exists, creating it and preparing header...");
+			//Log::log(Log::INFO, "File does NOT exists, creating it and preparing header...");
 
 			//create file and write first line, then the formatted line
 			myfile.open(filename.c_str());
