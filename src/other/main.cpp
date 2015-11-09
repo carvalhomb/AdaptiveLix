@@ -158,8 +158,6 @@ int main(int argc, char* argv[])
         Network::initialize();
 
 
-        Log::log(Log::INFO,"Starting connection... ");
-
         GameEvents::Data start_event_data = GameEvents::Data();
         start_event_data.action = "STARTGAME";
         start_event_data.level = "0"; //not in a level
@@ -171,7 +169,6 @@ int main(int argc, char* argv[])
         l_main->main_loop();
         delete l_main;
 
-        Log::log(Log::INFO,"Starting connection... ");
 
         GameEvents::Data end_event_data = GameEvents::Data();
         end_event_data.action = "ENDGAME";

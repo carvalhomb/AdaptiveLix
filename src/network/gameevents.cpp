@@ -7,6 +7,8 @@
 #include <string>
 #include <iostream>   // for cout, istream
 #include <sstream>
+#include <fstream>
+#include <unistd.h>
 #include <exception>
 #include <ctime>
 #include <iomanip>
@@ -44,6 +46,7 @@ string GameEvents::token = "";
 string GameEvents::sessionid = "";
 bool GameEvents::connection_is_setup = false;
 bool GameEvents::offline_mode = false;
+bool GameEvents::record_local_file = true;
 signed int GameEvents::max_number_attempts = 3;
 
 //////////////////////////////////////////////////////////////////////
@@ -135,36 +138,30 @@ void GameEvents::Data::load_result_data(Result result, Level level) {
 }
 
 
-string GameEvents::format_event_data(GameEvents::Data data)
-{
-	ostringstream replay_data_sstr;
+void GameEvents::send_event(GameEvents::Data event_data) {
 
-	replay_data_sstr << "<event>";
-	replay_data_sstr << "<timestamp>" << data.timestamp << "</timestamp>";
-	replay_data_sstr << "<action>" << data.action << "</action>";
-	if (data.level != "0") replay_data_sstr <<  "<level>" << data.level << "</level>";
-	if (data.update >= 0) replay_data_sstr << "<update>" << data.update << "</update>";
-	if (data.seconds >= 0) replay_data_sstr << "<seconds>" << data.seconds << "</seconds>";
-	if (data.which_lix >= 0 ) replay_data_sstr << "<which>" << data.which_lix << "</which>";
-	if (data.lix_required >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<lix_required>" << data.lix_required << "</lix_required>";
-	if (data.lix_saved >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<lix_saved>" << data.lix_saved << "</lix_saved>";
-	if (data.skills_used >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<skills_used>" << data.skills_used << "</skills_used>";
-	if (data.seconds_required >= 0 && (data.action == "ENDLEVEL")) replay_data_sstr << "<seconds_required>" << data.seconds_required << "</seconds_required>";
-	replay_data_sstr << "</event>";
-	return replay_data_sstr.str();
-}
-
-
-void GameEvents::send_event(GameEvents::Data data) {
 	if (not GameEvents::connection_is_setup) {
 		Log::log(Log::INFO, "Connection is not yet set up. Running 'configure()'...");
 		GameEvents::configure();
 		if (not GameEvents::max_number_attempts || GameEvents::max_number_attempts < 0 || GameEvents::max_number_attempts > 100) {
-				Log::log(Log::INFO, "Invalid value for max_number_attempts variable. Using '1' as default.");
-				GameEvents::max_number_attempts = 1;
+			Log::log(Log::INFO, "Invalid value for max_number_attempts variable. Using '1' as default.");
+			GameEvents::max_number_attempts = 1;
 		}
 	}
-	GameEvents::send_event(data, GameEvents::max_number_attempts);
+
+	if (GameEvents::offline_mode==false) {
+
+		GameEvents::send_event(event_data, GameEvents::max_number_attempts);
+	}
+	else {
+		Log::log(Log::INFO, "Running in offline mode.");
+	}
+
+
+	if (GameEvents::offline_mode || GameEvents::record_local_file) {
+		Log::log(Log::INFO, "Logging event offline.");
+		GameEvents::log_event_locally(event_data);
+	}
 }
 
 void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts) {
@@ -180,7 +177,7 @@ void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts
 	event = GameEvents::format_event_data(data);
 
 	ostringstream tmpmsg;
-	tmpmsg << "Sending event...'" << event.substr(0,50);
+	tmpmsg << "Sending event...'" << event.substr(0,70);
 
 	Log::log(Log::INFO, tmpmsg.str());
 
@@ -228,7 +225,6 @@ void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts
 		}
 	}
 	else {
-		//TODO: Implement an offline log file that can be uploaded later?
 		Log::log(Log::INFO, "Working in offline mode, not sending anything.");
 	}
 
@@ -291,15 +287,17 @@ void GameEvents::configure()
             string tmp4 = cfg.lookup("auth.sessionid");
             GameEvents::sessionid = tmp4;
 
+            bool tmp5 = cfg.lookup("record_local_file"); //Should i record a local file as well?
+            GameEvents::record_local_file = tmp5;
+
 
             try {
-
-            	signed int tmp5;
-            	tmp5 = cfg.lookup("service.max_number_attempts");
-            	//string tmp5_str = tmp5.str();
-				//signed int tmp5_int = std::atoi(tmp5_str.c_str());
-				if ( (tmp5 > 0) && (tmp5 < 100)) {
-					GameEvents::max_number_attempts = tmp5;
+            	signed int tmp6;
+            	tmp6 = cfg.lookup("service.max_number_attempts");
+            	//string tmp6_str = tmp6.str();
+				//signed int tmp6_int = std::atoi(tmp6_str.c_str());
+				if ( (tmp6 > 0) && (tmp6 < 100)) {
+					GameEvents::max_number_attempts = tmp6;
 				}
             }
 			catch (std::exception &ex) {
@@ -308,6 +306,9 @@ void GameEvents::configure()
 				Log::log(Log::INFO, tmpmsg.str());
 				GameEvents::max_number_attempts = 3;
 			}
+
+			bool tmp7 = cfg.lookup("offline_mode"); //Offline mode does not try to contact the services and records everything in a local file
+			GameEvents::offline_mode = tmp7;
 
             connection_is_setup = true;
         }
@@ -325,6 +326,8 @@ void GameEvents::configure()
 
 }
 
+
+
 string GameEvents::get_token()
 {
 
@@ -333,110 +336,85 @@ string GameEvents::get_token()
     // session id. get from UP service?
 
     const string resource = "token";
-    //try to connect to the service
-//    try
-//    {
-        //Is the connection set up? If not, run configure()
-        if (connection_is_setup == false) {
-            Log::log(Log::INFO, "Connection is not set up. Running 'configure()'...");
-            GameEvents::configure();
-        }
 
-        //And now, is the connection set up? And is the token empty?
-        if (connection_is_setup == true) {
-        	if ( GameEvents::token.empty() || GameEvents::token.size()==0 ) {
-        		//prepare request body
-        		ostringstream request_body_ss;
-        		request_body_ss << "{\"clientid\" : \"" << GameEvents::clientid << "\", ";
-        		request_body_ss << "\"apikey\" : \"" << GameEvents::apikey << "\", ";
-        		request_body_ss << "\"sessionid\" : \"" << GameEvents::sessionid << "\"";
-        		request_body_ss << "}";
+    //Is the connection set up? If not, run configure()
+    if (connection_is_setup == false) {
+    	Log::log(Log::INFO, "Connection is not set up. Running 'configure()'...");
+    	GameEvents::configure();
+    }
 
-        		string request_body;
-        		request_body = request_body_ss.str();
+    //And now, is the connection set up? And is the token empty?
+    if (connection_is_setup == true) {
+    	if ( GameEvents::token.empty() || GameEvents::token.size()==0 ) {
+    		//prepare request body
+    		ostringstream request_body_ss;
+    		request_body_ss << "{\"clientid\" : \"" << GameEvents::clientid << "\", ";
+    		request_body_ss << "\"apikey\" : \"" << GameEvents::apikey << "\", ";
+    		request_body_ss << "\"sessionid\" : \"" << GameEvents::sessionid << "\"";
+    		request_body_ss << "}";
+
+    		string request_body;
+    		request_body = request_body_ss.str();
 
 
-//        		try {
-        			string request_url = GameEvents::service_endpoint + "/" + resource;
+    		string request_url = GameEvents::service_endpoint + "/" + resource;
 
-        			Poco::Net::HTTPResponse response;
-        			ostringstream response_stream;
-        			Poco::Net::HTTPResponse::HTTPStatus response_status;
-        			response_status = GameEvents::post(request_url, request_body, response_stream);
-
-
-        			if (response_status == Poco::Net::HTTPResponse::HTTP_OK ) {
-        				//response: OK
-        			    ostringstream tmpmsg;
-        			    tmpmsg << "Successfully sent token request, status " << response_status;
-        			    Log::log(Log::INFO, tmpmsg.str());
-
-        			    try
-        			    {
-        			    	//Try to extract token
-        			    	Poco::JSON::Parser parser;
-        			    	Poco::Dynamic::Var result = parser.parse(response_stream.str());
-        			    	Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
-        			    	string tmptoken = object->get("token");
-        			    	GameEvents::token = tmptoken;
-        			    	ostringstream tmpmsg;
-        			    	tmpmsg << " ===== Got a token: " << GameEvents::token;
-        			    	Log::log(Log::INFO, tmpmsg.str());
-        			    }
-        			    catch (Poco::Exception &ex)
-        			    {
-        			    	ostringstream tmpmsg;
-        			    	tmpmsg << "Exception when trying to read token: " << ex.displayText();
-        			    	Log::log(Log::ERROR, tmpmsg.str());
-        			    	GameEvents::token = "";
-        			    }
-        			}
-        			else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
-        				Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
-        				GameEvents::token = "";
-        				throw Poco::Net::NotAuthenticatedException("Token unauthorized");
-        			}
-        			else {
-        				//response failed
-        				ostringstream tmpmsg;
-        				tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
-        				Log::log(Log::INFO,  tmpmsg.str() );
-        				throw Poco::Net::NetException(response.getReason());
-        			}
+    		Poco::Net::HTTPResponse response;
+    		ostringstream response_stream;
+    		Poco::Net::HTTPResponse::HTTPStatus response_status;
+    		response_status = GameEvents::post(request_url, request_body, response_stream);
 
 
-//        		}
-//    			catch (Poco::Net::ConnectionRefusedException& ex) {
-//    				ostringstream tmpmsg;
-//    				tmpmsg << "POCO connection refused, setting offline mode:" << ex.what();
-//    				Log::log(Log::ERROR, tmpmsg.str());
-//    				GameEvents::offline_mode = true;
-//    				throw;
-//    			}
-//        		catch  (Poco::Exception& ex)
-//				{
-//        			ostringstream tmpmsg;
-//        			tmpmsg << "Exception when trying to get a token: " << ex.displayText();
-//        			Log::log(Log::ERROR, tmpmsg.str());
-//        			throw;
-//				}
+    		if (response_status == Poco::Net::HTTPResponse::HTTP_OK ) {
+    			//response: OK
+    			ostringstream tmpmsg;
+    			tmpmsg << "Successfully sent token request, status " << response_status;
+    			Log::log(Log::INFO, tmpmsg.str());
 
-        	}
-        	else
-        	{
-        		Log::log(Log::INFO, "I already have a token. Continuing, so that I return the existing one...");
-        	}
-        }
-        else
-        {
-        	Log::log(Log::INFO, "Could not set up the connection settings.");
-        }
-//    }
-//    catch (Poco::Exception& e) {
-//        ostringstream tmpmsg;
-//        tmpmsg << "Exception: " << e.what() << ". Message: " << e.message() ;
-//        Log::log(Log::ERROR, tmpmsg.str());
-//    }
+    			try
+    			{
+    				//Try to extract token
+    				Poco::JSON::Parser parser;
+    				Poco::Dynamic::Var result = parser.parse(response_stream.str());
+    				Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+    				string tmptoken = object->get("token");
+    				GameEvents::token = tmptoken;
+    				ostringstream tmpmsg;
+    				tmpmsg << " ===== Got a token: " << GameEvents::token;
+    				Log::log(Log::INFO, tmpmsg.str());
+    			}
+    			catch (Poco::Exception &ex)
+    			{
+    				ostringstream tmpmsg;
+    				tmpmsg << "Exception when trying to read token: " << ex.displayText();
+    				Log::log(Log::ERROR, tmpmsg.str());
+    				GameEvents::token = "";
+    			}
+    		}
+    		else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
+    			Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
+    			GameEvents::token = "";
+    			throw Poco::Net::NotAuthenticatedException("Token unauthorized");
+    		}
+    		else {
+    			//response failed
+    			ostringstream tmpmsg;
+    			tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
+    			Log::log(Log::INFO,  tmpmsg.str() );
+    			throw Poco::Net::NetException(response.getReason());
+    		}
+
+    	}
+    	else
+    	{
+    		Log::log(Log::INFO, "I already have a token. Continuing, so that I return the existing one...");
+    	}
+    }
+    else
+    {
+    	Log::log(Log::INFO, "Could not set up the connection settings.");
+    }
+
 
     return GameEvents::token;
 }
@@ -445,8 +423,6 @@ string GameEvents::get_token()
 
 void GameEvents::send_event_attempt(string event)
 {
-	//TODO: if token is refused, try to get a new one and try once again
-
 	string resource = "commitevent";
 	string current_token;
 	try {
@@ -462,12 +438,6 @@ void GameEvents::send_event_attempt(string event)
 		Log::log(Log::ERROR, tmpmsg.str());
 		GameEvents::offline_mode = true;
 	}
-//	catch (Poco::Net::NotAuthenticatedException& ex) {
-//			ostringstream tmpmsg;
-//			tmpmsg << "Not authenticated: " << ex.what();
-//			Log::log(Log::ERROR, tmpmsg.str());
-//			throw;
-//	}
 	catch (std::exception &ex)
 	{
 		ostringstream tmpmsg;
@@ -499,50 +469,36 @@ void GameEvents::send_event_attempt(string event)
 
 			string request_body;
 			request_body = request_body_ss.str();
-			//Log::log(Log::INFO, request_body);
 
-//			try
-//			{
-				string request_url = "";
-				request_url = GameEvents::service_endpoint + "/" + resource;
+			string request_url = "";
+			request_url = GameEvents::service_endpoint + "/" + resource;
 
-				Poco::Net::HTTPResponse response;
-				ostringstream response_stream;
-				Poco::Net::HTTPResponse::HTTPStatus response_status;
-				response_status = GameEvents::post(request_url, request_body, response_stream);
+			Poco::Net::HTTPResponse response;
+			ostringstream response_stream;
+			Poco::Net::HTTPResponse::HTTPStatus response_status;
+			response_status = GameEvents::post(request_url, request_body, response_stream);
 
 
 
-				if (response_status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
-					//response: OK
-					ostringstream tmpmsg;
-					tmpmsg << "Successfully sent game event, status " << response_status;
-					Log::log(Log::INFO, tmpmsg.str());
+			if (response_status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
+				//response: OK
+				ostringstream tmpmsg;
+				tmpmsg << "Successfully sent game event, status " << response_status;
+				Log::log(Log::INFO, tmpmsg.str());
 
-				}
-				else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
-					Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
-					GameEvents::token = "";
-					throw Poco::Net::NotAuthenticatedException("Token expired");
-				}
-				else {
-					//response failed
-					ostringstream tmpmsg;
-					tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
-					Log::log(Log::INFO,  tmpmsg.str() );
-					throw Poco::Net::NetException(response.getReason());
-				}
-
-//			}
-//			catch (Poco::Exception &ex)
-//			{
-//				ostringstream tmpmsg;
-//				tmpmsg << "Received unexpected exception: " << ex.displayText();
-//				Log::log(Log::ERROR, tmpmsg.str());
-//				//ex.rethrow();
-//				throw;
-//				//return(false);
-//			}
+			}
+			else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
+				Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
+				GameEvents::token = "";
+				throw Poco::Net::NotAuthenticatedException("Token expired");
+			}
+			else {
+				//response failed
+				ostringstream tmpmsg;
+				tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
+				Log::log(Log::INFO,  tmpmsg.str() );
+				throw Poco::Net::NetException(response.getReason());
+			}
 
 		}
 	}
@@ -590,7 +546,79 @@ Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload,
 
 }
 
+bool GameEvents::file_exists(std::string filename) {
+    ifstream f(filename.c_str(), ifstream::in);
+    return !f.fail(); // using good() could fail on empty files
+}
+
+void GameEvents::log_event_locally(GameEvents::Data event_data) {
+
+	string filename = "local_log.csv";
+	string formatted_line = GameEvents::format_event_data_csv(event_data);
+	ofstream myfile;
+	try {
+		if (GameEvents::file_exists(filename)) {
+			Log::log(Log::INFO, "File exists, appending...");
+			myfile.open(filename.c_str(), std::ios_base::app);
+			myfile << formatted_line;
+			myfile.close();
+		}
+		else {
+			Log::log(Log::INFO, "File does NOT exists, creating it and preparing header...");
+
+			//create file and write first line, then the formatted line
+			myfile.open(filename.c_str());
+			myfile << "sessionid, timestamp, action, level, update, ";
+			myfile << "seconds, which_lix, lix_required, lix_saved, ";
+			myfile << "skills_used, seconds_required \n";
+			myfile << formatted_line;
+			myfile.close();
+		}
+	}
+	catch (std::exception &ex) {
+		ostringstream tmpmsg;
+		tmpmsg << "Exception while trying to write local file. " << ex.what();
+		Log::log(Log::ERROR, tmpmsg.str());
+	}
+}
 
 
 
 
+
+string GameEvents::format_event_data(GameEvents::Data data)
+{
+	ostringstream data_sstr;
+
+	data_sstr << "<event>";
+	data_sstr << "<timestamp>" << data.timestamp << "</timestamp>";
+	data_sstr << "<action>" << data.action << "</action>";
+	if (data.level != "0") data_sstr <<  "<level>" << data.level << "</level>";
+	if (data.update >= 0) data_sstr << "<update>" << data.update << "</update>";
+	if (data.seconds >= 0) data_sstr << "<seconds>" << data.seconds << "</seconds>";
+	if (data.which_lix >= 0 ) data_sstr << "<which>" << data.which_lix << "</which>";
+	if (data.lix_required >= 0 && (data.action == "ENDLEVEL")) data_sstr << "<lix_required>" << data.lix_required << "</lix_required>";
+	if (data.lix_saved >= 0 && (data.action == "ENDLEVEL")) data_sstr << "<lix_saved>" << data.lix_saved << "</lix_saved>";
+	if (data.skills_used >= 0 && (data.action == "ENDLEVEL")) data_sstr << "<skills_used>" << data.skills_used << "</skills_used>";
+	if (data.seconds_required >= 0 && (data.action == "ENDLEVEL")) data_sstr << "<seconds_required>" << data.seconds_required << "</seconds_required>";
+	data_sstr << "</event>";
+	return data_sstr.str();
+}
+
+string GameEvents::format_event_data_csv(GameEvents::Data data)
+{
+	ostringstream data_sstr;
+
+	data_sstr << "\"" << GameEvents::sessionid << "\", ";
+	data_sstr << "\"" << data.timestamp << "\", ";
+	data_sstr << "\"" << data.action << "\", ";
+	data_sstr <<  "\"" << data.level << "\", ";
+	data_sstr << "\"" << data.update << "\", ";
+	data_sstr << "\"" << data.seconds << "\", ";
+	data_sstr << "\"" << data.which_lix << "\", ";
+	data_sstr << "\"" << data.lix_required << "\", ";
+	data_sstr << "\"" << data.lix_saved << "\", ";
+	data_sstr << "\"" << data.skills_used << "\", ";
+	data_sstr << "\"" << data.seconds_required << "\" \n";
+	return data_sstr.str();
+}
