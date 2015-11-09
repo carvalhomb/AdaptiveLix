@@ -85,8 +85,11 @@ void GameEvents::Data::load_event_data(Replay::Data data, std::string level) {
 
 	//GameEvent::Data event_data;
 
+	this->level = level;
+	this->update = data.update;
+
 	//Convert info in replay_data object into words to send to service
-	std::string action_word;
+	string action_word;
 	action_word = data.action == Replay::SPAWNINT ? gloB->replay_spawnint
 			: data.action == Replay::NUKE ? gloB->replay_nuke
 					: data.action == Replay::ASSIGN ? gloB->replay_assign_any
@@ -94,21 +97,27 @@ void GameEvents::Data::load_event_data(Replay::Data data, std::string level) {
 									: data.action == Replay::ASSIGN_RIGHT ? gloB->replay_assign_right
 											: Language::common_cancel;
 
+	ostringstream action_word_stream;
+	action_word_stream << action_word;
 	if (data.action == Replay::ASSIGN || data.action == Replay::ASSIGN_LEFT
 			|| data.action == Replay::ASSIGN_RIGHT) {
-		action_word += "=";
-		action_word += LixEn::ac_to_string(static_cast <LixEn::Ac> (data.skill));
+		action_word_stream << "=";
+		action_word_stream << LixEn::ac_to_string(static_cast <LixEn::Ac> (data.skill));
+		this->which_lix = data.what;
 	}
 
-	this->action = action_word;
-	this->level = level;
-	this->update = data.update;
-	this->which_lix = data.what;
+	if (data.action == Replay::SPAWNINT ) {
+		action_word_stream << "=";
+		action_word_stream << data.what;
+	}
+
+	this->action = action_word_stream.str();
 
 	//Convert update to seconds
 	signed long secs = this->update / gloB->updates_per_second;
 	this->seconds = secs;
 }
+
 
 void GameEvents::Data::prepare_event_data(std::string action_word, signed long update, std::string level) {
 	this->action = action_word;
@@ -621,3 +630,5 @@ string GameEvents::format_event_data_csv(GameEvents::Data data)
 	data_sstr << "\"" << data.seconds_required << "\" \n";
 	return data_sstr.str();
 }
+
+
