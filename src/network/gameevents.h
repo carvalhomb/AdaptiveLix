@@ -35,7 +35,7 @@ class GameEvents
 			//virtual ~Data();
 			void load_event_data(Replay::Data data, std::string level);
 			void load_result_data(Result result, Level level);
-			//void prepare_event_data(std::string action_word, signed long update, std::string level);
+			void prepare_event_data(std::string action_word, signed long update, std::string level);
 		};
 
 

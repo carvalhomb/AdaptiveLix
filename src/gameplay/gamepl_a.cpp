@@ -11,7 +11,6 @@
 #include "../other/user.h"
 
 #include "../network/gameevents.h"
-#include "../other/file/log.h"
 
 Replay::Data Gameplay::new_replay_data()
 {
@@ -71,11 +70,8 @@ void Gameplay::calc_active()
         Replay::Data data = new_replay_data();
         data.action       = Replay::NUKE;
 
-        //Load data in the object
         GameEvents::Data event_data = GameEvents::Data();
         event_data.load_event_data(data, level.level_filename);
-        //Send data
-        Log::log(Log::INFO, "Sending nuke game event...");
         GameEvents::send_event(event_data);
 
         replay.add(data);
@@ -273,11 +269,8 @@ if (priority > 1 && priority < 99999) {
                 data.skill        = skill_visible->get_skill();
                 data.what         = lem_id;
 
-                //Load data in the object
                 GameEvents::Data event_data = GameEvents::Data();
                 event_data.load_event_data(data, level.level_filename);
-                //Send data
-                Log::log(Log::INFO, "Sending regular game event...");
                 GameEvents::send_event(event_data);
 
                 replay.add(data);

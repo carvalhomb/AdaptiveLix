@@ -67,8 +67,6 @@ GameEvents::Data::Data() {
 	timestampstring += "Z"; //Add UTC as timezone, since we used gmttime
 
 	this->timestamp = timestampstring;
-	//time_t right_now= time(0);
-	//this->timestamp = right_now;
 	this->action="";
 	this->level ="";
 	this->which_lix=-1;
@@ -109,15 +107,15 @@ void GameEvents::Data::load_event_data(Replay::Data data, std::string level) {
 	this->seconds = secs;
 }
 
-//void GameEvents::Data::prepare_event_data(std::string action_word, signed long update, std::string level) {
-//	this->action = action_word;
-//	this->level = level;
-//	this->update = update;
-//
-//	//Convert update to seconds
-//	signed long secs = this->update / gloB->updates_per_second;
-//	this->seconds = secs;
-//}
+void GameEvents::Data::prepare_event_data(std::string action_word, signed long update, std::string level) {
+	this->action = action_word;
+	this->level = level;
+	this->update = update;
+
+	//Convert update to seconds
+	signed long secs = this->update / gloB->updates_per_second;
+	this->seconds = secs;
+}
 
 void GameEvents::Data::load_result_data(Result result, Level level) {
 

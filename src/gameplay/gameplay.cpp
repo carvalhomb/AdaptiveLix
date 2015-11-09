@@ -90,12 +90,10 @@ Gameplay::Gameplay(
         // keyboard during calcing the panel.
     }
 
-    //Load data in the object
+
     GameEvents::Data start_level_event_data = GameEvents::Data();
     start_level_event_data.action = "STARTLEVEL";
     start_level_event_data.level = level.level_filename;
-    //Send data
-    Log::log(Log::INFO, "Sending start level event");
     GameEvents::send_event(start_level_event_data);
 }
 
@@ -539,9 +537,6 @@ void Gameplay::save_result()
     	//Load data in the object
     	GameEvents::Data end_level_event_data = GameEvents::Data();
     	end_level_event_data.load_result_data(result, level);
-
-    	//Send data
-    	Log::log(Log::INFO, "Sending end level and results");
     	GameEvents::send_event(end_level_event_data);
 
 

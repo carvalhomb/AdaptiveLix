@@ -160,13 +160,9 @@ int main(int argc, char* argv[])
 
         Log::log(Log::INFO,"Starting connection... ");
 
-        //Load data in the object
-        //GameEvents::Data start_event_data;
         GameEvents::Data start_event_data = GameEvents::Data();
         start_event_data.action = "STARTGAME";
         start_event_data.level = "0"; //not in a level
-        //Send data
-        Log::log(Log::INFO, "Sending start game event");
         GameEvents::send_event(start_event_data);
 
 
@@ -177,13 +173,9 @@ int main(int argc, char* argv[])
 
         Log::log(Log::INFO,"Starting connection... ");
 
-        //Load data in the object
-        //GameEvents::Data end_event_data;
         GameEvents::Data end_event_data = GameEvents::Data();
         end_event_data.action = "ENDGAME";
         end_event_data.level = "0"; //not in a level
-        //Send data
-        Log::log(Log::INFO, "Sending end game event");
         GameEvents::send_event(end_event_data);
 
 

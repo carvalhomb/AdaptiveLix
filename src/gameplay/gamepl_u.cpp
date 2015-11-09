@@ -12,7 +12,7 @@
 #include "../other/user.h"
 
 #include "../network/gameevents.h"
-#include "../other/file/log.h"
+
 
 void Gameplay::update()
 {
@@ -53,7 +53,7 @@ void Gameplay::update()
     if (Network::get_started()) {
         Replay::Vec netdata = Network::get_replay_data();
         replay.add(netdata);
-        Log::log(Log::INFO, "Debug::: Gameplay::update() line 45");
+
         replay_recalc_from = cs.update;
         for (Replay::ConstIt i = netdata.begin(); i != netdata.end(); ++i) {
             // Das folgende <= statt <  behebt den lange quaelenden Netzwerkbug
@@ -211,7 +211,7 @@ void Gameplay::update_cs_once()
                 data.player = tr->masters.begin()->number;
                 data.action = Replay::NUKE;
                 replay.add(data);
-                Log::log(Log::INFO, "Debug::: Gameplay::update() line 203, after nuke?");
+
                 // Und sofort ausfuehren: Replay wurde ja schon ausgewertet
                 // And running immediately: Replay was already evaluated
                 tr->lix_hatch = 0;
