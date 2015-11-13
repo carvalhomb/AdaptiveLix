@@ -523,8 +523,10 @@ Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload,
 	if (request_path.empty()) request_path = "/";
 
 	//In Windows we need to initialize the network
-	//TODO: Do I need a check here to avoid problems in other OS's?
-	Poco::Net::initializeNetwork();
+	#ifdef _WIN32
+		Poco::Net::initializeNetwork();
+	#endif
+
 
 	// prepare request
 	Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, request_path);
