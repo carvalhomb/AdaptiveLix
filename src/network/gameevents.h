@@ -38,6 +38,14 @@ class GameEvents
 			void prepare_event_data(std::string action_word, signed long update, std::string level);
 		};
 
+//		struct User {
+//			std::string username;
+//			std::string password;
+//
+//			User(std::string username, std::string password);
+//			//virtual ~User();
+//		};
+
 
         //GameEvents();
         //virtual ~GameEvents();
@@ -45,6 +53,7 @@ class GameEvents
 
         static void send_event(GameEvents::Data data);
         static void send_event(GameEvents::Data data, signed int number_of_attempts);
+        static void get_sessionid();
 
 
 
@@ -55,6 +64,9 @@ class GameEvents
         static std::string apikey;
         static std::string token;
         static std::string sessionid;
+        static std::string up_service_endpoint;
+        static std::string username;
+        static std::string password;
         static signed int max_number_attempts;
         static bool connection_is_setup;
         static bool record_local_file;

@@ -157,6 +157,9 @@ int main(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
+        //Request a sessionid
+
+        GameEvents::get_sessionid();
 
         GameEvents::Data start_event_data = GameEvents::Data();
         start_event_data.action = "STARTGAME";
