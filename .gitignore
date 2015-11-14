@@ -40,3 +40,5 @@ BuildMinGW/*
 
 #Eclipse prefs
 *.prefs
+
+**/local_log.csv
