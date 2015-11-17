@@ -80,5 +80,6 @@ class GameEvents
 		static bool file_exists(std::string filename);
         static void send_event_attempt(std::string event);
         static Poco::Net::HTTPResponse::HTTPStatus post(std::string url, std::string payload, std::ostringstream& output_stream);
+        static Poco::Net::HTTPResponse::HTTPStatus post(std::string url, std::string payload, std::ostringstream& output_stream, std::string token);
         static void log_event_locally(GameEvents::Data event_data);
 };

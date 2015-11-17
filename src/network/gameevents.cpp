@@ -171,7 +171,7 @@ void GameEvents::get_sessionid() {
 		//And now, is the connection set up? And is the token empty?
 		if (connection_is_setup == true) {
 			Log::log(Log::INFO, "Connection is set up, sending request...");
-			string resource = "session";
+			string resource = "sessions";
 
 			//prepare request body
 			ostringstream request_body_ss;
@@ -427,8 +427,8 @@ void GameEvents::configure()
             string tmp3 = cfg.lookup("auth.apikey");
             GameEvents::apikey = tmp3;
 
-            string tmp4 = cfg.lookup("auth.sessionid");
-            GameEvents::sessionid = tmp4;
+//            string tmp4 = cfg.lookup("auth.sessionid");
+//            GameEvents::sessionid = tmp4;
 
             bool tmp5 = cfg.lookup("record_local_file"); //Should i record a local file as well?
             GameEvents::record_local_file = tmp5;
@@ -576,7 +576,7 @@ string GameEvents::get_token()
 
 void GameEvents::send_event_attempt(string event)
 {
-	string resource = "commitevent";
+	string resource = "sessions/" + GameEvents::sessionid + "/events";
 	string current_token;
 	try {
 		//Log::log(Log::INFO, "Send event attempt, first making sure I have a token.");
@@ -615,7 +615,7 @@ void GameEvents::send_event_attempt(string event)
 			//prepare request body
 			time_t timestamp = time(0);
 			ostringstream request_body_ss;
-			request_body_ss << "{\"token\" : \"" << current_token << "\", ";
+			request_body_ss << "{";
 			request_body_ss << "\"timestamp\" : \"" << timestamp << "\", ";
 			request_body_ss << "\"gameevent\" : \"" << event << "\"";
 			request_body_ss << "}";
@@ -629,15 +629,15 @@ void GameEvents::send_event_attempt(string event)
 			Poco::Net::HTTPResponse response;
 			ostringstream response_stream;
 			Poco::Net::HTTPResponse::HTTPStatus response_status;
-			response_status = GameEvents::post(request_url, request_body, response_stream);
+			response_status = GameEvents::post(request_url, request_body, response_stream, current_token);
 
 
 
 			if (response_status == Poco::Net::HTTPResponse::HTTP_CREATED ) {
 				//response: OK
-				//ostringstream tmpmsg;
-				//tmpmsg << "Successfully sent game event, status " << response_status;
-				//Log::log(Log::INFO, tmpmsg.str());
+				ostringstream tmpmsg;
+				tmpmsg << "Successfully sent game event, status " << response_status;
+				Log::log(Log::INFO, tmpmsg.str());
 
 			}
 			else if (response_status == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
@@ -645,10 +645,17 @@ void GameEvents::send_event_attempt(string event)
 				GameEvents::token = "";
 				throw Poco::Net::NotAuthenticatedException("Token expired");
 			}
+			else if (response_status == Poco::Net::HTTPResponse::HTTP_BAD_REQUEST) {
+				Log::log(Log::ERROR, "Bad request, please inform the developer.");
+				//GameEvents::token = "";
+				throw Poco::Net::NetException("Bad request! API changed?");
+			}
 			else {
 				//response failed
 				ostringstream tmpmsg;
-				tmpmsg << "Failed to commit game event. Reason: " << response.getReason();
+				tmpmsg << "Failed to commit game event. ";
+				tmpmsg << "Status: "<< response_status;
+				tmpmsg << " . Reason: " << response.getReason();
 				Log::log(Log::ERROR,  tmpmsg.str() );
 				throw Poco::Net::NetException(response.getReason());
 			}
@@ -657,8 +664,14 @@ void GameEvents::send_event_attempt(string event)
 	}
 }
 
+Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload, ostringstream& output_stream)
+{
+	//Posting without a token
+	return GameEvents::post(url, payload, output_stream, "");
+}
 
-Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload, ostringstream& output_stream) {
+
+Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload, ostringstream& output_stream, string token) {
 	// prepare session
 	Poco::URI request_uri(url);
 	Poco::Net::HTTPClientSession client_session(request_uri.getHost(), request_uri.getPort());
@@ -675,11 +688,20 @@ Poco::Net::HTTPResponse::HTTPStatus GameEvents::post(string url, string payload,
 
 	// prepare request
 	Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, request_path);
+
+
+
 	if  (not (payload.empty() || payload.size()==0))
 	{
+		//Is there a non-empty token?
+		if  (not token.empty() && token.size()>0 )
+		{
+			request.set("X-AUTH-TOKEN", token);
+		}
 		request.setContentType("application/json");
 		request.setKeepAlive(true);
 		request.setContentLength( payload.length() );
+
 		//Log::log(Log::INFO, "Sending request...");
 
 		//send request
