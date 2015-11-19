@@ -10,6 +10,8 @@
 #include "gameplay.h"
 #include "../other/user.h"
 
+#include "../network/gameevents.h"
+
 Replay::Data Gameplay::new_replay_data()
 {
     Replay::Data data;
@@ -67,6 +69,11 @@ void Gameplay::calc_active()
         pan.pause      .set_off();
         Replay::Data data = new_replay_data();
         data.action       = Replay::NUKE;
+
+        GameEvents::Data event_data = GameEvents::Data();
+        event_data.load_event_data(data, level.level_filename);
+        GameEvents::send_event(event_data);
+
         replay.add(data);
         Network::send_replay_data(data);
         effect.add_sound(cs.update + 1, *trlo, 0, Sound::NUKE);
@@ -84,7 +91,7 @@ void Gameplay::calc_active()
 
     // mouse on the playing field, lixes are selectable
     if (! mouse_on_panel && trlo) {
-        // Bestimmte Richtung anwählen?
+        // Bestimmte Richtung anwahlen?
         bool only_dir_l = false;
         bool only_dir_r = false;
         if (  key[useR->key_force_left]
@@ -98,12 +105,12 @@ void Gameplay::calc_active()
             mouse_cursor.set_x_frame(2);
         }
         // Decide which lix the cursor points at
-        // Die Liste der Lixen wird durchlaufen und die Priorität jeder
-        // Lix errechnet. Wird eine höhere Priorität als die derzeitig
-        // höchste gefunden, wechselt LixIt target. Bei gleicher Prioritaet
+        // Die Liste der Lixen wird durchlaufen und die Prioritï¿½t jeder
+        // Lix errechnet. Wird eine hï¿½here Prioritï¿½t als die derzeitig
+        // hï¿½chste gefunden, wechselt LixIt target. Bei gleicher Prioritaet
         // haben Lixen, die naeher am Mauscursor liegen, Vorrang! Mit rechter
         // Maustaste (selectable in the options) waehlt man dagegen die letzte
-        // Lix mit der niedrigsten Priorität. Auch hier haben naeher liegende
+        // Lix mit der niedrigsten Prioritï¿½t. Auch hier haben naeher liegende
         // Lixen Vorrang.
         LixIt  target = trlo->lixvec.end(); // Klickbar mit Prioritaet
         LixIt  tarinf = trlo->lixvec.end(); // Nicht unb. klickbar mit Prior.
@@ -172,7 +179,7 @@ if (priority >  tarinf_priority
     tarinf_priority = priority;
     tarinf_hypot    = hypot;
 }
-// ...sind geringer als die für Anklick-Inbetrachtnahme!
+// ...sind geringer als die fï¿½r Anklick-Inbetrachtnahme!
 if (priority > 1 && priority < 99999) {
     if (!(only_dir_l && i->get_dir() ==  1)
      && !(only_dir_r && i->get_dir() == -1)) {
@@ -261,6 +268,11 @@ if (priority > 1 && priority < 99999) {
                                   : Replay::ASSIGN;
                 data.skill        = skill_visible->get_skill();
                 data.what         = lem_id;
+
+                GameEvents::Data event_data = GameEvents::Data();
+                event_data.load_event_data(data, level.level_filename);
+                GameEvents::send_event(event_data);
+
                 replay.add(data);
                 Network::send_replay_data(data);
             }

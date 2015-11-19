@@ -40,6 +40,8 @@
 
 #include <iostream>
 
+#include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
+
 #include "lmain.h" // Main object to manage the different parts of the program
 #include "user.h"
 #include "verify.h"
@@ -48,6 +50,8 @@
 
 #include "../lix/lix_enum.h" // initialize strings
 #include "../graphic/png/loadpng.h"
+
+#include "../network/gameevents.h"
 
 struct MainArgs {
     bool print_version_and_exit;
@@ -153,10 +157,27 @@ int main(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
+        //Request a sessionid
+
+        GameEvents::get_sessionid();
+
+        GameEvents::Data start_event_data = GameEvents::Data();
+        start_event_data.action = "STARTGAME";
+        start_event_data.level = "0"; //not in a level
+        GameEvents::send_event(start_event_data);
+
+
         // Main loop. See other/lmain.cpp for this.
         LMain* l_main = new LMain;
         l_main->main_loop();
         delete l_main;
+
+
+        GameEvents::Data end_event_data = GameEvents::Data();
+        end_event_data.action = "ENDGAME";
+        end_event_data.level = "0"; //not in a level
+        GameEvents::send_event(end_event_data);
+
 
         // Clean up
         useR->save();
@@ -182,6 +203,8 @@ int main(int argc, char* argv[])
     return 0;
 }
 END_OF_MAIN()
+
+
 
 
 

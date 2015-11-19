@@ -4,15 +4,19 @@
 
 # exclude all object files due to compiling code,
 # also all binaries, including Windows ones
-obj/*
+**/obj/*
+**/objlin/*
 deps/*
-bin/*
+bin/lix*
+binlin/lix*
+bin/test*
 *.layout
 *.depend
 
 # exclude the user data, log and config files, user translations in data/
 /data/user/*.txt
 /data/*.txt
+**/local_log.csv
 
 # exclude replays, but track replay/ and replay/auto/ via a dummy file
 replays/*
@@ -30,3 +34,11 @@ levels/network/*oldgfx/*
 
 # exclude test levels
 levels/test/*
+
+#build dir
+BuildMinGW/*
+
+#Eclipse prefs
+*.prefs
+
+**/local_log.csv

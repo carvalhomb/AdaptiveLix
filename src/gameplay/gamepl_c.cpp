@@ -13,6 +13,8 @@
 #include "../api/manager.h"
 #include "../other/user.h"
 
+#include "../network/gameevents.h"
+
 void Gameplay::calc()
 {
     // Wenn nicht gestartet, macht dies nix
@@ -46,6 +48,7 @@ void Gameplay::calc_window()
             break;
 
         case Api::WindowGameplay::MENU:
+
             save_result();
             // Auto-save the replay. I can't tell whether it was just a
             // watched singleplayer replay, so we'll save all successful
@@ -127,6 +130,11 @@ void Gameplay::check_skill_buttons() {
             if (! pan.skill[i].get_on()) {
                 if (hardware.get_ml()) {
                     Sound::play_loud(Sound::PANEL_EMPTY);
+
+                    GameEvents::Data event_data = GameEvents::Data();
+                    event_data.prepare_event_data("EMPTYSKILL", cs.update, level.level_filename);
+                    GameEvents::send_event(event_data);
+
                 }
                 // else play no sound -- we're holding the mouse button
                 // over a wrong skill, that's not notify-necessary, but
@@ -160,7 +168,7 @@ void Gameplay::check_skill_buttons() {
 void Gameplay::calc_self()
 {
     // Berechnungen, die in jedem Tick, nicht nur in jedem Update
-    // ausgeführt werden müssen
+    // ausgef-hrt werden-ssen
     ++local_ticks;
 
     // Aendert die Mauskoordinaten ggf., also frueh aufrufen!
@@ -297,6 +305,12 @@ void Gameplay::calc_self()
         if (pan.state_save.get_clicked()) {
             state_manager.save_user(cs, replay);
             Sound::play_loud(Sound::DISKSAVE);
+
+            GameEvents::Data event_data = GameEvents::Data();
+            event_data.prepare_event_data("SAVESTATE", cs.update, level.level_filename);
+            GameEvents::send_event(event_data);
+
+
         }
 
         // Laden
@@ -315,47 +329,106 @@ void Gameplay::calc_self()
                 if (pan.get_speed() != GameplayPanel::SPEED_PAUSE)
                     pan.set_speed(GameplayPanel::SPEED_NORMAL);
                 load_state(sta);
+
+                GameEvents::Data event_data = GameEvents::Data();
+                event_data.prepare_event_data("LOADSTATE", cs.update, level.level_filename);
+                GameEvents::send_event(event_data);
+
             }
         }
 
         // Pause
         if (pan.pause.get_clicked()) {
             if (pan.get_speed() == GameplayPanel::SPEED_PAUSE)
+            {
                  pan.set_speed(GameplayPanel::SPEED_NORMAL);
-            else pan.set_speed(GameplayPanel::SPEED_PAUSE);
+
+                 GameEvents::Data event_data = GameEvents::Data();
+                 event_data.prepare_event_data("RESUME", cs.update, level.level_filename);
+                 GameEvents::send_event(event_data);
+            }
+            else
+            {
+            	pan.set_speed(GameplayPanel::SPEED_PAUSE);
+
+            	GameEvents::Data event_data = GameEvents::Data();
+            	event_data.prepare_event_data("PAUSE", cs.update, level.level_filename);
+            	GameEvents::send_event(event_data);
+            }
         }
         // Zoom
         else if (pan.zoom.get_clicked()) {
             pan.zoom.set_on(!pan.zoom.get_on());
             map.set_zoom(pan.zoom.get_on());
+
+            GameEvents::Data event_data = GameEvents::Data();
+            event_data.prepare_event_data("ZOOM", cs.update, level.level_filename);
+            GameEvents::send_event(event_data);
+
         }
         // Speed. On some executions, update
         else if (pan.speed_back.get_execute_left()) {
             go_back_updates(1);
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
+
+            GameEvents::Data event_data = GameEvents::Data();
+            event_data.prepare_event_data("MINUS1FRAME", cs.update, level.level_filename);
+            GameEvents::send_event(event_data);
+
         }
         else if (pan.speed_back.get_execute_right()) {
             // go back 1 second
             go_back_updates(Help::timer_ticks_per_second
                           / timer_ticks_for_update_normal);
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
+
+            GameEvents::Data event_data = GameEvents::Data();
+            event_data.prepare_event_data("MINUS1SECOND", cs.update, level.level_filename);
+            GameEvents::send_event(event_data);
+
         }
         else if (pan.speed_ahead.get_execute_left()) {
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
+
+            GameEvents::Data event_data = GameEvents::Data();
+            event_data.prepare_event_data("PLUS1FRAME", cs.update, level.level_filename);
+            GameEvents::send_event(event_data);
+
             // do a single logic update even though the game is paused
             update();
+
         }
         else if (pan.speed_ahead.get_execute_right()) {
+        	Ulng startupdate = cs.update;
             for (size_t i = 0; i < Help::timer_ticks_per_second
                                  * seconds_skipped_on_speed_slow_right
                                  / timer_ticks_for_update_normal; ++i)
                 update();
+
+            GameEvents::Data event_data = GameEvents::Data();
+            event_data.prepare_event_data("PLUS1SECOND", startupdate, level.level_filename);
+            GameEvents::send_event(event_data);
+
         }
         else if (pan.speed_fast.get_execute_left()) {
             if (pan.speed_fast.get_on())
+            {
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
+
+                GameEvents::Data event_data = GameEvents::Data();
+                event_data.prepare_event_data("NORMALSPEED", cs.update, level.level_filename);
+                GameEvents::send_event(event_data);
+
+            }
             else
+            {
                 pan.set_speed(GameplayPanel::SPEED_FAST);
+
+                GameEvents::Data event_data = GameEvents::Data();
+                event_data.prepare_event_data("FASTSPEED", cs.update, level.level_filename);
+                GameEvents::send_event(event_data);
+
+            }
         }
         else if (pan.speed_fast.get_execute_right()) {
             // We frequently want to switch from fast to turbo.
@@ -365,14 +438,29 @@ void Gameplay::calc_self()
                 && pan.get_speed() == GameplayPanel::SPEED_TURBO
             ) {
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
+
+                GameEvents::Data event_data = GameEvents::Data();
+                event_data.prepare_event_data("NORMALSPEED", cs.update, level.level_filename);
+                GameEvents::send_event(event_data);
+
             }
             else {
                 pan.set_speed(GameplayPanel::SPEED_TURBO);
+
+                GameEvents::Data event_data = GameEvents::Data();
+                event_data.prepare_event_data("TURBOSPEED", cs.update, level.level_filename);
+                GameEvents::send_event(event_data);
+
             }
         }
         // Neustart
         else if (pan.restart.get_clicked()) {
             restart_level();
+
+            GameEvents::Data event_data = GameEvents::Data();
+            event_data.prepare_event_data("RESTARTLEVEL", cs.update, level.level_filename);
+            GameEvents::send_event(event_data);
+
         }
 
         // Switch the spectator's panel to a different tribe's skillset
@@ -439,7 +527,7 @@ void Gameplay::calc_self()
         calc_active();
     }
 
-    // Jetzt die Schleife für ein Update, also eine Gameplay-Zeiteinheit
+    // Jetzt die Schleife fï¿½r ein Update, also eine Gameplay-Zeiteinheit
     // Dies prueft nicht die lokalen Ticks, sondern richtet sich nur nach
     // den vom Timer gezaehlten Ticks!
     if (!pan.pause.get_on()) {

@@ -22,6 +22,8 @@ void Level::load_from_file(const Filename& filename)
     clear();
     status = GOOD;
 
+    level_filename = filename.get_rootless();
+
     FileFormat fmt = get_file_format(filename);
     if (fmt == FORMAT_BINARY) {
         // load an original .LVL file from L1/ONML/...

@@ -16,6 +16,7 @@
 #include "../other/file/io.h"
 #include "../other/language.h"
 
+
 Replay::Replay()
 :
     file_not_found(false),
@@ -204,10 +205,15 @@ void Replay::add(const Replay::Data& d)
 {
     // Veraendert ist es natuerlich nicht mehr geladen, aber die Tatsache, ob
     // der Level in der Datei steckt, darf nicht verloren gehen.
+	//
+	// Changed it is of course no longer loaded, but the fact whether
+	// the level is in the file must not be lost.
+
     file_not_found = false;
     version_min    = gloB->version_min;
 
-    // Daten verarbeiten
+    // Daten verarbeiten.
+    // Process data
     if (data.size() == 0 || d.update > max_updates) {
         data.push_back(d);
         max_updates = d.update;
@@ -215,7 +221,7 @@ void Replay::add(const Replay::Data& d)
     else {
         It itr = data.begin();
         while (itr != data.end()) {
-            // compare_data is a static funcition defined right above this
+            // compare_data is a static function defined right above this
             if (compare_data(d, *itr) == -1) {
                 data.insert(itr, d);
                 break;
@@ -351,6 +357,7 @@ void Replay::save_to_file(const Filename& s, const Level* const lev)
             word += LixEn::ac_to_string(static_cast <LixEn::Ac> (itr->skill));
         }
         file << IO::LineBang(itr->update, itr->player, word, itr->what);
+
     }
 
     // save level into replay

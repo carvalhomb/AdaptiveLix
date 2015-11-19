@@ -11,6 +11,9 @@
 #include "../other/hardware.h"
 #include "../other/help.h"
 
+#include "../network/gameevents.h"
+#include "../other/file/log.h"
+
 // Statische Konstanten initialisieren
 const int Gameplay::block_s = 14; // Blocker-Abstand zur Seite
 const int Gameplay::block_u = 16; // nach oben
@@ -86,6 +89,12 @@ Gameplay::Gameplay(
         // because we'd get a crash on scancode_to_string with uninitialized
         // keyboard during calcing the panel.
     }
+
+
+    GameEvents::Data start_level_event_data = GameEvents::Data();
+    start_level_event_data.action = "STARTLEVEL";
+    start_level_event_data.level = level.level_filename;
+    GameEvents::send_event(start_level_event_data);
 }
 
 
@@ -498,6 +507,7 @@ Result Gameplay::get_result()
 {
     // a Result will save the spent updates, not the current updates.
     // The main menu will convert the spent updates into seconds again.
+	//Log::log(Log::INFO, "Debug::: Gameplay::get_result() line 501");
     return Result(level.built, trlo->lix_saved, trlo->skills_used,
         trlo->update_saved > 0
         ? trlo->update_saved - state_manager.get_zero().update
@@ -520,7 +530,17 @@ void Gameplay::save_result()
     // required, to mark the level as having been looked at.
     if (! multiplayer && malo->name == gloB->user_name)
     {
-        useR->set_level_result_carefully(filename,get_result(),level.required);
+    	//Load result
+    	Result result;
+    	result = get_result();
+
+    	//Load data in the object
+    	GameEvents::Data end_level_event_data = GameEvents::Data();
+    	end_level_event_data.load_result_data(result, level);
+    	GameEvents::send_event(end_level_event_data);
+
+
+    	useR->set_level_result_carefully(filename,result,level.required);
         useR->save();
     }
 }
