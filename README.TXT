@@ -1,24 +1,35 @@
-Lix is an action-puzzle game in the IRS genre (Interactive Rodent Simulation).
-It has a networked multiplayer mode, a level editor, and also single-player.
+AdaptiveLix is a fork of the game Lix [https://github.com/SimonN/Lix].
 
-Read these files in the doc/ directory:
+## About AdaptiveLix
 
-    doc/readme.txt  - the main readme file, usage tips, contact information
-    doc/copying.txt - the public domain dedication and fallback license
-    doc/build/*.txt - how to compile and run the game on Linux or Windows
+This fork is part of a PhD project on Serious Games. You can read more about this and other related work at http://mairacarvalho.com.
 
-Customizing the game:
+## How to run AdaptiveLix
 
-    doc/files.txt   - file and bitmap format descriptions
-    doc/objdef.txt  - how to further customize self-made in-game objects
-    doc/oldterr.txt - how to extend the game with Lemmings content
-    doc/transl.txt  - how to translate the user interface to your language
+- Download or clone the repository. 
+- Make sure that the file bin/config.cfg is available. 
+- If you want to run the game in online mode, change the bin/config.cfg file accordingly.
+- Run the file bin/winlix.exe (in Windows) or binlin/lix (in Linux).
 
-Miscellaneous information:
+## Useful documentation:
 
-    doc/history.txt - version history
-    doc/lixd.txt    - how to run a dedicated Lix server with lixd
-    doc/techfaq.txt - some older troubleshooting tips
+- doc/readme.txt  - the main readme file, usage tips, contact information
+- doc/copying.txt - the public domain dedication and fallback license
 
-Have fun!
-Simon
+
+## Customizing the game:
+
+- doc/files.txt   - file and bitmap format descriptions
+- doc/objdef.txt  - how to further customize self-made in-game objects
+- doc/oldterr.txt - how to extend the game with Lemmings content
+- doc/transl.txt  - how to translate the user interface to your language
+
+## Miscellaneous information:
+
+- doc/history.txt - version history
+- doc/lixd.txt    - how to run a dedicated Lix server with lixd
+- doc/techfaq.txt - some older troubleshooting tips
+
+## How to build from source
+    
+- doc/build/*.txt - how to compile and run the game on Linux or Windows
