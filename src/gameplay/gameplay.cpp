@@ -12,6 +12,7 @@
 #include "../other/help.h"
 
 #include "../network/gameevents.h"
+#include "../network/gamedata.h"
 #include "../other/file/log.h"
 
 // Statische Konstanten initialisieren
@@ -91,9 +92,7 @@ Gameplay::Gameplay(
     }
 
 
-    GameEvents::Data start_level_event_data = GameEvents::Data();
-    start_level_event_data.action = "STARTLEVEL";
-    start_level_event_data.level = level.level_filename;
+    GameData start_level_event_data = GameData("STARTLEVEL", level);
     GameEvents::send_event(start_level_event_data);
 }
 
@@ -535,8 +534,8 @@ void Gameplay::save_result()
     	result = get_result();
 
     	//Load data in the object
-    	GameEvents::Data end_level_event_data = GameEvents::Data();
-    	end_level_event_data.load_result_data(result, level);
+    	GameData end_level_event_data = GameData("", level);
+    	end_level_event_data.load_result_data(result);
     	GameEvents::send_event(end_level_event_data);
 
 

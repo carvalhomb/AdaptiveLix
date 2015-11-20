@@ -11,6 +11,7 @@
 #include "../other/user.h"
 
 #include "../network/gameevents.h"
+#include "../network/gamedata.h"
 
 Replay::Data Gameplay::new_replay_data()
 {
@@ -70,8 +71,8 @@ void Gameplay::calc_active()
         Replay::Data data = new_replay_data();
         data.action       = Replay::NUKE;
 
-        GameEvents::Data event_data = GameEvents::Data();
-        event_data.load_event_data(data, level.level_filename);
+        GameData event_data = GameData("", level);
+        event_data.load_replay_data(data);
         GameEvents::send_event(event_data);
 
         replay.add(data);
@@ -269,8 +270,8 @@ if (priority > 1 && priority < 99999) {
                 data.skill        = skill_visible->get_skill();
                 data.what         = lem_id;
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.load_event_data(data, level.level_filename);
+                GameData event_data = GameData("", level);
+                event_data.load_replay_data(data);
                 GameEvents::send_event(event_data);
 
                 replay.add(data);

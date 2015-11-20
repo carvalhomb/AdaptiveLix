@@ -10,54 +10,16 @@
 
 #include <string>
 #include <Poco/Net/HTTPResponse.h>
-#include "../gameplay/replay.h"
-#include "../level/level.h"
-#include "../other/user.h"
+#include "gamedata.h"
 
 
 class GameEvents
 {
     public:
-		struct Data {
-			std::string level;
-			std::string action;
-			signed long update;
-			signed long seconds;
-			signed long which_lix;
-			std::string timestamp;
-			//time_t timestamp;
-			int lix_required;
-			int lix_saved;
-			int skills_used;
-			int seconds_required;
-
-			Data();
-			//virtual ~Data();
-			void load_event_data(Replay::Data data, std::string level);
-			void load_result_data(Result result, Level level);
-			void prepare_event_data(std::string action_word, signed long update, std::string level);
-		};
-
-//		struct User {
-//			std::string username;
-//			std::string password;
-//
-//			User(std::string username, std::string password);
-//			//virtual ~User();
-//		};
-
-
-        //GameEvents();
-        //virtual ~GameEvents();
-
-
-        static void send_event(GameEvents::Data data);
-        static void send_event(GameEvents::Data data, signed int number_of_attempts);
+        static void send_event(GameData data);
+        static void send_event(GameData data, signed int number_of_attempts);
         static void get_sessionid();
 
-
-
-    protected:
     private:
         static std::string service_endpoint;
         static std::string clientid;
@@ -75,11 +37,11 @@ class GameEvents
 
         static void configure();
         static std::string get_token();
-		static std::string format_event_data(GameEvents::Data event_data);
-		static std::string format_event_data_csv(GameEvents::Data data);
+		static std::string format_event_data(GameData event_data);
+		static std::string format_event_data_csv(GameData data);
 		static bool file_exists(std::string filename);
         static void send_event_attempt(std::string event);
         static Poco::Net::HTTPResponse::HTTPStatus post(std::string url, std::string payload, std::ostringstream& output_stream);
         static Poco::Net::HTTPResponse::HTTPStatus post(std::string url, std::string payload, std::ostringstream& output_stream, std::string token);
-        static void log_event_locally(GameEvents::Data event_data);
+        static void log_event_locally(GameData event_data);
 };

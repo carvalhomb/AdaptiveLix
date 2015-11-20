@@ -12,6 +12,7 @@
 #include "../other/user.h"
 
 #include "../network/gameevents.h"
+#include "../network/gamedata.h"
 
 
 void Gameplay::update()
@@ -30,8 +31,8 @@ void Gameplay::update()
         data.action       = Replay::SPAWNINT;
         data.what         = trlo->spawnint;
 
-        GameEvents::Data event_data = GameEvents::Data();
-        event_data.load_event_data(data, level.level_filename);
+        GameData event_data = GameData("", level);
+        event_data.load_replay_data(data);
         GameEvents::send_event(event_data);
 
         replay.add(data);

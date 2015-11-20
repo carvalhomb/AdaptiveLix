@@ -14,6 +14,8 @@
 #include "../other/user.h"
 
 #include "../network/gameevents.h"
+#include "../network/gamedata.h"
+
 
 void Gameplay::calc()
 {
@@ -131,8 +133,7 @@ void Gameplay::check_skill_buttons() {
                 if (hardware.get_ml()) {
                     Sound::play_loud(Sound::PANEL_EMPTY);
 
-                    GameEvents::Data event_data = GameEvents::Data();
-                    event_data.prepare_event_data("EMPTYSKILL", cs.update, level.level_filename);
+                    GameData event_data = GameData("EMPTYSKILL", level, cs.update);
                     GameEvents::send_event(event_data);
 
                 }
@@ -306,8 +307,7 @@ void Gameplay::calc_self()
             state_manager.save_user(cs, replay);
             Sound::play_loud(Sound::DISKSAVE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("SAVESTATE", cs.update, level.level_filename);
+            GameData event_data = GameData("SAVESTATE", level, cs.update);
             GameEvents::send_event(event_data);
 
 
@@ -330,8 +330,7 @@ void Gameplay::calc_self()
                     pan.set_speed(GameplayPanel::SPEED_NORMAL);
                 load_state(sta);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("LOADSTATE", cs.update, level.level_filename);
+                GameData event_data = GameData("LOADSTATE", level, cs.update);
                 GameEvents::send_event(event_data);
 
             }
@@ -343,16 +342,14 @@ void Gameplay::calc_self()
             {
                  pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
-                 GameEvents::Data event_data = GameEvents::Data();
-                 event_data.prepare_event_data("RESUME", cs.update, level.level_filename);
+                 GameData event_data = GameData("RESUME", level, cs.update);
                  GameEvents::send_event(event_data);
             }
             else
             {
             	pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
-            	GameEvents::Data event_data = GameEvents::Data();
-            	event_data.prepare_event_data("PAUSE", cs.update, level.level_filename);
+            	GameData event_data = GameData("PAUSE", level, cs.update);
             	GameEvents::send_event(event_data);
             }
         }
@@ -361,8 +358,7 @@ void Gameplay::calc_self()
             pan.zoom.set_on(!pan.zoom.get_on());
             map.set_zoom(pan.zoom.get_on());
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("ZOOM", cs.update, level.level_filename);
+            GameData event_data = GameData("ZOOM", level, cs.update);
             GameEvents::send_event(event_data);
 
         }
@@ -371,8 +367,7 @@ void Gameplay::calc_self()
             go_back_updates(1);
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("MINUS1FRAME", cs.update, level.level_filename);
+            GameData event_data = GameData("MINUS1FRAME", level, cs.update);
             GameEvents::send_event(event_data);
 
         }
@@ -382,16 +377,14 @@ void Gameplay::calc_self()
                           / timer_ticks_for_update_normal);
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("MINUS1SECOND", cs.update, level.level_filename);
+            GameData event_data = GameData("MINUS1SECOND", level, cs.update);
             GameEvents::send_event(event_data);
 
         }
         else if (pan.speed_ahead.get_execute_left()) {
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("PLUS1FRAME", cs.update, level.level_filename);
+            GameData event_data = GameData("PLUS1FRAME", level, cs.update);
             GameEvents::send_event(event_data);
 
             // do a single logic update even though the game is paused
@@ -405,8 +398,7 @@ void Gameplay::calc_self()
                                  / timer_ticks_for_update_normal; ++i)
                 update();
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("PLUS1SECOND", startupdate, level.level_filename);
+            GameData event_data = GameData("PLUS1SECOND", level, startupdate);
             GameEvents::send_event(event_data);
 
         }
@@ -415,8 +407,7 @@ void Gameplay::calc_self()
             {
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("NORMALSPEED", cs.update, level.level_filename);
+                GameData event_data = GameData("NORMALSPEED", level, cs.update);
                 GameEvents::send_event(event_data);
 
             }
@@ -424,8 +415,7 @@ void Gameplay::calc_self()
             {
                 pan.set_speed(GameplayPanel::SPEED_FAST);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("FASTSPEED", cs.update, level.level_filename);
+                GameData event_data = GameData("FASTSPEED", level, cs.update);
                 GameEvents::send_event(event_data);
 
             }
@@ -439,16 +429,14 @@ void Gameplay::calc_self()
             ) {
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("NORMALSPEED", cs.update, level.level_filename);
+                GameData event_data = GameData("NORMALSPEED", level, cs.update);
                 GameEvents::send_event(event_data);
 
             }
             else {
                 pan.set_speed(GameplayPanel::SPEED_TURBO);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("TURBOSPEED", cs.update, level.level_filename);
+                GameData event_data = GameData("TURBOSPEED", level, cs.update);
                 GameEvents::send_event(event_data);
 
             }
@@ -457,8 +445,7 @@ void Gameplay::calc_self()
         else if (pan.restart.get_clicked()) {
             restart_level();
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("RESTARTLEVEL", cs.update, level.level_filename);
+            GameData event_data = GameData("RESTARTLEVEL", level, cs.update);
             GameEvents::send_event(event_data);
 
         }

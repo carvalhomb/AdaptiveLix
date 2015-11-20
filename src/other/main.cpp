@@ -52,6 +52,7 @@
 #include "../graphic/png/loadpng.h"
 
 #include "../network/gameevents.h"
+#include "../network/gamedata.h"
 
 struct MainArgs {
     bool print_version_and_exit;
@@ -161,9 +162,7 @@ int main(int argc, char* argv[])
 
         GameEvents::get_sessionid();
 
-        GameEvents::Data start_event_data = GameEvents::Data();
-        start_event_data.action = "STARTGAME";
-        start_event_data.level = "0"; //not in a level
+        GameData start_event_data = GameData("STARTGAME");
         GameEvents::send_event(start_event_data);
 
 
@@ -173,9 +172,7 @@ int main(int argc, char* argv[])
         delete l_main;
 
 
-        GameEvents::Data end_event_data = GameEvents::Data();
-        end_event_data.action = "ENDGAME";
-        end_event_data.level = "0"; //not in a level
+        GameData end_event_data = GameData("ENDGAME");
         GameEvents::send_event(end_event_data);
 
 

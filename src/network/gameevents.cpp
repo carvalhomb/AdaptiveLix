@@ -1,19 +1,20 @@
 #include "gameevents.h"
+#include "gamedata.h"
 
 //#include "../other/myalleg.h" //needs to come first
 
-#include <algorithm>  // for copy
-#include <iterator>
 #include <string>
-#include <iostream>   // for cout, istream
 #include <sstream>
-#include <fstream>
-#include <unistd.h>
-#include <exception>
-#include <ctime>
-#include <iomanip>
-#include <cstdlib>
-#include <libconfig.h++>
+
+//#include <algorithm>  // for copy
+//#include <iterator>
+//#include <iostream>   // for cout, istream
+//#include <fstream>
+//#include <unistd.h>
+//#include <exception>//
+//#include <iomanip>
+//#include <cstdlib>
+
 
 #include <Poco/Exception.h>
 #include <Poco/JSON/Parser.h>
@@ -25,17 +26,11 @@
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 #include <Poco/StreamCopier.h>
+#include <libconfig.h++>
 
-//#include "../other/user.h"
-//#include "../other/verify.h"
-#include "../other/globals.h"
 #include "../other/file/log.h"
-#include "../other/file/filename.h"
-#include "../other/language.h"
 
-#include "../lix/lix_enum.h" // initialize strings
-//#include "../graphic/png/loadpng.h"
-#include "../gameplay/replay.h"
+
 
 using namespace std;
 
@@ -60,98 +55,7 @@ signed int GameEvents::max_number_attempts = 3;
 // Public methods
 //////////////////////////////////////////////////////////////////////
 
-GameEvents::Data::Data() {
-	//Constructor, set the timestamp
 
-	time_t rawtime;
-	struct tm * timeinfo;
-	char buffer [80];
-	ostringstream timestampstream;
-	time ( &rawtime );
-	timeinfo = gmtime ( &rawtime );
-	strftime(buffer,80,"%Y-%m-%dT%H:%M:%S",timeinfo);
-
-	timestampstream << buffer;
-
-	std::string timestampstring = timestampstream.str();
-	timestampstring += "Z"; //Add UTC as timezone, since we used gmttime
-
-	this->timestamp = timestampstring;
-	this->action="";
-	this->level ="";
-	this->which_lix=-1;
-	this->update=-1;
-	this->seconds=-1;
-	this->lix_required=0;
-	this->lix_saved=0;
-	this->skills_used=0;
-	this->seconds_required=0;
-}
-
-void GameEvents::Data::load_event_data(Replay::Data data, std::string level) {
-
-	//GameEvent::Data event_data;
-
-	this->level = level;
-	this->update = data.update;
-
-	//Convert info in replay_data object into words to send to service
-	string action_word;
-	action_word = data.action == Replay::SPAWNINT ? gloB->replay_spawnint
-			: data.action == Replay::NUKE ? gloB->replay_nuke
-					: data.action == Replay::ASSIGN ? gloB->replay_assign_any
-							: data.action == Replay::ASSIGN_LEFT  ? gloB->replay_assign_left
-									: data.action == Replay::ASSIGN_RIGHT ? gloB->replay_assign_right
-											: Language::common_cancel;
-
-	ostringstream action_word_stream;
-	action_word_stream << action_word;
-	if (data.action == Replay::ASSIGN || data.action == Replay::ASSIGN_LEFT
-			|| data.action == Replay::ASSIGN_RIGHT) {
-		action_word_stream << "=";
-		action_word_stream << LixEn::ac_to_string(static_cast <LixEn::Ac> (data.skill));
-		this->which_lix = data.what;
-	}
-
-	if (data.action == Replay::SPAWNINT ) {
-		action_word_stream << "=";
-		action_word_stream << data.what;
-	}
-
-	this->action = action_word_stream.str();
-
-	//Convert update to seconds
-	signed long secs = this->update / gloB->updates_per_second;
-	this->seconds = secs;
-}
-
-
-void GameEvents::Data::prepare_event_data(std::string action_word, signed long update, std::string level) {
-	this->action = action_word;
-	this->level = level;
-	this->update = update;
-
-	//Convert update to seconds
-	signed long secs = this->update / gloB->updates_per_second;
-	this->seconds = secs;
-}
-
-void GameEvents::Data::load_result_data(Result result, Level level) {
-
-	this->action = "ENDLEVEL";
-	this->update = -1;
-	this->which_lix = -1;
-
-	this->lix_required = level.required;
-	this->lix_saved = result.lix_saved;
-	this->skills_used = result.skills_used;
-	this->seconds_required=level.seconds;
-	this->level=level.level_filename;
-
-
-	//Convert update to seconds
-	this->seconds = this->update;
-}
 
 //GameEvents::User::User(std::string username, std::string password) {
 //	//Constructor
@@ -272,7 +176,7 @@ void GameEvents::get_sessionid() {
 	}
 }
 
-void GameEvents::send_event(GameEvents::Data event_data) {
+void GameEvents::send_event(GameData event_data) {
 
 	if (not GameEvents::connection_is_setup) {
 		Log::log(Log::INFO, "Connection is not yet set up. Running 'configure()'...");
@@ -298,7 +202,7 @@ void GameEvents::send_event(GameEvents::Data event_data) {
 	}
 }
 
-void GameEvents::send_event(GameEvents::Data data, signed int number_of_attempts) {
+void GameEvents::send_event(GameData data, signed int number_of_attempts) {
 
 	bool success;
 	success = false;
@@ -728,7 +632,7 @@ bool GameEvents::file_exists(std::string filename) {
     return !f.fail(); // using good() could fail on empty files
 }
 
-void GameEvents::log_event_locally(GameEvents::Data event_data) {
+void GameEvents::log_event_locally(GameData event_data) {
 
 	string filename = "local_log.csv";
 	string formatted_line = GameEvents::format_event_data_csv(event_data);
@@ -763,7 +667,7 @@ void GameEvents::log_event_locally(GameEvents::Data event_data) {
 
 
 
-string GameEvents::format_event_data(GameEvents::Data data)
+string GameEvents::format_event_data(GameData data)
 {
 	ostringstream data_sstr;
 
@@ -782,7 +686,7 @@ string GameEvents::format_event_data(GameEvents::Data data)
 	return data_sstr.str();
 }
 
-string GameEvents::format_event_data_csv(GameEvents::Data data)
+string GameEvents::format_event_data_csv(GameData data)
 {
 	ostringstream data_sstr;
 
