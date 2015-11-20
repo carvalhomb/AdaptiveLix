@@ -9,7 +9,6 @@
 #include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
 
 #include <string>
-#include <Poco/Net/HTTPResponse.h>
 #include "gamedata.h"
 
 
@@ -41,7 +40,9 @@ class GameEvents
 		static std::string format_event_data_csv(GameData data);
 		static bool file_exists(std::string filename);
         static void send_event_attempt(std::string event);
-        static Poco::Net::HTTPResponse::HTTPStatus post(std::string url, std::string payload, std::ostringstream& output_stream);
-        static Poco::Net::HTTPResponse::HTTPStatus post(std::string url, std::string payload, std::ostringstream& output_stream, std::string token);
+        static int post(std::string url, std::string payload, std::ostringstream& output_stream);
+        static int post(std::string url, std::string payload, std::ostringstream& output_stream, std::string token);
         static void log_event_locally(GameData event_data);
+        static std::string extract_sessionid(std::string);
+        static std::string extract_token(std::string);
 };
