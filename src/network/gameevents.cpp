@@ -10,7 +10,8 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/ThreadPool.h>
 //#include "Poco/Thread.h"
-#include "Poco/RunnableAdapter.h"
+#include <Poco/RunnableAdapter.h>
+#include <Poco/ThreadLocal.h>
 
 
 #include <libconfig.h++>
@@ -70,10 +71,10 @@ void GameEvents::get_sessionid() {
 			try {
 				PocoWrapper poco_requester(request_url, payload, "");
 
-				Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
-				Poco::ThreadPool::defaultPool().start(poco_runnable);
-				Poco::ThreadPool::defaultPool().joinAll();
-
+//				Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
+//				Poco::ThreadPool::defaultPool().start(poco_runnable);
+//				Poco::ThreadPool::defaultPool().joinAll();
+				poco_requester.send_package();
 
 				int response_status = poco_requester.get_response_status();
 				string response_body;
@@ -321,9 +322,10 @@ string GameEvents::get_token()
 
     		PocoWrapper poco_requester(request_url, request_body, "");
 
-    		Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
-    		Poco::ThreadPool::defaultPool().start(poco_runnable);
-    		Poco::ThreadPool::defaultPool().joinAll();
+//    		Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
+//    		Poco::ThreadPool::defaultPool().start(poco_runnable);
+//    		Poco::ThreadPool::defaultPool().joinAll();
+    		poco_requester.send_package();
 
     		int response_status;
     		response_status = poco_requester.get_response_status();
@@ -332,11 +334,11 @@ string GameEvents::get_token()
 
     		if (response_status == 200 ) {
     			//response: OK
-    			ostringstream tmpmsg;
-    			tmpmsg << "Successfully sent token request, status " << response_status;
-    			tmpmsg << ". This is the body: ";
-    			tmpmsg << response_body;
-    			Log::log(Log::INFO, tmpmsg.str());
+//    			ostringstream tmpmsg;
+//    			tmpmsg << "Successfully sent token request, status " << response_status;
+//    			tmpmsg << ". This is the body: ";
+//    			tmpmsg << response_body;
+//    			Log::log(Log::INFO, tmpmsg.str());
     			GameEvents::token = GameEvents::extract_token(response_body);
     		}
     		else if (response_status == 401) {
@@ -410,13 +412,23 @@ void GameEvents::send_event_attempt(string event)
 			string request_url = "";
 			request_url = GameEvents::gameevents_service_endpoint + "/" + resource;
 
+			//Log::log(Log::INFO, "Going to try sending the request via runnable adapter");
+			PocoWrapper poco_requester(request_url, request_body, current_token);
+			//Log::log(Log::INFO, "Initialized object.");
+
+			Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
+			//Log::log(Log::INFO, "created adapted object");
+
+			//Poco::ThreadPool::defaultPool().start(poco_runnable);
+
 			try {
-				PocoWrapper poco_requester(request_url, request_body, current_token);
 
-				Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
 				Poco::ThreadPool::defaultPool().start(poco_runnable);
-				//Poco::ThreadPool::defaultPool().joinAll();
+				//Log::log(Log::INFO, "started thread");
+				Poco::ThreadPool::defaultPool().joinAll();
 
+				//PocoWrapper poco_requester(request_url, request_body, current_token);
+				//poco_requester.send_package();
 
 				//ostringstream response_stream;
 				//poco_requester.get_response(response_stream);
