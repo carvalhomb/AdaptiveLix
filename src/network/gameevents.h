@@ -40,8 +40,6 @@ class GameEvents
 		static std::string format_event_data_csv(GameData data);
 		static bool file_exists(std::string filename);
         static void send_event_attempt(std::string event);
-        static int post(std::string url, std::string payload, std::ostringstream& output_stream);
-        static int post(std::string url, std::string payload, std::ostringstream& output_stream, std::string token);
         static void log_event_locally(GameData event_data);
         static std::string extract_sessionid(std::string);
         static std::string extract_token(std::string);

@@ -15,6 +15,7 @@
 #include <ctime>
 #include <string>
 #include <sstream>
+#include <Poco/Net/NetException.h>
 
 using namespace std;
 

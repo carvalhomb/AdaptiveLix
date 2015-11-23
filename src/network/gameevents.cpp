@@ -6,15 +6,11 @@
 #include <string>
 #include <sstream>
 
-//#include <algorithm>  // for copy
-//#include <iterator>
-//#include <iostream>   // for cout, istream
-//#include <fstream>
-//#include <unistd.h>
-//#include <exception>//
-//#include <iomanip>
-//#include <cstdlib>
 #include <Poco/JSON/Parser.h>
+#include <Poco/Net/NetException.h>
+#include <Poco/ThreadPool.h>
+//#include "Poco/Thread.h"
+#include "Poco/RunnableAdapter.h"
 
 
 #include <libconfig.h++>
@@ -73,31 +69,35 @@ void GameEvents::get_sessionid() {
 
 			try {
 				PocoWrapper poco_requester(request_url, payload, "");
-				poco_requester.post();
-				ostringstream response_stream;
-				poco_requester.get_response(response_stream);
+
+				Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
+				Poco::ThreadPool::defaultPool().start(poco_runnable);
+				Poco::ThreadPool::defaultPool().joinAll();
+
 
 				int response_status = poco_requester.get_response_status();
+				string response_body;
+				response_body = poco_requester.get_response_body();
 
+				//HTTP 200 OK
 				if (response_status == 200) {
-					GameEvents::sessionid = extract_sessionid(response_stream.str());
+					GameEvents::sessionid = extract_sessionid(response_body);
 
 					if (GameEvents::sessionid == "") {
 						GameEvents::offline_mode = true;
 					}
 				}
+				//HTTP 401 UNAUTHORIZED
 				else if (response_status == 401) {
-					Log::log(Log::INFO, "Username not authorized. Going to offline mode.");
+					Log::log(Log::INFO, "Username provided in config file was not authorized to get a sessionid. Running in offline mode.");
 					GameEvents::offline_mode = true;
-					//throw Poco::Net::NotAuthenticatedException("Token unauthorized");
 				}
 				else {
 					//response failed
 					ostringstream tmpmsg;
-					tmpmsg << "Failed to get sessionid. Response status: " << response_status << ". Going offline.";
+					tmpmsg << "Failed to get sessionid. Response status from user profile service: " << response_status << ". Running in offline mode.";
 					Log::log(Log::INFO,  tmpmsg.str() );
 					GameEvents::offline_mode = true;
-					//throw Poco::Net::NetException(response.getReason());
 				}
 			}
 			catch (std::exception &ex) {
@@ -118,46 +118,26 @@ void GameEvents::get_sessionid() {
 
 
 void GameEvents::send_event(GameData event_data) {
-
 	if (not GameEvents::connection_is_setup) {
 		Log::log(Log::INFO, "Connection is not yet set up. Running 'configure()'...");
 		GameEvents::configure();
 		if (not GameEvents::max_number_attempts || GameEvents::max_number_attempts < 0 || GameEvents::max_number_attempts > 100) {
-			Log::log(Log::ERROR, "Invalid value for max_number_attempts variable. Using '1' as default.");
-			GameEvents::max_number_attempts = 1;
+			Log::log(Log::ERROR, "Invalid value for max_number_attempts variable. Using '3' as default.");
+			GameEvents::max_number_attempts = 3;
 		}
 	}
-
-	if (GameEvents::offline_mode==false) {
-
-		GameEvents::send_event(event_data, GameEvents::max_number_attempts);
-	}
-	else {
-		//Log::log(Log::INFO, "Running in offline mode.");
-	}
-
-
-	if (GameEvents::offline_mode || GameEvents::record_local_file) {
-		//Log::log(Log::INFO, "Logging event offline.");
-		GameEvents::log_event_locally(event_data);
-	}
+	GameEvents::send_event(event_data, GameEvents::max_number_attempts);
 }
 
+
+
 void GameEvents::send_event(GameData data, signed int number_of_attempts) {
-
-	bool success;
-	success = false;
-
-	signed int counter;
-	counter = 1;
+	bool success = false;
+	signed int counter = 1;
 
 	//Format data
-	std::string event;
-	event = GameEvents::format_event_data(data);
-
-	//ostringstream tmpmsg;
-	//tmpmsg << "Sending event...'" << event.substr(0,70);
-	//Log::log(Log::INFO, tmpmsg.str());
+	std::string formatted_event_data;
+	formatted_event_data = GameEvents::format_event_data(data);
 
 	if (not GameEvents::offline_mode) {
 		while ((counter <= number_of_attempts) and (not success) and (not GameEvents::offline_mode))
@@ -166,12 +146,12 @@ void GameEvents::send_event(GameData data, signed int number_of_attempts) {
 			//tmpmsg << "Attempt number " << counter;
 			//Log::log(Log::INFO, tmpmsg.str());
 			try {
-				GameEvents::send_event_attempt(event);
+				GameEvents::send_event_attempt(formatted_event_data);
 				success = true;
 			}
 			catch (std::exception &ex) {
 				ostringstream tmpmsg;
-				tmpmsg << "Unexpected exception: " << ex.what();
+				tmpmsg << "Exception in attempt #"<< counter <<": " << ex.what();
 				Log::log(Log::ERROR, tmpmsg.str());
 				break;
 			}
@@ -179,6 +159,11 @@ void GameEvents::send_event(GameData data, signed int number_of_attempts) {
 	}
 	else {
 		Log::log(Log::INFO, "Working in offline mode.");
+	}
+
+
+	if (GameEvents::offline_mode || GameEvents::record_local_file) {
+			GameEvents::log_event_locally(data);
 	}
 
 }
@@ -254,9 +239,6 @@ void GameEvents::configure()
 
             string tmp3 = cfg.lookup("auth.apikey");
             GameEvents::apikey = tmp3;
-
-//            string tmp4 = cfg.lookup("auth.sessionid");
-//            GameEvents::sessionid = tmp4;
 
             bool tmp5 = cfg.lookup("record_local_file"); //Should i record a local file as well?
             GameEvents::record_local_file = tmp5;
@@ -338,19 +320,24 @@ string GameEvents::get_token()
     		string request_url = GameEvents::gameevents_service_endpoint + "/" + resource;
 
     		PocoWrapper poco_requester(request_url, request_body, "");
-    		poco_requester.post();
-    		ostringstream response_stream;
-    		poco_requester.get_response(response_stream);
+
+    		Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
+    		Poco::ThreadPool::defaultPool().start(poco_runnable);
+    		Poco::ThreadPool::defaultPool().joinAll();
 
     		int response_status;
     		response_status = poco_requester.get_response_status();
+    		string response_body;
+    		response_body = poco_requester.get_response_body();
 
     		if (response_status == 200 ) {
     			//response: OK
     			ostringstream tmpmsg;
     			tmpmsg << "Successfully sent token request, status " << response_status;
+    			tmpmsg << ". This is the body: ";
+    			tmpmsg << response_body;
     			Log::log(Log::INFO, tmpmsg.str());
-    			GameEvents::token = GameEvents::extract_token(response_stream.str());
+    			GameEvents::token = GameEvents::extract_token(response_body);
     		}
     		else if (response_status == 401) {
     			Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
@@ -385,11 +372,11 @@ void GameEvents::send_event_attempt(string event)
 {
 	string resource = "sessions/" + GameEvents::sessionid + "/events";
 	string current_token;
+
 	try {
 		//Log::log(Log::INFO, "Send event attempt, first making sure I have a token.");
 		current_token = GameEvents::get_token();
 	}
-
 	catch (std::exception &ex)
 	{
 		ostringstream tmpmsg;
@@ -399,9 +386,9 @@ void GameEvents::send_event_attempt(string event)
 
 	if (connection_is_setup == false) {
 		Log::log(Log::ERROR, "Could not set up the connection.");
-
 	}
-	else {
+	else
+	{
 		if (current_token.empty() || current_token.size()==0) {
 			Log::log(Log::ERROR, "Could not get a token.");
 		}
@@ -423,39 +410,30 @@ void GameEvents::send_event_attempt(string event)
 			string request_url = "";
 			request_url = GameEvents::gameevents_service_endpoint + "/" + resource;
 
-			PocoWrapper poco_requester(request_url, request_body, current_token);
-			poco_requester.post();
-			ostringstream response_stream;
-			poco_requester.get_response(response_stream);
+			try {
+				PocoWrapper poco_requester(request_url, request_body, current_token);
 
-			int response_status;
-			response_status = poco_requester.get_response_status();
+				Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
+				Poco::ThreadPool::defaultPool().start(poco_runnable);
+				//Poco::ThreadPool::defaultPool().joinAll();
 
 
-			if (response_status == 201 ) {
-				//response: OK
-				ostringstream tmpmsg;
-				tmpmsg << "Successfully sent game event, status " << response_status;
-				Log::log(Log::INFO, tmpmsg.str());
-
+				//ostringstream response_stream;
+				//poco_requester.get_response(response_stream);
 			}
-			else if (response_status == 401) {
-				Log::log(Log::ERROR, "Token unauthorized. Resetting the token variable.");
+			catch(Poco::Net::NotAuthenticatedException &ex)
+			{
+				ostringstream tmpmsg;
+				tmpmsg << "Token unauthorized. Resetting the token variable. Exception: " << ex.what();
 				GameEvents::token = "";
-				//throw Poco::Net::NotAuthenticatedException("Token expired");
+				Log::log(Log::INFO, tmpmsg.str());
 			}
-			else if (response_status == 400) {
-				Log::log(Log::ERROR, "Bad request, please inform the developer.");
-				//GameEvents::token = "";
-				//throw Poco::Net::NetException("Bad request! API changed?");
-			}
-			else {
-				//response failed
+			catch(std::exception &ex)
+			{
 				ostringstream tmpmsg;
-				tmpmsg << "Failed to commit game event. ";
-				tmpmsg << "Status: "<< response_status;
-				Log::log(Log::ERROR,  tmpmsg.str() );
-				//throw Poco::Net::NetException(response.getReason());
+				tmpmsg << "Exception while trying to send event. Going offline. Exception: " << ex.what();
+				GameEvents::offline_mode = true;
+				Log::log(Log::ERROR, tmpmsg.str());
 			}
 
 		}
@@ -581,10 +559,10 @@ string GameEvents::extract_token(string response_string) {
 
 		return tmptoken;
 	}
-	catch (Poco::Exception &ex)
+	catch (std::exception &ex)
 	{
 		ostringstream tmpmsg;
-		tmpmsg << "Exception when trying to read token: " << ex.displayText();
+		tmpmsg << "Exception when trying to read token: " << ex.what();
 		Log::log(Log::ERROR, tmpmsg.str());
 		//GameEvents::token = "";
 		return "";
