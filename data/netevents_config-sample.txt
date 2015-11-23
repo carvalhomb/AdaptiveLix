@@ -1,0 +1,18 @@
+gameevents_service = {
+	endpoint = ""
+	max_number_attempts = 3
+}
+userprofile_service = {
+	endpoint = ""
+	max_number_attempts = 3
+}
+auth = {
+  clientid = ""
+  apikey = ""
+}
+user = {
+	username = ""
+	password = ""
+}
+record_local_file = true
+offline_mode = true

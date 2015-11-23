@@ -26,14 +26,14 @@
 using namespace std;
 
 //Game events service info
-string GameEvents::service_endpoint = "";
+string GameEvents::gameevents_service_endpoint = "";
 string GameEvents::clientid = "";
 string GameEvents::apikey = "";
 string GameEvents::token = "";
 string GameEvents::sessionid = "";
 
 //Userprofile service info
-string GameEvents::up_service_endpoint = "";
+string GameEvents::userprofile_service_endpoint = "";
 string GameEvents::username = "";
 string GameEvents::password = "";
 
@@ -68,7 +68,7 @@ void GameEvents::get_sessionid() {
 			payload_ss << "\"password\" : \"" << GameEvents::password << "\"";
 			payload_ss << "}";
 
-			string request_url = GameEvents::up_service_endpoint + "/" + resource;
+			string request_url = GameEvents::userprofile_service_endpoint + "/" + resource;
 			string payload = payload_ss.str();
 
 			try {
@@ -201,7 +201,10 @@ void GameEvents::configure()
         libconfig::Config cfg;
         //Try to open the config file
         try {
-            cfg.readFile("config.cfg");
+        	//string
+        	string myconfig = gloB->file_netevents_config.get_rootful();
+        	Log::log(Log::INFO, myconfig);
+            cfg.readFile(gloB->file_netevents_config.get_rootful().c_str());
         }
         catch(const libconfig::FileIOException &fioex)
         {
@@ -214,31 +217,36 @@ void GameEvents::configure()
             msg << "Parse error at " << pex.getFile() << ":" << pex.getLine() << " - " << pex.getError();
             Log::log(Log::ERROR, msg.str());
         }
+        catch (std::exception &ex) {
+        	ostringstream tmpmsg;
+        	tmpmsg << "Could not open config file. Exception: " << ex.what();
+        	Log::log(Log::ERROR, tmpmsg.str());
+        }
 
         //try to read the service endpoint
 
         try
         {
-            string tmp = cfg.lookup("service.endpoint");
-            GameEvents::service_endpoint = tmp;
-            if (GameEvents::service_endpoint.empty() || GameEvents::service_endpoint.size()==0) {
+            string tmp = cfg.lookup("gameevents_service.endpoint");
+            GameEvents::gameevents_service_endpoint = tmp;
+            if (GameEvents::gameevents_service_endpoint.empty() || GameEvents::gameevents_service_endpoint.size()==0) {
                 Log::log(Log::ERROR, "Could not find configuration for service endpoint.");
             }
             else {
                 //Make sure there's no trailing space in the service_endpoint string
-                if ( GameEvents::service_endpoint[service_endpoint.size()-1] == '/' )
-                    GameEvents::service_endpoint = GameEvents::service_endpoint.substr(0, GameEvents::service_endpoint.size()-1);
+                if ( GameEvents::gameevents_service_endpoint[gameevents_service_endpoint.size()-1] == '/' )
+                    GameEvents::gameevents_service_endpoint = GameEvents::gameevents_service_endpoint.substr(0, GameEvents::gameevents_service_endpoint.size()-1);
             }
 
-            string tmp10 = cfg.lookup("up_service.endpoint");
-            GameEvents::up_service_endpoint = tmp10;
-            if (GameEvents::up_service_endpoint.empty() || GameEvents::up_service_endpoint.size()==0) {
+            string tmp10 = cfg.lookup("userprofile_service.endpoint");
+            GameEvents::userprofile_service_endpoint = tmp10;
+            if (GameEvents::userprofile_service_endpoint.empty() || GameEvents::userprofile_service_endpoint.size()==0) {
             	Log::log(Log::ERROR, "Could not find configuration for user profile service endpoint.");
             }
             else {
             	//Make sure there's no trailing space in the service_endpoint string
-            	if ( GameEvents::up_service_endpoint[up_service_endpoint.size()-1] == '/' )
-            		GameEvents::up_service_endpoint = GameEvents::up_service_endpoint.substr(0, GameEvents::up_service_endpoint.size()-1);
+            	if ( GameEvents::userprofile_service_endpoint[userprofile_service_endpoint.size()-1] == '/' )
+            		GameEvents::userprofile_service_endpoint = GameEvents::userprofile_service_endpoint.substr(0, GameEvents::userprofile_service_endpoint.size()-1);
             }
 
             string tmp2 = cfg.lookup("auth.clientid");
@@ -256,7 +264,7 @@ void GameEvents::configure()
 
             try {
             	signed int tmp6;
-            	tmp6 = cfg.lookup("service.max_number_attempts");
+            	tmp6 = cfg.lookup("gameevents_service.max_number_attempts");
             	//string tmp6_str = tmp6.str();
 				//signed int tmp6_int = std::atoi(tmp6_str.c_str());
 				if ( (tmp6 > 0) && (tmp6 < 100)) {
@@ -327,7 +335,7 @@ string GameEvents::get_token()
     		string request_body;
     		request_body = request_body_ss.str();
 
-    		string request_url = GameEvents::service_endpoint + "/" + resource;
+    		string request_url = GameEvents::gameevents_service_endpoint + "/" + resource;
 
     		PocoWrapper poco_requester(request_url, request_body, "");
     		poco_requester.post();
@@ -413,7 +421,7 @@ void GameEvents::send_event_attempt(string event)
 			request_body = request_body_ss.str();
 
 			string request_url = "";
-			request_url = GameEvents::service_endpoint + "/" + resource;
+			request_url = GameEvents::gameevents_service_endpoint + "/" + resource;
 
 			PocoWrapper poco_requester(request_url, request_body, current_token);
 			poco_requester.post();
@@ -462,10 +470,11 @@ bool GameEvents::file_exists(std::string filename) {
 
 void GameEvents::log_event_locally(GameData event_data) {
 
-	string filename = "local_log.csv";
-	string formatted_line = GameEvents::format_event_data_csv(event_data);
-	ofstream myfile;
 	try {
+		string filename = gloB->file_events_output.get_rootful();
+		string formatted_line = GameEvents::format_event_data_csv(event_data);
+		ofstream myfile;
+
 		if (GameEvents::file_exists(filename)) {
 			//Log::log(Log::INFO, "File exists, appending...");
 			myfile.open(filename.c_str(), std::ios_base::app);

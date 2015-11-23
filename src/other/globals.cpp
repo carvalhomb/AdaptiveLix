@@ -323,6 +323,8 @@ Globals::Globals()
     file_config                  (dir_data.get_dir_rootless() + "config.txt"),
     file_log                     (dir_data.get_dir_rootless() + "log.txt"),
     file_level_network           (dir_data.get_dir_rootless() + "netlevel.txt"),
+	file_events_output           (dir_data.get_dir_rootless() + "netevents_output.csv"),
+	file_netevents_config		 (dir_data.get_dir_rootless() + "netevents_config.txt"),
 
     // file to load custom language translations from
     file_translations            (dir_data.get_dir_rootless() + "translate.txt"),

@@ -20,12 +20,12 @@ class GameEvents
         static void get_sessionid();
 
     private:
-        static std::string service_endpoint;
+        static std::string gameevents_service_endpoint;
         static std::string clientid;
         static std::string apikey;
         static std::string token;
         static std::string sessionid;
-        static std::string up_service_endpoint;
+        static std::string userprofile_service_endpoint;
         static std::string username;
         static std::string password;
         static signed int max_number_attempts;

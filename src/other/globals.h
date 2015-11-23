@@ -337,6 +337,8 @@ public:
         file_config,
         file_log,
         file_level_network,
+		file_events_output,
+		file_netevents_config,
 
         file_translations,
         file_translations_dump,
