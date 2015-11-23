@@ -16,3 +16,7 @@ GameEventsWrapper::GameEventsWrapper(GameData passed_event_data, int passed_num_
 void GameEventsWrapper::run() {
 	GameEvents::send_event(event_data, num_attempts);
 }
+
+void GameEventsWrapper::run2() {
+	GameEvents::send_event(event_data, num_attempts);
+}

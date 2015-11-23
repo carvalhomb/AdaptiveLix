@@ -55,6 +55,7 @@
 //#include "../network/gameevents.h"
 #include "../network/gameeventswrapper.h"
 #include "../network/gamedata.h"
+#include "../network/dummy.h"
 
 
 
@@ -166,9 +167,11 @@ int main(int argc, char* argv[])
         GameEvents::get_sessionid();
 
         GameData start_event_data = GameData("STARTGAME");
-        GameEventsWrapper gameevents_worker_start(start_event_data);
-        Poco::ThreadPool::defaultPool().start(gameevents_worker_start);
-        Poco::ThreadPool::defaultPool().joinAll();
+        //GameEventsWrapper gameevents_worker_start(start_event_data);
+        Dummy dummy;
+        dummy.start(start_event_data);
+        //Poco::ThreadPool::defaultPool().start(gameevents_worker_start);
+        //Poco::ThreadPool::defaultPool().joinAll();
 
 
         // Main loop. See other/lmain.cpp for this.
