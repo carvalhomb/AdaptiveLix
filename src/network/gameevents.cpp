@@ -413,22 +413,22 @@ void GameEvents::send_event_attempt(string event)
 			request_url = GameEvents::gameevents_service_endpoint + "/" + resource;
 
 			//Log::log(Log::INFO, "Going to try sending the request via runnable adapter");
-			PocoWrapper poco_requester(request_url, request_body, current_token);
+			//PocoWrapper poco_requester(request_url, request_body, current_token);
 			//Log::log(Log::INFO, "Initialized object.");
 
-			Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
+			//Poco::RunnableAdapter<PocoWrapper> poco_runnable(poco_requester, &PocoWrapper::run);
 			//Log::log(Log::INFO, "created adapted object");
 
 			//Poco::ThreadPool::defaultPool().start(poco_runnable);
 
 			try {
 
-				Poco::ThreadPool::defaultPool().start(poco_runnable);
+				//Poco::ThreadPool::defaultPool().start(poco_runnable);
 				//Log::log(Log::INFO, "started thread");
-				Poco::ThreadPool::defaultPool().joinAll();
+				//Poco::ThreadPool::defaultPool().joinAll();
 
-				//PocoWrapper poco_requester(request_url, request_body, current_token);
-				//poco_requester.send_package();
+				PocoWrapper poco_requester(request_url, request_body, current_token);
+				poco_requester.send_package();
 
 				//ostringstream response_stream;
 				//poco_requester.get_response(response_stream);

@@ -53,6 +53,20 @@ GameData::GameData(string action) {
 	this->level = "0"; //Not in a level
 }
 
+GameData::GameData() {
+	this->timestamp = GameData::get_timestamp();
+	this->action="0";
+	this->which_lix=-1;
+	this->update=-1;
+	this->seconds=-1;
+	this->lix_required=0;
+	this->lix_saved=0;
+	this->skills_used=0;
+	this->seconds_required=0;
+	this->levelobj = Level();
+	this->level = "0"; //Not in a level
+}
+
 string GameData::get_timestamp(){
 	time_t rawtime;
 	struct tm * timeinfo;

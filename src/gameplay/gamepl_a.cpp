@@ -10,8 +10,11 @@
 #include "gameplay.h"
 #include "../other/user.h"
 
-#include "../network/gameevents.h"
+//#include "../network/gameevents.h"
+#include "../network/gameeventswrapper.h"
 #include "../network/gamedata.h"
+//#include "../other/file/log.h"
+
 
 Replay::Data Gameplay::new_replay_data()
 {
@@ -73,7 +76,8 @@ void Gameplay::calc_active()
 
         GameData event_data = GameData("", level);
         event_data.load_replay_data(data);
-        GameEvents::send_event(event_data);
+        GameEventsWrapper gameevents_worker_nuke(event_data);
+        Poco::ThreadPool::defaultPool().start(gameevents_worker_nuke);
 
         replay.add(data);
         Network::send_replay_data(data);
@@ -272,7 +276,9 @@ if (priority > 1 && priority < 99999) {
 
                 GameData event_data = GameData("", level);
                 event_data.load_replay_data(data);
-                GameEvents::send_event(event_data);
+                GameEventsWrapper gameevents_worker_normal(event_data);
+                Poco::ThreadPool::defaultPool().start(gameevents_worker_normal);
+
 
                 replay.add(data);
                 Network::send_replay_data(data);

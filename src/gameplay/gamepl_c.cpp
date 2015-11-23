@@ -13,8 +13,10 @@
 #include "../api/manager.h"
 #include "../other/user.h"
 
-#include "../network/gameevents.h"
+//#include "../network/gameevents.h"
+#include "../network/gameeventswrapper.h"
 #include "../network/gamedata.h"
+//#include "../other/file/log.h"
 
 
 void Gameplay::calc()
@@ -134,7 +136,9 @@ void Gameplay::check_skill_buttons() {
                     Sound::play_loud(Sound::PANEL_EMPTY);
 
                     GameData event_data = GameData("EMPTYSKILL", level, cs.update);
-                    GameEvents::send_event(event_data);
+                    GameEventsWrapper gameevents_worker_empty(event_data);
+                    Poco::ThreadPool::defaultPool().start(gameevents_worker_empty);
+
 
                 }
                 // else play no sound -- we're holding the mouse button
@@ -308,7 +312,8 @@ void Gameplay::calc_self()
             Sound::play_loud(Sound::DISKSAVE);
 
             GameData event_data = GameData("SAVESTATE", level, cs.update);
-            GameEvents::send_event(event_data);
+            GameEventsWrapper gameevents_worker_save(event_data);
+            Poco::ThreadPool::defaultPool().start(gameevents_worker_save);
 
 
         }
@@ -331,7 +336,9 @@ void Gameplay::calc_self()
                 load_state(sta);
 
                 GameData event_data = GameData("LOADSTATE", level, cs.update);
-                GameEvents::send_event(event_data);
+                GameEventsWrapper gameevents_worker_load(event_data);
+                Poco::ThreadPool::defaultPool().start(gameevents_worker_load);
+
 
             }
         }
@@ -343,14 +350,17 @@ void Gameplay::calc_self()
                  pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
                  GameData event_data = GameData("RESUME", level, cs.update);
-                 GameEvents::send_event(event_data);
+                 GameEventsWrapper gameevents_worker_resume(event_data);
+                 Poco::ThreadPool::defaultPool().start(gameevents_worker_resume);
+
             }
             else
             {
             	pan.set_speed(GameplayPanel::SPEED_PAUSE);
-
             	GameData event_data = GameData("PAUSE", level, cs.update);
-            	GameEvents::send_event(event_data);
+            	GameEventsWrapper gameevents_worker_pause(event_data);
+            	Poco::ThreadPool::defaultPool().start(gameevents_worker_pause);
+
             }
         }
         // Zoom
@@ -359,7 +369,9 @@ void Gameplay::calc_self()
             map.set_zoom(pan.zoom.get_on());
 
             GameData event_data = GameData("ZOOM", level, cs.update);
-            GameEvents::send_event(event_data);
+            GameEventsWrapper gameevents_worker_zoom(event_data);
+            Poco::ThreadPool::defaultPool().start(gameevents_worker_zoom);
+
 
         }
         // Speed. On some executions, update
@@ -368,7 +380,9 @@ void Gameplay::calc_self()
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
             GameData event_data = GameData("MINUS1FRAME", level, cs.update);
-            GameEvents::send_event(event_data);
+            GameEventsWrapper gameevents_worker_minusone(event_data);
+            Poco::ThreadPool::defaultPool().start(gameevents_worker_minusone);
+
 
         }
         else if (pan.speed_back.get_execute_right()) {
@@ -378,14 +392,18 @@ void Gameplay::calc_self()
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
             GameData event_data = GameData("MINUS1SECOND", level, cs.update);
-            GameEvents::send_event(event_data);
+            GameEventsWrapper gameevents_worker_minusones(event_data);
+            Poco::ThreadPool::defaultPool().start(gameevents_worker_minusones);
+
 
         }
         else if (pan.speed_ahead.get_execute_left()) {
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
             GameData event_data = GameData("PLUS1FRAME", level, cs.update);
-            GameEvents::send_event(event_data);
+            GameEventsWrapper gameevents_worker_plusone(event_data);
+            Poco::ThreadPool::defaultPool().start(gameevents_worker_plusone);
+
 
             // do a single logic update even though the game is paused
             update();
@@ -399,7 +417,9 @@ void Gameplay::calc_self()
                 update();
 
             GameData event_data = GameData("PLUS1SECOND", level, startupdate);
-            GameEvents::send_event(event_data);
+            GameEventsWrapper gameevents_worker_plusones(event_data);
+            Poco::ThreadPool::defaultPool().start(gameevents_worker_plusones);
+
 
         }
         else if (pan.speed_fast.get_execute_left()) {
@@ -408,7 +428,9 @@ void Gameplay::calc_self()
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
                 GameData event_data = GameData("NORMALSPEED", level, cs.update);
-                GameEvents::send_event(event_data);
+                GameEventsWrapper gameevents_worker_normalspeed(event_data);
+                Poco::ThreadPool::defaultPool().start(gameevents_worker_normalspeed);
+
 
             }
             else
@@ -416,7 +438,9 @@ void Gameplay::calc_self()
                 pan.set_speed(GameplayPanel::SPEED_FAST);
 
                 GameData event_data = GameData("FASTSPEED", level, cs.update);
-                GameEvents::send_event(event_data);
+                GameEventsWrapper gameevents_worker_fastspeed(event_data);
+                Poco::ThreadPool::defaultPool().start(gameevents_worker_fastspeed);
+
 
             }
         }
@@ -430,14 +454,18 @@ void Gameplay::calc_self()
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
                 GameData event_data = GameData("NORMALSPEED", level, cs.update);
-                GameEvents::send_event(event_data);
+                GameEventsWrapper gameevents_worker_normalspeed2(event_data);
+                Poco::ThreadPool::defaultPool().start(gameevents_worker_normalspeed2);
+
 
             }
             else {
                 pan.set_speed(GameplayPanel::SPEED_TURBO);
 
                 GameData event_data = GameData("TURBOSPEED", level, cs.update);
-                GameEvents::send_event(event_data);
+                GameEventsWrapper gameevents_worker_turbospeed(event_data);
+                Poco::ThreadPool::defaultPool().start(gameevents_worker_turbospeed);
+
 
             }
         }
@@ -446,7 +474,9 @@ void Gameplay::calc_self()
             restart_level();
 
             GameData event_data = GameData("RESTARTLEVEL", level, cs.update);
-            GameEvents::send_event(event_data);
+            GameEventsWrapper gameevents_worker_restart(event_data);
+            Poco::ThreadPool::defaultPool().start(gameevents_worker_restart);
+
 
         }
 

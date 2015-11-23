@@ -39,7 +39,6 @@
  */
 
 #include <iostream>
-#include <Poco/ThreadPool.h>
 
 #include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
 
@@ -52,8 +51,12 @@
 #include "../lix/lix_enum.h" // initialize strings
 #include "../graphic/png/loadpng.h"
 
-#include "../network/gameevents.h"
+#include <Poco/ThreadPool.h>
+//#include "../network/gameevents.h"
+#include "../network/gameeventswrapper.h"
 #include "../network/gamedata.h"
+
+
 
 struct MainArgs {
     bool print_version_and_exit;
@@ -160,11 +163,12 @@ int main(int argc, char* argv[])
         Network::initialize();
 
         //Request a sessionid
-
         GameEvents::get_sessionid();
 
         GameData start_event_data = GameData("STARTGAME");
-        GameEvents::send_event(start_event_data);
+        GameEventsWrapper gameevents_worker_start(start_event_data);
+        Poco::ThreadPool::defaultPool().start(gameevents_worker_start);
+        Poco::ThreadPool::defaultPool().joinAll();
 
 
         // Main loop. See other/lmain.cpp for this.
@@ -172,9 +176,10 @@ int main(int argc, char* argv[])
         l_main->main_loop();
         delete l_main;
 
-
         GameData end_event_data = GameData("ENDGAME");
-        GameEvents::send_event(end_event_data);
+        GameEventsWrapper gameevents_worker_end(end_event_data);
+        Poco::ThreadPool::defaultPool().start(gameevents_worker_end);
+        Poco::ThreadPool::defaultPool().joinAll();
 
 
         // Clean up

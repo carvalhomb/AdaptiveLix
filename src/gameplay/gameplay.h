@@ -29,7 +29,7 @@
 #include "../other/user.h" // returning game results
 //
 
-
+#include <Poco/ThreadPool.h>
 
 
 class Gameplay {

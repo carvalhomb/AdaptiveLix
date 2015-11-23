@@ -70,9 +70,9 @@ string PocoWrapper::get_response_body() {
 	return response_body;
 }
 
-void PocoWrapper::run() {
-	send_package();
-}
+//void PocoWrapper::run() {
+//	send_package();
+//}
 
 void PocoWrapper::send_package() {
 	response_body = "";

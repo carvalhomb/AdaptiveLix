@@ -25,7 +25,7 @@ public:
 	int skills_used;
 	int seconds_required;
 
-	//GameData();
+	GameData();
 	GameData(std::string action, Level level, signed long update=-1);
 	GameData(std::string action);
 	//virtual ~Data();
