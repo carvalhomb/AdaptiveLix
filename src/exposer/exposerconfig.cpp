@@ -5,7 +5,6 @@
  *      Author: mbrandaoca
  */
 
-#pragma once
 
 #include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
 
@@ -16,7 +15,7 @@
 #include <Poco/Net/NetException.h>
 
 #include <Poco/JSON/Parser.h>
-#include <Poco/NET/HTTPRequest.h>
+#include <Poco/Net/HTTPRequest.h>
 #include <libconfig.h++>
 
 #include "../other/file/log.h"
