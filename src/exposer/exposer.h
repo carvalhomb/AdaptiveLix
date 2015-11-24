@@ -15,10 +15,12 @@ class Exposer
 public:
 	Exposer();
 	Exposer(GameData passed_data);
-	~Exposer();
+	//~Exposer();
 	void run();
+
 private:
 	GameData data;
+	void exit();
 };
 
 

@@ -28,7 +28,7 @@ NetworkSaver::NetworkSaver(GameData passed_event_data, int passed_num_attempts) 
 	num_attempts = passed_num_attempts;
 }
 
-void NetworkSaver::save() {
+void NetworkSaver::run() {
 	send_event(event_data, num_attempts);
 }
 

@@ -7,11 +7,15 @@
 
 #include <string>
 
-class LocalSaver {
+
+#include <Poco/Runnable.h>
+
+class LocalSaver : public Poco::Runnable {
 
 	public:
 		LocalSaver(std::string received_payload);
-		void save();
+		//void save();
+		virtual void run();
 	private:
 		std::string payload;
 		static bool file_exists(std::string filename);

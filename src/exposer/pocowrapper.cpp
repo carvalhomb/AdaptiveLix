@@ -15,8 +15,6 @@
 
 #include <Poco/Exception.h>
 #include <Poco/Net/NetException.h>
-#include <Poco/JSON/Parser.h>
-#include <Poco/Dynamic/Var.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
@@ -26,7 +24,6 @@
 #include <Poco/URI.h>
 #include <Poco/StreamCopier.h>
 
-#include <Poco/ThreadLocal.h>
 
 #include "pocowrapper.h"
 

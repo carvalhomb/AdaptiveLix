@@ -37,7 +37,8 @@ ExposerConfig::~ExposerConfig() {
 void ExposerConfig::initialize() {
 	try {
 		read_config_file();
-		handshake();
+		handshake(gloB->exposer_userprofile_service_endpoint.c_str());
+		handshake(gloB->exposer_gameevents_service_endpoint.c_str());
 		get_sessionid();
 		get_tokens();
 	}
@@ -203,19 +204,71 @@ void ExposerConfig::get_sessionid() {
 
 }
 
-void ExposerConfig::handshake() {
+void ExposerConfig::handshake(string service, string resource) {
 	/*
-	 * Tries to connect to the services first to make sure they are up and running. If not,
+	 * Tries to connect to the service first to make sure it is up and running. If not,
 	 * switches game to offline mode.
 	 */
-	string resource = "version";
-	string userprofile_request_url = gloB->exposer_userprofile_service_endpoint + "/" + resource;
-	string gameevents_request_url = gloB->exposer_gameevents_service_endpoint + "/" + resource;
 
-	PocoWrapper requester_userprofile(Poco::Net::HTTPRequest::HTTP_GET, userprofile_request_url);
-	PocoWrapper requester_gameevents(Poco::Net::HTTPRequest::HTTP_GET, gameevents_request_url);
-	requester_userprofile.execute();
-	requester_gameevents.execute();
+	bool success = false;
+	signed int counter = 1;
+
+	string request_url = service + "/" + resource;
+
+	while ((counter <= gloB->exposer_max_number_attempts) and (not success))
+	{
+		ostringstream tmpmsg;
+		tmpmsg << "Ping attempt number " << counter;
+		Log::log(Log::INFO, tmpmsg.str());
+
+		try {
+			success = ping(request_url);
+		}
+		catch (std::exception &ex) {
+			ostringstream tmpmsg;
+			tmpmsg << "Exception in attempt #"<< counter <<": " << ex.what();
+			Log::log(Log::ERROR, tmpmsg.str());
+			break;
+		}
+	}
+
+	if (not success) {
+		ostringstream tmpmsg;
+		tmpmsg << "Failed handshake after maximum attempts. Going offline.";
+		Log::log(Log::ERROR, tmpmsg.str());
+		gloB->exposer_offline_mode=true;
+	}
+
+}
+
+bool ExposerConfig::ping(string url) {
+	try {
+		PocoWrapper requester(Poco::Net::HTTPRequest::HTTP_GET, url);
+		requester.execute();
+
+		int response_status = requester.get_response_status();
+
+		//HTTP 200 OK
+		if (response_status == 200) {
+			ostringstream tmpmsg;
+			tmpmsg << "Ping successful, service at " << url << " up and running.";
+			Log::log(Log::INFO, tmpmsg.str());
+			return true;
+		}
+		else {
+			ostringstream tmpmsg;
+			tmpmsg << "Ping response: " << response_status;
+			Log::log(Log::ERROR, tmpmsg.str());
+			return false;
+		}
+	}
+	catch (std::exception &ex) {
+		ostringstream tmpmsg;
+		tmpmsg << "Unexpected exception in ping: " << ex.what();
+		Log::log(Log::ERROR, tmpmsg.str());
+		return false;
+	}
+
 }
 
 void ExposerConfig::get_tokens() {

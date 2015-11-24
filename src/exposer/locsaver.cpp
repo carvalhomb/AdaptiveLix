@@ -22,7 +22,7 @@ LocalSaver::LocalSaver(std::string received_payload) {
 	payload = received_payload;
 }
 
-void LocalSaver::save() {
+void LocalSaver::run() {
 	try {
 			string filename = gloB->exposer_local_output.get_rootful();
 			ofstream myfile;

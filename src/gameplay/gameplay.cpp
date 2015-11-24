@@ -540,7 +540,6 @@ void Gameplay::save_result()
     	Exposer exposer = Exposer(end_level_event_data);
     	exposer.run();
 
-
     	useR->set_level_result_carefully(filename,result,level.required);
         useR->save();
     }
