@@ -57,7 +57,8 @@ void NetworkSaver::send_event(GameData data, signed int number_of_attempts) {
 				ostringstream tmpmsg;
 				tmpmsg << "Exception in attempt #"<< counter <<": " << ex.what();
 				Log::log(Log::ERROR, tmpmsg.str());
-				break;
+				counter++;
+				//break;
 			}
 		}
 	}

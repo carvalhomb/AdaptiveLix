@@ -20,10 +20,12 @@ private:
 	void read_config_file();
 	void update_globals();
 	void get_sessionid();
+	void get_sessionid_attempt();
 	void handshake(std::string service, std::string resource = "version");
 	void get_tokens();
-	void get_gameevents_token();
-	bool ping(std::string url);
+	void get_gameevents_token(signed int number_of_attempts);
+	void get_gameevents_token_attempt();
+	void ping(std::string url);
 	std::string extract_sessionid(std::string json_string);
 	std::string extract_token(std::string json_string);
 

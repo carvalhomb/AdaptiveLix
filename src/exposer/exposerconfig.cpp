@@ -12,6 +12,9 @@
 #include <string>
 #include <sstream>
 
+#include <exception>
+#include <Poco/Net/NetException.h>
+
 #include <Poco/JSON/Parser.h>
 #include <Poco/NET/HTTPRequest.h>
 #include <libconfig.h++>
@@ -156,6 +159,32 @@ void ExposerConfig::read_config_file() {
 
 void ExposerConfig::get_sessionid() {
 
+	bool success = false;
+	signed int counter = 1;
+
+	if (not gloB->exposer_offline_mode) {
+
+		while ((counter <= gloB->exposer_max_number_attempts) and (not success) and  (not gloB->exposer_offline_mode) )
+		{
+			try {
+				get_sessionid_attempt();
+				success = true;
+			}
+			catch (std::exception &ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "Exception in getsessionid attempt #"<< counter <<": " << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				counter++;
+				//break;
+			}
+
+		}
+	}
+
+}
+
+void ExposerConfig::get_sessionid_attempt() {
+
 	string resource = "sessions";
 
 	//prepare request body
@@ -191,9 +220,10 @@ void ExposerConfig::get_sessionid() {
 		else {
 			//response failed
 			ostringstream tmpmsg;
-			tmpmsg << "Failed to get sessionid. Response status from user profile service: " << response_status << ". Running in offline mode.";
-			Log::log(Log::INFO,  tmpmsg.str() );
-			gloB->exposer_offline_mode = true;
+			tmpmsg << "Failed to get sessionid. Status [user profile service]: " << response_status << ".";
+			throw Poco::Net::NetException(tmpmsg.str());
+			//Log::log(Log::INFO,  tmpmsg.str() );
+			//gloB->exposer_offline_mode = true;
 		}
 	}
 	catch (std::exception &ex) {
@@ -218,17 +248,19 @@ void ExposerConfig::handshake(string service, string resource) {
 	while ((counter <= gloB->exposer_max_number_attempts) and (not success))
 	{
 		ostringstream tmpmsg;
-		tmpmsg << "Ping attempt number " << counter;
+		tmpmsg << "Ping attempt number " << counter <<" of " << gloB->exposer_max_number_attempts << ".";
 		Log::log(Log::INFO, tmpmsg.str());
 
 		try {
-			success = ping(request_url);
+			ping(request_url);
+			success = true;
 		}
 		catch (std::exception &ex) {
 			ostringstream tmpmsg;
-			tmpmsg << "Exception in attempt #"<< counter <<": " << ex.what();
+			tmpmsg << "Exception in attempt #"<< counter << " : " << ex.what();
 			Log::log(Log::ERROR, tmpmsg.str());
-			break;
+			counter++;
+			//break;
 		}
 	}
 
@@ -241,82 +273,110 @@ void ExposerConfig::handshake(string service, string resource) {
 
 }
 
-bool ExposerConfig::ping(string url) {
-	try {
-		PocoWrapper requester(Poco::Net::HTTPRequest::HTTP_GET, url);
-		requester.execute();
+void ExposerConfig::ping(string url) {
 
-		int response_status = requester.get_response_status();
+	PocoWrapper requester(Poco::Net::HTTPRequest::HTTP_GET, url);
+	requester.execute();
 
-		//HTTP 200 OK
-		if (response_status == 200) {
-			ostringstream tmpmsg;
-			tmpmsg << "Ping successful, service at " << url << " up and running.";
-			Log::log(Log::INFO, tmpmsg.str());
-			return true;
-		}
-		else {
-			ostringstream tmpmsg;
-			tmpmsg << "Ping response: " << response_status;
-			Log::log(Log::ERROR, tmpmsg.str());
-			return false;
-		}
-	}
-	catch (std::exception &ex) {
+	int response_status = requester.get_response_status();
+
+	//HTTP 200 OK
+	if (response_status == 200) {
 		ostringstream tmpmsg;
-		tmpmsg << "Unexpected exception in ping: " << ex.what();
-		Log::log(Log::ERROR, tmpmsg.str());
-		return false;
+		tmpmsg << "Ping successful, service at " << url << " up and running.";
+		Log::log(Log::INFO, tmpmsg.str());
 	}
-
+	else {
+		ostringstream tmpmsg;
+		tmpmsg << "Ping failed response: " << response_status;
+		throw Poco::Net::NetException(tmpmsg.str());
+	}
 }
 
 void ExposerConfig::get_tokens() {
-	get_gameevents_token();
+	get_gameevents_token(gloB->exposer_max_number_attempts);
 }
 
-void ExposerConfig::get_gameevents_token() {
-	const string resource = "token";
-
-	//And now, is the connection set up? And is the token empty?
-	if (gloB->exposer_connection_is_setup == true && gloB->exposer_offline_mode==false) {
-		if ( gloB->exposer_token.empty() || gloB->exposer_token.size()==0 ) {
-			//prepare request body
-			ostringstream request_body_ss;
-			request_body_ss << "{\"clientid\" : \"" << gloB->exposer_clientid << "\", ";
-			request_body_ss << "\"apikey\" : \"" << gloB->exposer_apikey << "\", ";
-			request_body_ss << "\"sessionid\" : \"" << gloB->exposer_sessionid << "\"";
-			request_body_ss << "}";
-
-			string request_body;
-			request_body = request_body_ss.str();
-
-			string request_url = gloB->exposer_gameevents_service_endpoint + "/" + resource;
-
-			PocoWrapper poco_requester(Poco::Net::HTTPRequest::HTTP_POST, request_url, "", request_body);
-			poco_requester.execute();
-
-			int response_status;
-			response_status = poco_requester.get_response_status();
-			string response_body;
-			response_body = poco_requester.get_response_body();
-
-			if (response_status == 200 ) {
-				gloB->exposer_token = extract_token(response_body);
-			}
-			else if (response_status == 401) {
-				Log::log(Log::INFO, "Token unauthorized. Resetting the token variable.");
-				gloB->exposer_token = "";
-			}
-			else {
-				//response failed
-				ostringstream tmpmsg;
-				tmpmsg << "Failed to get token. Status: " << response_status;
-				Log::log(Log::INFO,  tmpmsg.str() );
-				gloB->exposer_token = "";
-			}
-		}
+void ExposerConfig::get_gameevents_token(signed int number_of_attempts) {
+	bool success = false;
+	bool is_token_set = false;
+	if ( not gloB->exposer_token.empty() and gloB->exposer_token.size()>0 ) {
+		is_token_set = true;
 	}
+	signed int counter = 1;
+
+	if (gloB->exposer_connection_is_setup and not gloB->exposer_offline_mode and is_token_set == false) {
+		while ((counter <= number_of_attempts) and (not success) and (not gloB->exposer_offline_mode))
+		{
+			ostringstream tmpmsg;
+			tmpmsg << "Attempt to get token #" << counter << " of " << number_of_attempts << ".";
+			Log::log(Log::INFO, tmpmsg.str());
+
+			try {
+				get_gameevents_token_attempt();
+				success = true;
+			}
+			catch (std::exception &ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "Exception in attempt #"<< counter <<": " << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				counter++;
+				//break;
+			}
+
+		}
+
+	}
+
+}
+
+void ExposerConfig::get_gameevents_token_attempt() {
+
+	const string resource = "token";
+	string request_url = gloB->exposer_gameevents_service_endpoint + "/" + resource;
+
+	//prepare request body
+	ostringstream request_body_ss;
+	request_body_ss << "{\"clientid\" : \"" << gloB->exposer_clientid << "\", ";
+	request_body_ss << "\"apikey\" : \"" << gloB->exposer_apikey << "\", ";
+	request_body_ss << "\"sessionid\" : \"" << gloB->exposer_sessionid << "\"";
+	request_body_ss << "}";
+
+	string request_body;
+	request_body = request_body_ss.str();
+
+
+	PocoWrapper poco_requester(Poco::Net::HTTPRequest::HTTP_POST, request_url, "", request_body);
+	poco_requester.execute();
+
+	int response_status;
+	response_status = poco_requester.get_response_status();
+	string response_body;
+	response_body = poco_requester.get_response_body();
+
+	if (response_status == 200 ) {
+		gloB->exposer_token = extract_token(response_body);
+	}
+	else if (response_status == 401) {
+		Log::log(Log::INFO, "Could not authenticate. Raising not authenticated exception.");
+		//gloB->exposer_token = "";
+		throw Poco::Net::NotAuthenticatedException("Could not authenticate");
+	}
+	else if (response_status == 500) {
+		Log::log(Log::INFO, "500 error in server. Raising net exception.");
+		//gloB->exposer_token = "";
+		throw Poco::Net::NetException("500 error in server... try again?");
+	}
+	else {
+		//response failed
+		ostringstream tmpmsg;
+		tmpmsg << "Failed to get token. Status: " << response_status;
+		throw Poco::Net::NetException(tmpmsg.str());
+		//gloB->exposer_token = "";
+	}
+
+	//ostringstream response_stream;
+	//poco_requester.get_response(response_stream);
 }
 
 string ExposerConfig::extract_sessionid(string json_string) {
