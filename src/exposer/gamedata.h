@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
+//#include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
 
 #include <string>
 
@@ -19,7 +19,6 @@ public:
 	signed long seconds;
 	signed long which_lix;
 	std::string timestamp;
-	//time_t timestamp;
 	int lix_required;
 	int lix_saved;
 	int skills_used;
@@ -28,11 +27,10 @@ public:
 	GameData();
 	GameData(std::string action, Level level, signed long update=-1);
 	GameData(std::string action);
-	//virtual ~Data();
-	//void load_event_data(Replay::Data data, std::string level);
 	void load_replay_data(Replay::Data data);
 	void load_result_data(Result result);
-	//void load_update_data(Level level, signed long update);
+	std::string to_csv();
+	std::string to_xml();
 
 private:
 	std::string extract_action_word(Replay::Data data);

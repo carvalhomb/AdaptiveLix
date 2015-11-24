@@ -11,9 +11,8 @@
 #include "../graphic/sound.h"
 #include "../other/user.h"
 
-//#include "../network/gameevents.h"
-#include "../network/gameeventswrapper.h"
-#include "../network/gamedata.h"
+#include "../exposer/gamedata.h"
+#include "../exposer/exposer.h"
 //#include "../other/file/log.h"
 
 
@@ -35,8 +34,8 @@ void Gameplay::update()
 
         GameData event_data = GameData("", level);
         event_data.load_replay_data(data);
-        GameEventsWrapper gameevents_worker_spawn(event_data);
-        Poco::ThreadPool::defaultPool().start(gameevents_worker_spawn);
+        Exposer exposer = Exposer(event_data);
+        exposer.run();
 
 
         replay.add(data);

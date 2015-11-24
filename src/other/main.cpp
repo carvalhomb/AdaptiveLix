@@ -51,11 +51,11 @@
 #include "../lix/lix_enum.h" // initialize strings
 #include "../graphic/png/loadpng.h"
 
-#include <Poco/ThreadPool.h>
-//#include "../network/gameevents.h"
-#include "../network/gameeventswrapper.h"
-#include "../network/gamedata.h"
-#include "../network/dummy.h"
+//Expose the game events
+#include "../exposer/gamedata.h"
+#include "../exposer/exposer.h"
+#include "../exposer/exposerconfig.h"
+
 
 
 
@@ -163,15 +163,13 @@ int main(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
-        //Request a sessionid
-        GameEvents::get_sessionid();
+        //Initialize an ExposerConfig object
+        ExposerConfig expconfig;
+        expconfig.initialize();
 
         GameData start_event_data = GameData("STARTGAME");
-        //GameEventsWrapper gameevents_worker_start(start_event_data);
-        Dummy dummy;
-        dummy.start(start_event_data);
-        //Poco::ThreadPool::defaultPool().start(gameevents_worker_start);
-        //Poco::ThreadPool::defaultPool().joinAll();
+        Exposer exposer_startgame = Exposer(start_event_data);
+        exposer_startgame.run();
 
 
         // Main loop. See other/lmain.cpp for this.
@@ -180,9 +178,9 @@ int main(int argc, char* argv[])
         delete l_main;
 
         GameData end_event_data = GameData("ENDGAME");
-        GameEventsWrapper gameevents_worker_end(end_event_data);
-        Poco::ThreadPool::defaultPool().start(gameevents_worker_end);
-        Poco::ThreadPool::defaultPool().joinAll();
+        Exposer exposer_endgame = Exposer(end_event_data);
+        exposer_endgame.run();
+
 
 
         // Clean up

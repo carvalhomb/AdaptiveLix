@@ -11,6 +11,7 @@
 
 #include <string>
 #include <sstream>
+#include <exception>
 
 #include <Poco/Exception.h>
 #include <Poco/Net/NetException.h>
@@ -33,23 +34,11 @@ using namespace std;
 
 
 
-//PocoWrapper::PocoWrapper() {
-//	url = "";
-//	payload = "";
-//	auth_token = "";
-//	status = HTTPResponse::HTTP_INTERNAL_SERVER_ERROR;
-//	//URI request_uri(url);
-//	// prepare path
-//	//request_path = request_uri.getPathAndQuery();
-//	//if (request_path.empty()) request_path = "/";
-//	//HTTPClientSession client_session(request_uri.getHost(), request_uri.getPort());
-//}
-
-PocoWrapper::PocoWrapper(string myurl, string mypayload, string myauth_token) {
+PocoWrapper::PocoWrapper(string mymethod, string myurl, string myauth_token, string mypayload) {
+	method = mymethod;
 	url = myurl;
 	payload = mypayload;
 	auth_token = myauth_token;
-	//status = Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR;
 	status = 0;
 
 	// prepare path
@@ -62,6 +51,8 @@ PocoWrapper::PocoWrapper(string myurl, string mypayload, string myauth_token) {
 	client_session = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(request_uri);
 }
 
+
+
 int PocoWrapper::get_response_status() {
 	return status;
 }
@@ -70,30 +61,51 @@ string PocoWrapper::get_response_body() {
 	return response_body;
 }
 
-//void PocoWrapper::run() {
-//	send_package();
-//}
 
-void PocoWrapper::send_package() {
+void PocoWrapper::execute() {
 	response_body = "";
 	ostringstream internal_stream;
 
-	//Log::log(Log::INFO, "I'm in run!");
+	//In Windows we need to initialize the network
+		#ifdef _WIN32
+			Poco::Net::initializeNetwork();
+		#endif
+
 
 	try {
-		//Log::log(Log::INFO, "Before post");
-		post();
-		//Log::log(Log::INFO, "After post");
+		// prepare request
+		Poco::Net::HTTPRequest request(method, request_path);
+
+		//Is there a non-empty token?
+		if  (not auth_token.empty() && auth_token.size()>0 )
+		{
+			//Log::log(Log::INFO, "token not empty");
+			request.set("X-AUTH-TOKEN", auth_token);
+		}
+
+		//is there a request body? Is this a POST request?
+		if  (not (payload.empty() || payload.size()==0) && (method == Poco::Net::HTTPRequest::HTTP_POST))
+		{
+			request.setContentType("application/json");
+			request.setKeepAlive(true);
+			request.setContentLength( payload.length() );
+		}
+		else {
+			//Not a POST request, empty the payload
+			payload = "";
+		}
+
+		//send request
+		client_session->sendRequest(request) << payload;
+
 		std::istream &is = client_session->receiveResponse(response);
 		Poco::StreamCopier::copyStream(is, internal_stream);
 		status = response.getStatus();
-		//Log::log(Log::INFO, "After get status");
 		response_body = internal_stream.str();
-		//Log::log(Log::INFO, "After get response body");
 
-		//ostringstream tmpmsg;
-		//tmpmsg << "Response body: " << response_body;
-		//Log::log(Log::INFO, tmpmsg.str());
+//		ostringstream tmpmsg;
+//		tmpmsg << "Response body: " << response_body;
+//		Log::log(Log::INFO, tmpmsg.str());
 
 		if (status==0) {
 			ostringstream tmpmsg;
@@ -104,7 +116,6 @@ void PocoWrapper::send_package() {
 			ostringstream tmpmsg;
 			tmpmsg << "Not Authorized by service: 401 UNAUTHORIZED";
 			Log::log(Log::ERROR, tmpmsg.str());
-			//throw Poco::Net::NotAuthenticatedException("Not authorized by service.");
 		}
 	}
 	catch (Poco::Net::NotAuthenticatedException& ex) {
@@ -134,45 +145,3 @@ void PocoWrapper::send_package() {
 	}
 }
 
-
-
-void PocoWrapper::post() {
-
-	//Log::log(Log::INFO, "Inside post");
-	//In Windows we need to initialize the network
-	#ifdef _WIN32
-		Poco::Net::initializeNetwork();
-	#endif
-		//Log::log(Log::INFO, "before creating request");
-
-	// prepare request
-	Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, request_path);
-
-	//Log::log(Log::INFO, "request created");
-
-	if  (not (payload.empty() || payload.size()==0))
-	{
-		//Log::log(Log::INFO, "payload not empty");
-		//Is there a non-empty token?
-		if  (not auth_token.empty() && auth_token.size()>0 )
-		{
-			//Log::log(Log::INFO, "token not empty");
-			request.set("X-AUTH-TOKEN", auth_token);
-		}
-		request.setContentType("application/json");
-		request.setKeepAlive(true);
-		request.setContentLength( payload.length() );
-
-		//Log::log(Log::INFO, "Sending request...");
-
-		//send request
-		client_session->sendRequest(request) << payload;
-		//Log::log(Log::INFO, "request sent");
-	}
-	else {
-		client_session->reset();
-		ostringstream tmpmsg;
-		tmpmsg << "Bad request.";
-		Log::log(Log::ERROR, tmpmsg.str());
-	}
-}

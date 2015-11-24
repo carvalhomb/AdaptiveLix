@@ -337,8 +337,6 @@ public:
         file_config,
         file_log,
         file_level_network,
-		file_events_output,
-		file_netevents_config,
 
         file_translations,
         file_translations_dump,
@@ -376,6 +374,25 @@ public:
 
         file_replay_auto_single,
         file_replay_auto_multi;
+
+
+    //Events exposer variables
+    	const Filename exposer_local_output;
+    	const Filename exposer_config;
+
+        std::string exposer_gameevents_service_endpoint;
+        std::string exposer_clientid;
+        std::string exposer_apikey;
+        std::string exposer_token;
+        std::string exposer_sessionid;
+        std::string exposer_userprofile_service_endpoint;
+        std::string exposer_username;
+        std::string exposer_password;
+
+        signed int exposer_max_number_attempts;
+        bool exposer_connection_is_setup;
+        bool exposer_record_local_file;
+        bool exposer_offline_mode;
 
 private:
 

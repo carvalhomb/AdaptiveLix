@@ -11,9 +11,8 @@
 #include "../other/hardware.h"
 #include "../other/help.h"
 
-#include "../network/gameevents.h"
-#include "../network/gamedata.h"
-#include "../other/file/log.h"
+#include "../exposer/exposer.h"
+#include "../exposer/gamedata.h"
 
 // Statische Konstanten initialisieren
 const int Gameplay::block_s = 14; // Blocker-Abstand zur Seite
@@ -93,7 +92,9 @@ Gameplay::Gameplay(
 
 
     GameData start_level_event_data = GameData("STARTLEVEL", level);
-    GameEvents::send_event(start_level_event_data);
+    Exposer exposer = Exposer(start_level_event_data);
+    exposer.run();
+
 }
 
 
@@ -536,7 +537,8 @@ void Gameplay::save_result()
     	//Load data in the object
     	GameData end_level_event_data = GameData("", level);
     	end_level_event_data.load_result_data(result);
-    	GameEvents::send_event(end_level_event_data);
+    	Exposer exposer = Exposer(end_level_event_data);
+    	exposer.run();
 
 
     	useR->set_level_result_carefully(filename,result,level.required);

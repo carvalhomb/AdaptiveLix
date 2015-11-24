@@ -323,8 +323,6 @@ Globals::Globals()
     file_config                  (dir_data.get_dir_rootless() + "config.txt"),
     file_log                     (dir_data.get_dir_rootless() + "log.txt"),
     file_level_network           (dir_data.get_dir_rootless() + "netlevel.txt"),
-	file_events_output           (dir_data.get_dir_rootless() + "netevents_output.csv"),
-	file_netevents_config		 (dir_data.get_dir_rootless() + "netevents_config.txt"),
 
     // file to load custom language translations from
     file_translations            (dir_data.get_dir_rootless() + "translate.txt"),
@@ -365,7 +363,28 @@ Globals::Globals()
     file_bitmap_font_sml         (dir_data_bitmap.get_dir_rootless() + "font_sml.I.tga"),
 
     file_replay_auto_single      (dir_replay_auto.get_dir_rootless() + "s"),
-    file_replay_auto_multi       (dir_replay_auto.get_dir_rootless() + "m")
+    file_replay_auto_multi       (dir_replay_auto.get_dir_rootless() + "m"),
+
+	//Exposer files
+	exposer_local_output         (dir_data.get_dir_rootless() + "netevents_output.csv"),
+	exposer_config		 		 (dir_data.get_dir_rootless() + "netevents_config.txt"),
+
+	//Game events service info
+	exposer_gameevents_service_endpoint(""),
+	exposer_clientid(""),
+	exposer_apikey(""),
+	exposer_token(""),
+	exposer_sessionid(""),
+
+	//Userprofile service info
+	exposer_userprofile_service_endpoint(""),
+	exposer_username(""),
+	exposer_password(""),
+
+	exposer_connection_is_setup(false),
+	exposer_offline_mode(false),
+	exposer_record_local_file(true),
+	exposer_max_number_attempts(3)
 {
 }
 

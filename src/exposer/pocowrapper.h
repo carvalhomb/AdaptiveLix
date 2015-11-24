@@ -12,17 +12,15 @@
 class PocoWrapper {
 
 	public:
-		PocoWrapper(std::string url, std::string payload, std::string auth_token);
+		PocoWrapper(std::string method, std::string url, std::string auth_token="", std::string payload="");
 		//virtual void run();
-		void send_package();
-		void post();
+		void execute();
 		std::string get_response_body();
 		int get_response_status();
 
 	private:
-		//void get_response();
-		//std::ostringstream& internal_stream;
 		std::string response_body;
+		std::string method;
 		std::string url;
 		std::string payload;
 		std::string auth_token;
