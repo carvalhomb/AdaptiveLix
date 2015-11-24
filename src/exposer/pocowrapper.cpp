@@ -64,9 +64,9 @@ void PocoWrapper::execute() {
 	ostringstream internal_stream;
 
 	//In Windows we need to initialize the network
-		#ifdef _WIN32
-			Poco::Net::initializeNetwork();
-		#endif
+	#ifdef _WIN32
+		Poco::Net::initializeNetwork();
+	#endif
 
 
 	try {
@@ -86,14 +86,15 @@ void PocoWrapper::execute() {
 			request.setContentType("application/json");
 			request.setKeepAlive(true);
 			request.setContentLength( payload.length() );
+			//Log::log(Log::INFO, payload);
+			//send request
+			client_session->sendRequest(request) << payload;
+
 		}
 		else {
-			//Not a POST request, empty the payload
-			payload = "";
+			//Not a POST request, send request without payload
+			client_session->sendRequest(request);
 		}
-
-		//send request
-		client_session->sendRequest(request) << payload;
 
 		std::istream &is = client_session->receiveResponse(response);
 		Poco::StreamCopier::copyStream(is, internal_stream);
@@ -106,12 +107,17 @@ void PocoWrapper::execute() {
 
 		if (status==0) {
 			ostringstream tmpmsg;
-			tmpmsg << "Error running service. Not enough time to get response?";
+			tmpmsg << "Error running service.";
 			Log::log(Log::ERROR, tmpmsg.str());
 		}
 		else if (status==401) {
 			ostringstream tmpmsg;
 			tmpmsg << "Not Authorized by service: 401 UNAUTHORIZED";
+			Log::log(Log::ERROR, tmpmsg.str());
+		}
+		else if (status==500) {
+			ostringstream tmpmsg;
+			tmpmsg << "Error in service: 500 INTERNAL SERVER ERROR";
 			Log::log(Log::ERROR, tmpmsg.str());
 		}
 	}

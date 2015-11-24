@@ -311,7 +311,7 @@ void ExposerConfig::get_gameevents_token() {
 			else {
 				//response failed
 				ostringstream tmpmsg;
-				tmpmsg << "Failed to commit game event. Status: " << response_status;
+				tmpmsg << "Failed to get token. Status: " << response_status;
 				Log::log(Log::INFO,  tmpmsg.str() );
 				gloB->exposer_token = "";
 			}

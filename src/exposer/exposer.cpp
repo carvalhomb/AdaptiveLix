@@ -13,6 +13,7 @@
 #include <exception>
 
 #include "../other/globals.h"
+#include "../other/file/log.h"
 
 #include <Poco/ThreadPool.h>
 
@@ -31,30 +32,11 @@ Exposer::Exposer(GameData passed_data)
 
 void Exposer::run()
 {
-
-	//Poco::ThreadPool::defaultPool().start(gameevents_worker_start);
-
-	//Is the game running in offline mode?
-	if (gloB->exposer_offline_mode == false) {
-		NetworkSaver networksaver = NetworkSaver(data);
-		//Poco::ThreadPool::defaultPool().start(networksaver);
-		networksaver.run();
-
-	}
-
-	//Is the game set to record data locally or is it running offline?
-	if (gloB->exposer_offline_mode == true or gloB->exposer_record_local_file==true) {
-		//format data to csv
-		std::string data_in_csv = data.to_csv();
-
-		LocalSaver localsaver = LocalSaver(data_in_csv);
-		//Poco::ThreadPool::defaultPool().start(localsaver);
-		localsaver.run();
-	}
-	exit();
+	NetworkSaver networksaver = NetworkSaver(data);
+	LocalSaver localsaver = LocalSaver(data);
+	Poco::ThreadPool::defaultPool().start(networksaver);
+	Poco::ThreadPool::defaultPool().start(localsaver);
+	Poco::ThreadPool::defaultPool().joinAll();
 }
 
-void Exposer::exit()
-{
-	//Poco::ThreadPool::defaultPool().joinAll();
-}
+

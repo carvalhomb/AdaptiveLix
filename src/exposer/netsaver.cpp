@@ -29,7 +29,9 @@ NetworkSaver::NetworkSaver(GameData passed_event_data, int passed_num_attempts) 
 }
 
 void NetworkSaver::run() {
-	send_event(event_data, num_attempts);
+	if (gloB->exposer_offline_mode == false) {
+		send_event(event_data, num_attempts);
+	}
 }
 
 
@@ -69,7 +71,9 @@ void NetworkSaver::send_event_attempt(string formatted_event)
 
 	if (gloB->exposer_connection_is_setup == true && gloB->exposer_offline_mode==false) {
 		if (current_token.empty() || current_token.size()==0) {
-			Log::log(Log::ERROR, "I don't have a token.");
+			//Log::log(Log::ERROR, "I don't have a token. Unsetting the connection so that it gets configured again.");
+			Log::log(Log::ERROR, "I don't have a token. Going offline.");
+			gloB->exposer_offline_mode=true;
 		}
 		else
 		{

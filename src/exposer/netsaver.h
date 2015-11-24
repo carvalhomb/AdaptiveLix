@@ -12,7 +12,6 @@ class NetworkSaver  : public Poco::Runnable {
 
 public:
 	NetworkSaver(GameData passed_event_data, int passed_num_attempts = 3);
-	//void save();
 	virtual void run();
 private:
 //	void send_event(GameData event_data);
