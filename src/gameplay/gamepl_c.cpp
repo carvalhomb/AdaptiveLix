@@ -516,7 +516,12 @@ void Gameplay::calc_self()
          && !window_gameplay) {
             window_gameplay = new Api::WindowGameplay(&replay, &level,
                                                       cs.tribes.size());
+            GameData event_data = GameData("LEVELMENU", level, cs.update);
+            Exposer exposer = Exposer(event_data);
+            exposer.run();
+
             Api::Manager::add_focus(window_gameplay);
+
             return;
         }
     }
@@ -607,6 +612,9 @@ void Gameplay::restart_level()
     load_state(state_manager.get_zero());
     pan.set_speed(GameplayPanel::SPEED_NORMAL);
     pan.set_hint_cur(0); // remove shown hints (displays tutorial if present)
+    GameData event_data = GameData("RESTARTLEVEL", level);
+    Exposer exposer = Exposer(event_data);
+    exposer.run();
 }
 
 
@@ -623,6 +631,9 @@ void Gameplay::load_state(const GameState& state)
         effect.delete_after(cs.update);
         for (HatchIt i = hatches.begin(); i != hatches.end(); ++i)
          i->animate(effect, cs.update);
+        GameData event_data = GameData("RESTARTLEVEL", level);
+        Exposer exposer = Exposer(event_data);
+        exposer.run();
     }
 }
 

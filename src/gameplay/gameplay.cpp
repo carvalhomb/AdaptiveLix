@@ -107,6 +107,9 @@ Gameplay::~Gameplay()
     cs.tribes.clear();
 
     effect.clear_all_lists();
+    GameData start_level_event_data = GameData("ENDLEVEL", level);
+    Exposer exposer = Exposer(start_level_event_data);
+    exposer.run();
 }
 
 
@@ -499,6 +502,10 @@ void Gameplay::on_hint_change_callback(void* v, const int hint_cur)
     const std::vector <std::string>& hint_vec = g.level.get_hints();
     if (hint_vec.empty()) g.chat.set_hint("");
     else                  g.chat.set_hint(hint_vec[hint_cur]);
+
+    GameData event_data = GameData("REQUESTHINT", g.level);
+    Exposer exposer = Exposer(event_data);
+    exposer.run();
 }
 
 

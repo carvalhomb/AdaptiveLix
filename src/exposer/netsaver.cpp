@@ -41,7 +41,7 @@ void NetworkSaver::send_event(GameData data, signed int number_of_attempts) {
 
 	//Format data
 	std::string formatted_event_data;
-	formatted_event_data = data.to_xml();
+	formatted_event_data = data.to_json();
 
 	if (not gloB->exposer_offline_mode) {
 		while ((counter <= number_of_attempts) and (not success) and (not gloB->exposer_offline_mode))
@@ -84,8 +84,8 @@ void NetworkSaver::send_event_attempt(string formatted_event)
 			time_t timestamp = time(0);
 			ostringstream request_body_ss;
 			request_body_ss << "{";
-			request_body_ss << "\"timestamp\" : \"" << timestamp << "\", ";
-			request_body_ss << "\"gameevent\" : \"" << formatted_event << "\"";
+			request_body_ss << "\"timestamp\" : \"" << timestamp << "\", \n";
+			request_body_ss << "\"gameevent\" : [" << formatted_event << "]";
 			request_body_ss << "}";
 
 			string request_body;

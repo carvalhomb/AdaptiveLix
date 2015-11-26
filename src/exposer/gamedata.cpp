@@ -153,7 +153,7 @@ string GameData::to_xml()
 	if (level != "0") data_sstr <<  "<level>" << level << "</level>";
 	if (update >= 0) data_sstr << "<update>" << update << "</update>";
 	if (seconds >= 0) data_sstr << "<seconds>" << seconds << "</seconds>";
-	if (which_lix >= 0 ) data_sstr << "<which>" << which_lix << "</which>";
+	if (which_lix >= 0 ) data_sstr << "<which_lix>" << which_lix << "</which_lix>";
 	if (lix_required >= 0 && (action == "ENDLEVEL")) data_sstr << "<lix_required>" << lix_required << "</lix_required>";
 	if (lix_saved >= 0 && (action == "ENDLEVEL")) data_sstr << "<lix_saved>" << lix_saved << "</lix_saved>";
 	if (skills_used >= 0 && (action == "ENDLEVEL")) data_sstr << "<skills_used>" << skills_used << "</skills_used>";
@@ -162,20 +162,39 @@ string GameData::to_xml()
 	return data_sstr.str();
 }
 
+string GameData::to_json()
+{
+	ostringstream data_sstr;
+
+	data_sstr << "{ ";
+	data_sstr << "\"timestamp\" : \"" << timestamp << "\",\n";
+	data_sstr << "\"action\" : \"" << action << "\",\n";
+	data_sstr <<  "\"level\" : \"" << level << "\",\n";
+	data_sstr << "\"update\" : \"" << update << "\",\n";
+	data_sstr << "\"seconds\" : \"" << seconds << "\",\n";
+	data_sstr << "\"which_lix\" : \"" << which_lix << "\",\n";
+	data_sstr << "\"lix_required\" : \"" << lix_required << "\",\n";
+	data_sstr << "\"lix_saved\" : \"" << lix_saved << "\",\n";
+	data_sstr << "\"skills_used\" : \"" << skills_used << "\",\n";
+	data_sstr << "\"seconds_required\" : \"" << seconds_required << "\"\n";
+	data_sstr << "}";
+	return data_sstr.str();
+}
+
 string GameData::to_csv()
 {
 	ostringstream data_sstr;
 
-	data_sstr << "\"" << gloB->exposer_sessionid << "\", ";
-	data_sstr << "\"" << timestamp << "\", ";
-	data_sstr << "\"" << action << "\", ";
-	data_sstr <<  "\"" << level << "\", ";
-	data_sstr << "\"" << update << "\", ";
-	data_sstr << "\"" << seconds << "\", ";
-	data_sstr << "\"" << which_lix << "\", ";
-	data_sstr << "\"" << lix_required << "\", ";
-	data_sstr << "\"" << lix_saved << "\", ";
-	data_sstr << "\"" << skills_used << "\", ";
-	data_sstr << "\"" << seconds_required << "\" \n";
+	data_sstr << gloB->exposer_sessionid << ", ";
+	data_sstr << timestamp << ", ";
+	data_sstr << action << ", ";
+	data_sstr << level << ", ";
+	data_sstr << update << ", ";
+	data_sstr << seconds << ", ";
+	data_sstr << which_lix << ", ";
+	data_sstr << lix_required << ", ";
+	data_sstr << lix_saved << ", ";
+	data_sstr << skills_used << ", ";
+	data_sstr << seconds_required << "\n";
 	return data_sstr.str();
 }

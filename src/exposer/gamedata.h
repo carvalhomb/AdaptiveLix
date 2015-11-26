@@ -31,6 +31,7 @@ public:
 	void load_result_data(Result result);
 	std::string to_csv();
 	std::string to_xml();
+	std::string to_json();
 
 private:
 	std::string extract_action_word(Replay::Data data);

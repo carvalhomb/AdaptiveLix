@@ -67,7 +67,8 @@ public:
         ASSIGN,
         ASSIGN_LEFT,
         ASSIGN_RIGHT,
-        NUKE
+        NUKE,
+		WRONG_ASSIGN
     };
 
     struct Player {
