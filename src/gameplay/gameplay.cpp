@@ -75,8 +75,18 @@ Gameplay::Gameplay(
     window_gameplay   (0),
     special           (Object::MAX)
 {
-    if (rep) replay = *rep;
-    else     replay.set_level_filename(filename);
+    if (rep) {
+    	replay = *rep;
+    	GameData start_level_event_data = GameData("RESTARTLEVEL", level);
+    	Exposer exposer = Exposer(start_level_event_data);
+    	exposer.run();
+    }
+    else {
+    	replay.set_level_filename(filename);
+    	GameData start_level_event_data = GameData("STARTLEVEL", level);
+    	Exposer exposer = Exposer(start_level_event_data);
+    	exposer.run();
+    }
 
     prepare_players(rep);
     prepare_level();
@@ -91,9 +101,7 @@ Gameplay::Gameplay(
     }
 
 
-    GameData start_level_event_data = GameData("STARTLEVEL", level);
-    Exposer exposer = Exposer(start_level_event_data);
-    exposer.run();
+
 
 }
 
@@ -500,12 +508,21 @@ void Gameplay::on_hint_change_callback(void* v, const int hint_cur)
 {
     Gameplay& g = *static_cast <Gameplay*> (v);
     const std::vector <std::string>& hint_vec = g.level.get_hints();
-    if (hint_vec.empty()) g.chat.set_hint("");
-    else                  g.chat.set_hint(hint_vec[hint_cur]);
+    if (hint_vec.empty()) {
+    	g.chat.set_hint("");
+    }
+    else {
+    	g.chat.set_hint(hint_vec[hint_cur]);
+    }
 
-    GameData event_data = GameData("REQUESTHINT", g.level);
-    Exposer exposer = Exposer(event_data);
-    exposer.run();
+    if (not hint_vec.empty() && hint_cur != 0 && hint_cur != int(hint_vec.size()))
+    {
+    	GameData event_data = GameData("REQUESTHINT", g.level);
+    	Exposer exposer = Exposer(event_data);
+    	exposer.run();
+    }
+
+
 }
 
 
@@ -542,9 +559,9 @@ void Gameplay::save_result()
     	result = get_result();
 
     	//Load data in the object
-    	GameData end_level_event_data = GameData("", level);
-    	end_level_event_data.load_result_data(result);
-    	Exposer exposer = Exposer(end_level_event_data);
+    	GameData result_data = GameData("", level);
+    	result_data.load_result_data(result);
+    	Exposer exposer = Exposer(result_data);
     	exposer.run();
 
     	useR->set_level_result_carefully(filename,result,level.required);

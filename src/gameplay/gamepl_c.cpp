@@ -471,9 +471,9 @@ void Gameplay::calc_self()
         else if (pan.restart.get_clicked()) {
             restart_level();
 
-            GameData event_data = GameData("RESTARTLEVEL", level, cs.update);
-            Exposer exposer = Exposer(event_data);
-            exposer.run();
+//            GameData event_data = GameData("RESTARTLEVEL", level, cs.update);
+//            Exposer exposer = Exposer(event_data);
+//            exposer.run();
 
 
         }
@@ -612,9 +612,9 @@ void Gameplay::restart_level()
     load_state(state_manager.get_zero());
     pan.set_speed(GameplayPanel::SPEED_NORMAL);
     pan.set_hint_cur(0); // remove shown hints (displays tutorial if present)
-    GameData event_data = GameData("RESTARTLEVEL", level);
-    Exposer exposer = Exposer(event_data);
-    exposer.run();
+//    GameData event_data = GameData("RESTARTLEVEL", level);
+//    Exposer exposer = Exposer(event_data);
+//    exposer.run();
 }
 
 
@@ -631,9 +631,9 @@ void Gameplay::load_state(const GameState& state)
         effect.delete_after(cs.update);
         for (HatchIt i = hatches.begin(); i != hatches.end(); ++i)
          i->animate(effect, cs.update);
-        GameData event_data = GameData("RESTARTLEVEL", level);
-        Exposer exposer = Exposer(event_data);
-        exposer.run();
+//        GameData event_data = GameData("RESTARTLEVEL", level);
+//        Exposer exposer = Exposer(event_data);
+//        exposer.run();
     }
 }
 

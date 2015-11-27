@@ -100,7 +100,7 @@ void GameData::load_replay_data(Replay::Data data) {
 
 
 void GameData::load_result_data(Result result) {
-	this->action = "ENDLEVEL";
+	this->action = "RESULT";
 	this->update = -1;
 	this->which_lix = -1;
 
