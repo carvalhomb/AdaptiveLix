@@ -77,15 +77,9 @@ Gameplay::Gameplay(
 {
     if (rep) {
     	replay = *rep;
-    	GameData start_level_event_data = GameData("RESTARTLEVEL", level);
-    	Exposer exposer = Exposer(start_level_event_data);
-    	exposer.run();
     }
     else {
     	replay.set_level_filename(filename);
-    	GameData start_level_event_data = GameData("STARTLEVEL", level);
-    	Exposer exposer = Exposer(start_level_event_data);
-    	exposer.run();
     }
 
     prepare_players(rep);
@@ -101,6 +95,9 @@ Gameplay::Gameplay(
     }
 
 
+    GameData start_level_event_data = GameData("STARTLEVEL", level);
+    Exposer exposer = Exposer(start_level_event_data);
+    exposer.run();
 
 
 }
@@ -115,9 +112,6 @@ Gameplay::~Gameplay()
     cs.tribes.clear();
 
     effect.clear_all_lists();
-    GameData start_level_event_data = GameData("ENDLEVEL", level);
-    Exposer exposer = Exposer(start_level_event_data);
-    exposer.run();
 }
 
 
@@ -531,7 +525,6 @@ Result Gameplay::get_result()
 {
     // a Result will save the spent updates, not the current updates.
     // The main menu will convert the spent updates into seconds again.
-	//Log::log(Log::INFO, "Debug::: Gameplay::get_result() line 501");
     return Result(level.built, trlo->lix_saved, trlo->skills_used,
         trlo->update_saved > 0
         ? trlo->update_saved - state_manager.get_zero().update
@@ -558,8 +551,13 @@ void Gameplay::save_result()
     	Result result;
     	result = get_result();
 
-    	//Load data in the object
-    	GameData result_data = GameData("", level);
+    	//End the level
+    	GameData endlevel_data = GameData("ENDLEVEL", level);
+    	Exposer exposer_endlevel = Exposer(endlevel_data);
+    	exposer_endlevel.run();
+
+    	//Load result data in the object
+    	GameData result_data = GameData("RESULT", level);
     	result_data.load_result_data(result);
     	Exposer exposer = Exposer(result_data);
     	exposer.run();

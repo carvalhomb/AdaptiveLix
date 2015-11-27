@@ -74,7 +74,7 @@ void Gameplay::calc_active()
         Replay::Data data = new_replay_data();
         data.action       = Replay::NUKE;
 
-        GameData event_data = GameData("", level);
+        GameData event_data = GameData("NUKE", level);
         event_data.load_replay_data(data);
         Exposer exposer = Exposer(event_data);
         exposer.run();
