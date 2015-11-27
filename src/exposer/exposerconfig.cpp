@@ -39,10 +39,12 @@ ExposerConfig::~ExposerConfig() {
 void ExposerConfig::initialize() {
 	try {
 		read_config_file();
-		handshake(gloB->exposer_userprofile_service_endpoint.c_str());
-		handshake(gloB->exposer_gameevents_service_endpoint.c_str());
-		get_sessionid();
-		get_tokens();
+		if (gloB->exposer_offline_mode == false) {
+			handshake(gloB->exposer_userprofile_service_endpoint.c_str());
+			handshake(gloB->exposer_gameevents_service_endpoint.c_str());
+			get_sessionid();
+			get_tokens();
+		}
 	}
 	catch (std::exception &ex) {
 		ostringstream tmpmsg;
