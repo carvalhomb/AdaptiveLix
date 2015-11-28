@@ -8,13 +8,12 @@
 #include <string>
 
 #include "gamedata.h"
-#include <Poco/Runnable.h>
 
-class LocalSaver : public Poco::Runnable {
+class LocalSaver {
 
 	public:
 		LocalSaver(GameData passed_event_data);
-		virtual void run();
+		void run();
 	private:
 		GameData event_data;
 		void save_locally(std::string data_in_csv);

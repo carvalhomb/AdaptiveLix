@@ -5,16 +5,16 @@
  *      Author: mbrandaoca
  */
 
+
 #include "gamedata.h"
 
 
-class NetworkSaver  : public Poco::Runnable {
+class NetworkSaver {
 
 public:
 	NetworkSaver(GameData passed_event_data, int passed_num_attempts = 3);
-	virtual void run();
+	void run();
 private:
-//	void send_event(GameData event_data);
 	void send_event(GameData event_data, signed int number_of_attempts);
 	void send_event_attempt(std::string formatted_event);
 	GameData event_data;

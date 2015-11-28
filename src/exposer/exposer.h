@@ -5,23 +5,19 @@
  *      Author: maira
  */
 
-//#include <Poco/RunnableAdapter.h>
-//#include <Poco/ThreadPool.h>
-#include <Poco/NotificationCenter.h>
+#include <Poco/NotificationQueue.h>
 
 #include "gamedata.h"
 
 class Exposer
 {
 public:
-//	Exposer();
-	Exposer(GameData passed_data, Poco::NotificationCenter* nc);
-//	Exposer(GameData passed_data);
+	Exposer(GameData passed_data, Poco::NotificationQueue* nq);
 	void run();
 
 private:
-	GameData data;
-	Poco::NotificationCenter* nc;
+	GameData _data;
+	Poco::NotificationQueue* _nq;
 };
 
 

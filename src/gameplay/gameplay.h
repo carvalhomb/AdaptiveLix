@@ -27,8 +27,6 @@
 #include "../network/network.h"
 #include "../other/console.h"
 #include "../other/user.h" // returning game results
-//
-#include <Poco/NotificationCenter.h>
 
 
 class Gameplay {

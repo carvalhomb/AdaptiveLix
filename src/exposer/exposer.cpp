@@ -15,9 +15,6 @@
 #include "../other/globals.h"
 #include "../other/file/log.h"
 
-//#include <Poco/ThreadPool.h>
-#include <Poco/NotificationCenter.h>
-
 #include "locsaver.h"
 #include "netsaver.h"
 
@@ -25,31 +22,19 @@
 
 #include "notification.h"
 
-//Exposer::Exposer() {}
 
-//Exposer::Exposer(GameData passed_data)
-//{
-//	//Poco::NotificationCenter nc;
-//	data = passed_data;
-//	nc = &NotifCenter::static_nc;
-//}
-
-Exposer::Exposer(GameData passed_data, Poco::NotificationCenter* passed_nc)
+Exposer::Exposer(GameData data, Poco::NotificationQueue* nq)
 {
-	data = passed_data;
-	nc = passed_nc;
+	_data = data;
+	_nq = nq;
 }
 
 
 void Exposer::run()
 {
-	//NetworkSaver networksaver = NetworkSaver(data);
-	//LocalSaver localsaver = LocalSaver(data);
-
 	GameEventNotification* notification_msg = new GameEventNotification;
-	notification_msg->load(data);
-	nc->postNotification(notification_msg);
-
+	notification_msg->load(_data);
+	_nq->enqueueNotification(notification_msg);
 }
 
 

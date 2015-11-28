@@ -12,11 +12,7 @@
 #include "../other/help.h"
 
 //Expose game data
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
-#include <Poco/NObserver.h>
-#include <Poco/AutoPtr.h>
-#include "../exposer/notifhandler.h"
+#include <Poco/NotificationQueue.h>
 #include "../exposer/exposer.h"
 #include "../exposer/gamedata.h"
 
@@ -102,7 +98,7 @@ Gameplay::Gameplay(
 
     //Submit start level
     GameData start_level_event_data = GameData("STARTLEVEL", level);
-    Exposer exposer = Exposer(start_level_event_data, gloB->notification_center);
+    Exposer exposer = Exposer(start_level_event_data, gloB->nq);
     exposer.run();
 
 }
@@ -522,7 +518,7 @@ void Gameplay::on_hint_change_callback(void* v, const int hint_cur)
     	//nc_gameplay->addObserver(Poco::Observer<NotificationHandler, GameEventNotification>(nc_hints, &NotificationHandler::handle));
 
     	GameData event_data = GameData("REQUESTHINT", g.level);
-    	Exposer exposer = Exposer(event_data, gloB->notification_center);
+    	Exposer exposer = Exposer(event_data, gloB->nq);
     	exposer.run();
     }
 
@@ -563,13 +559,13 @@ void Gameplay::save_result()
 
     	//End the level
     	GameData endlevel_data = GameData("ENDLEVEL", level);
-    	Exposer exposer_endlevel = Exposer(endlevel_data, gloB->notification_center);
+    	Exposer exposer_endlevel = Exposer(endlevel_data, gloB->nq);
     	exposer_endlevel.run();
 
     	//Load result data in the object
     	GameData result_data = GameData("RESULT", level);
     	result_data.load_result_data(result);
-    	Exposer exposer = Exposer(result_data, gloB->notification_center);
+    	Exposer exposer = Exposer(result_data, gloB->nq);
     	exposer.run();
 
     	useR->set_level_result_carefully(filename,result,level.required);

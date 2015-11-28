@@ -34,7 +34,7 @@ void Gameplay::update()
 
         GameData event_data = GameData("", level);
         event_data.load_replay_data(data);
-        Exposer exposer = Exposer(event_data, gloB->notification_center);
+        Exposer exposer = Exposer(event_data, gloB->nq);
         exposer.run();
 
 

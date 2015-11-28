@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Poco/Notification.h>
-//#include <Poco/NotificationCenter.h>
-//#include <Poco/AutoPtr.h>
 
 #include "gamedata.h"
 
@@ -15,3 +13,9 @@ public:
 };
 
 
+// quit notification send to worker thread
+class QuitNotification: public Poco::Notification
+{
+public:
+	typedef Poco::AutoPtr<QuitNotification> Ptr;
+};

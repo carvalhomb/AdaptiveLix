@@ -13,7 +13,8 @@
 
 #pragma once
 
-#include <Poco/NotificationCenter.h>
+//#include <Poco/NotificationCenter.h>
+#include <Poco/NotificationQueue.h>
 
 #include "./file/filename.h"
 
@@ -31,7 +32,7 @@ public:
     void load();
     void save();
 
-    void load_notification_center(Poco::NotificationCenter* notification_center_pointer);
+    void load_notification_queue(Poco::NotificationQueue* nq_ptr);
 
     // version is the current version. version_min is the oldest version
     // featuring the same game mechanics as the current one, so it's the
@@ -398,8 +399,8 @@ public:
         bool exposer_record_local_file;
         bool exposer_offline_mode;
 
-        //Pointer to Notification center
-        Poco::NotificationCenter* notification_center;
+        //Pointer to Notification queue
+        Poco::NotificationQueue* nq;
 
 private:
 

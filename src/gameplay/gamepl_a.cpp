@@ -76,7 +76,7 @@ void Gameplay::calc_active()
 
         GameData event_data = GameData("NUKE", level);
         event_data.load_replay_data(data);
-        Exposer exposer = Exposer(event_data, gloB->notification_center);
+        Exposer exposer = Exposer(event_data, gloB->nq);
         exposer.run();
 
         replay.add(data);
@@ -292,7 +292,7 @@ void Gameplay::calc_active()
 
                 GameData event_data = GameData("", level);
                 event_data.load_replay_data(data);
-                Exposer exposer = Exposer(event_data, gloB->notification_center);
+                Exposer exposer = Exposer(event_data, gloB->nq);
                 exposer.run();
 
                 replay.add(data);

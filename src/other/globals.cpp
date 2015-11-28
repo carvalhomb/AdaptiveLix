@@ -7,7 +7,8 @@
 
 #include <fstream>
 
-#include <Poco/NotificationCenter.h>
+//#include <Poco/NotificationCenter.h>
+#include <Poco/NotificationQueue.h>
 
 #include "globals.h"
 #include "file/io.h"
@@ -497,7 +498,7 @@ void Globals::save()
 }
 // Ende save_config_file
 
-void Globals::load_notification_center(Poco::NotificationCenter* notification_center_pointer)
+void Globals::load_notification_queue(Poco::NotificationQueue* nq_ptr)
 {
-	notification_center = notification_center_pointer;
+	nq = nq_ptr;
 }

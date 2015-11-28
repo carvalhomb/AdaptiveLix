@@ -52,16 +52,19 @@
 #include "../graphic/png/loadpng.h"
 
 //Expose the game events
-#include <Poco/NotificationCenter.h>
-#include <Poco/Observer.h>
-#include <Poco/NObserver.h>
+//#include <Poco/NotificationCenter.h>
+#include <Poco/NotificationQueue.h>
+#include <Poco/ThreadPool.h>
+#include <Poco/Thread.h>
+//#include <Poco/Observer.h>
+//#include <Poco/NObserver.h>
 #include <Poco/AutoPtr.h>
 
 #include "../exposer/gamedata.h"
 #include "../exposer/exposer.h"
 #include "../exposer/exposerconfig.h"
 #include "../exposer/notification.h"
-#include "../exposer/notifhandler.h"
+#include "../exposer/notifworker.h"
 
 
 struct MainArgs {
@@ -167,20 +170,27 @@ int main(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
-        //Initialize notification center for exposing game events and load the pointer
-        Poco::NotificationCenter nc_main;
-        gloB->load_notification_center(&nc_main);
+        //Initialize notification queue
+        Poco::NotificationQueue nq;
 
-        NotificationHandler notif_handler;
-        gloB->notification_center->addObserver(Poco::Observer<NotificationHandler, GameEventNotification>(notif_handler, &NotificationHandler::handle));
+        //create two workers to deal with the notifications
+        NotificationWorker worker1(nq); // create worker threads
+        NotificationWorker worker2(nq);
 
+        //make the notification queue available globally, under gloB->nq
+        gloB->load_notification_queue(&nq);
+
+
+
+        Poco::ThreadPool::defaultPool().start(worker1); // start workers
+        Poco::ThreadPool::defaultPool().start(worker2);
 
         //Initialize an ExposerConfig object
         ExposerConfig expconfig;
         expconfig.initialize();
 
         GameData start_event_data = GameData("STARTGAME");
-        Exposer exposer_startgame = Exposer(start_event_data, gloB->notification_center);
+        Exposer exposer_startgame = Exposer(start_event_data, gloB->nq);
         exposer_startgame.run();
 
 
@@ -190,10 +200,20 @@ int main(int argc, char* argv[])
         delete l_main;
 
         GameData end_event_data = GameData("ENDGAME");
-        Exposer exposer_endgame = Exposer(end_event_data, gloB->notification_center);
+        Exposer exposer_endgame = Exposer(end_event_data, gloB->nq);
         exposer_endgame.run();
 
+        gloB->nq->enqueueNotification(new QuitNotification);
+        gloB->nq->enqueueNotification(new QuitNotification);
 
+        //Finalize workers and queue
+        while (!gloB->nq->empty()) {  // wait until all work is done
+        	Poco::Thread::sleep(200);
+        }
+
+        Poco::Thread::sleep(500);
+
+        Poco::ThreadPool::defaultPool().joinAll();
 
         // Clean up
         useR->save();
@@ -213,6 +233,7 @@ int main(int argc, char* argv[])
 
     Log::deinitialize();
     Globals::deinitialize();
+
 
     // don't call allegro_exit(), doing that causes the program
     // to not terminate in rare cases
