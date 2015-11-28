@@ -52,6 +52,12 @@
 #include "../graphic/png/loadpng.h"
 
 //Expose the game events
+#include <Poco/NotificationCenter.h>
+#include <Poco/Observer.h>
+#include <Poco/NObserver.h>
+#include <Poco/AutoPtr.h>
+
+#include "../exposer/notifcenter.h"
 #include "../exposer/gamedata.h"
 #include "../exposer/exposer.h"
 #include "../exposer/exposerconfig.h"
@@ -75,7 +81,6 @@ static MainArgs parse_main_arguments(int, char*[]);
 static void     setenv_allegro_modules();
 static void     unsetenv_allegro_modules();
 static void     print_usage();
-
 
 
 int main(int argc, char* argv[])
@@ -163,12 +168,21 @@ int main(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
+        //Initialize notification center for exposing game events
+        Poco::NotificationCenter nc;
+        Target target;
+//        NotifCenter::static_nc.addObserver(Observer<Target, BaseNotification>(target, &Target::handleBase));
+        nc.addObserver(Poco::Observer<Target, BaseNotification>(target, &Target::handleBase));
+//        nc.addObserver(
+//        NObserver<Target, SubNotification>(target, &Target::handleSub)
+//        );
+
         //Initialize an ExposerConfig object
         ExposerConfig expconfig;
         expconfig.initialize();
 
         GameData start_event_data = GameData("STARTGAME");
-        Exposer exposer_startgame = Exposer(start_event_data);
+        Exposer exposer_startgame = Exposer(start_event_data, &nc);
         exposer_startgame.run();
 
 
@@ -178,7 +192,7 @@ int main(int argc, char* argv[])
         delete l_main;
 
         GameData end_event_data = GameData("ENDGAME");
-        Exposer exposer_endgame = Exposer(end_event_data);
+        Exposer exposer_endgame = Exposer(end_event_data, &nc);
         exposer_endgame.run();
 
 
