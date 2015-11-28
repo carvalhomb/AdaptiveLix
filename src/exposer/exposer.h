@@ -14,9 +14,9 @@
 class Exposer
 {
 public:
-	Exposer();
+//	Exposer();
 	Exposer(GameData passed_data, Poco::NotificationCenter* nc);
-	Exposer(GameData passed_data);
+//	Exposer(GameData passed_data);
 	void run();
 
 private:

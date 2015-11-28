@@ -7,6 +7,8 @@
 
 #include <fstream>
 
+#include <Poco/NotificationCenter.h>
+
 #include "globals.h"
 #include "file/io.h"
 #include "../network/net_t.h" // for updates_per_second and default port
@@ -494,3 +496,8 @@ void Globals::save()
     file.close();
 }
 // Ende save_config_file
+
+void Globals::load_notification_center(Poco::NotificationCenter* notification_center_pointer)
+{
+	notification_center = notification_center_pointer;
+}

@@ -28,7 +28,7 @@
 #include "../other/console.h"
 #include "../other/user.h" // returning game results
 //
-
+#include <Poco/NotificationCenter.h>
 
 
 class Gameplay {
@@ -50,6 +50,7 @@ public:
         INTERACTIVE_MODE, // play or watch a replay from the normal game
         VERIFY_MODE       // auto-abort sometime after replay, update very fast
     };
+
 
 private:
 
@@ -111,6 +112,8 @@ private:
     typedef std::vector <EdGraphic>  ::reverse_iterator IacRIt;
     typedef std::vector <GameHatch>  ::iterator         HatchIt;
     typedef std::vector <Triggerable>::iterator         TrigIt;
+
+
 
     ////////////////
     // Funktionen //

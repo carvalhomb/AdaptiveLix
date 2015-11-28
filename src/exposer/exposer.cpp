@@ -22,16 +22,17 @@
 #include "netsaver.h"
 
 #include "exposer.h"
-#include "notifcenter.h"
 
-Exposer::Exposer() {}
+#include "notification.h"
 
-Exposer::Exposer(GameData passed_data)
-{
-	//Poco::NotificationCenter nc;
-	data = passed_data;
-	nc = &NotifCenter::static_nc;
-}
+//Exposer::Exposer() {}
+
+//Exposer::Exposer(GameData passed_data)
+//{
+//	//Poco::NotificationCenter nc;
+//	data = passed_data;
+//	nc = &NotifCenter::static_nc;
+//}
 
 Exposer::Exposer(GameData passed_data, Poco::NotificationCenter* passed_nc)
 {
@@ -44,14 +45,11 @@ void Exposer::run()
 {
 	//NetworkSaver networksaver = NetworkSaver(data);
 	//LocalSaver localsaver = LocalSaver(data);
-	//nc->postNotification(new BaseNotification);
-	BaseNotification* notification_msg = new BaseNotification;
+
+	GameEventNotification* notification_msg = new GameEventNotification;
 	notification_msg->load(data);
 	nc->postNotification(notification_msg);
 
-	//Poco::ThreadPool::defaultPool().start(networksaver);
-	//Poco::ThreadPool::defaultPool().start(localsaver);
-	//Poco::ThreadPool::defaultPool().joinAll();
 }
 
 

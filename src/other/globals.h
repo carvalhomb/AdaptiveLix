@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <Poco/NotificationCenter.h>
+
 #include "./file/filename.h"
 
 // At the end of this file, a pointer to a Globals called gloB
@@ -28,6 +30,8 @@ public:
 
     void load();
     void save();
+
+    void load_notification_center(Poco::NotificationCenter* notification_center_pointer);
 
     // version is the current version. version_min is the oldest version
     // featuring the same game mechanics as the current one, so it's the
@@ -393,6 +397,9 @@ public:
         bool exposer_connection_is_setup;
         bool exposer_record_local_file;
         bool exposer_offline_mode;
+
+        //Pointer to Notification center
+        Poco::NotificationCenter* notification_center;
 
 private:
 

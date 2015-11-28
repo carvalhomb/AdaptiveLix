@@ -137,7 +137,7 @@ void Gameplay::check_skill_buttons() {
                     Sound::play_loud(Sound::PANEL_EMPTY);
 
                     GameData event_data = GameData("EMPTYSKILL", level, cs.update);
-                    Exposer exposer = Exposer(event_data);
+                    Exposer exposer = Exposer(event_data, gloB->notification_center);
                     exposer.run();
 
 
@@ -313,7 +313,7 @@ void Gameplay::calc_self()
             Sound::play_loud(Sound::DISKSAVE);
 
             GameData event_data = GameData("SAVESTATE", level, cs.update);
-            Exposer exposer = Exposer(event_data);
+            Exposer exposer = Exposer(event_data, gloB->notification_center);
             exposer.run();
 
 
@@ -337,7 +337,7 @@ void Gameplay::calc_self()
                 load_state(sta);
 
                 GameData event_data = GameData("LOADSTATE", level, cs.update);
-                Exposer exposer = Exposer(event_data);
+                Exposer exposer = Exposer(event_data, gloB->notification_center);
                 exposer.run();
 
 
@@ -351,7 +351,7 @@ void Gameplay::calc_self()
                  pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
                  GameData event_data = GameData("RESUME", level, cs.update);
-                 Exposer exposer = Exposer(event_data);
+                 Exposer exposer = Exposer(event_data, gloB->notification_center);
                  exposer.run();
 
             }
@@ -359,7 +359,7 @@ void Gameplay::calc_self()
             {
             	pan.set_speed(GameplayPanel::SPEED_PAUSE);
             	GameData event_data = GameData("PAUSE", level, cs.update);
-            	Exposer exposer = Exposer(event_data);
+            	Exposer exposer = Exposer(event_data, gloB->notification_center);
             	exposer.run();
 
             }
@@ -370,7 +370,7 @@ void Gameplay::calc_self()
             map.set_zoom(pan.zoom.get_on());
 
             GameData event_data = GameData("ZOOM", level, cs.update);
-            Exposer exposer = Exposer(event_data);
+            Exposer exposer = Exposer(event_data, gloB->notification_center);
             exposer.run();
 
 
@@ -381,7 +381,7 @@ void Gameplay::calc_self()
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
             GameData event_data = GameData("MINUS1FRAME", level, cs.update);
-            Exposer exposer = Exposer(event_data);
+            Exposer exposer = Exposer(event_data, gloB->notification_center);
             exposer.run();
 
 
@@ -393,7 +393,7 @@ void Gameplay::calc_self()
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
             GameData event_data = GameData("MINUS1SECOND", level, cs.update);
-            Exposer exposer = Exposer(event_data);
+            Exposer exposer = Exposer(event_data, gloB->notification_center);
             exposer.run();
 
 
@@ -402,7 +402,7 @@ void Gameplay::calc_self()
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
             GameData event_data = GameData("PLUS1FRAME", level, cs.update);
-            Exposer exposer = Exposer(event_data);
+            Exposer exposer = Exposer(event_data, gloB->notification_center);
             exposer.run();
 
 
@@ -418,7 +418,7 @@ void Gameplay::calc_self()
                 update();
 
             GameData event_data = GameData("PLUS1SECOND", level, startupdate);
-            Exposer exposer = Exposer(event_data);
+            Exposer exposer = Exposer(event_data, gloB->notification_center);
             exposer.run();
 
 
@@ -429,7 +429,7 @@ void Gameplay::calc_self()
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
                 GameData event_data = GameData("NORMALSPEED", level, cs.update);
-                Exposer exposer = Exposer(event_data);
+                Exposer exposer = Exposer(event_data, gloB->notification_center);
                 exposer.run();
 
 
@@ -439,7 +439,7 @@ void Gameplay::calc_self()
                 pan.set_speed(GameplayPanel::SPEED_FAST);
 
                 GameData event_data = GameData("FASTSPEED", level, cs.update);
-                Exposer exposer = Exposer(event_data);
+                Exposer exposer = Exposer(event_data, gloB->notification_center);
                 exposer.run();
 
 
@@ -455,7 +455,7 @@ void Gameplay::calc_self()
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
                 GameData event_data = GameData("NORMALSPEED", level, cs.update);
-                Exposer exposer = Exposer(event_data);
+                Exposer exposer = Exposer(event_data, gloB->notification_center);
                 exposer.run();
 
 
@@ -464,7 +464,7 @@ void Gameplay::calc_self()
                 pan.set_speed(GameplayPanel::SPEED_TURBO);
 
                 GameData event_data = GameData("TURBOSPEED", level, cs.update);
-                Exposer exposer = Exposer(event_data);
+                Exposer exposer = Exposer(event_data, gloB->notification_center);
                 exposer.run();
 
 
@@ -514,7 +514,7 @@ void Gameplay::calc_self()
             window_gameplay = new Api::WindowGameplay(&replay, &level,
                                                       cs.tribes.size());
             GameData event_data = GameData("LEVELMENU", level, cs.update);
-            Exposer exposer = Exposer(event_data);
+            Exposer exposer = Exposer(event_data, gloB->notification_center);
             exposer.run();
 
             Api::Manager::add_focus(window_gameplay);
@@ -628,7 +628,7 @@ void Gameplay::load_state(const GameState& state)
 
 
         GameData event_data = GameData("STARTLEVEL", level);
-        Exposer exposer = Exposer(event_data);
+        Exposer exposer = Exposer(event_data, gloB->notification_center);
         exposer.run();
 
     }

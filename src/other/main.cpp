@@ -57,12 +57,11 @@
 #include <Poco/NObserver.h>
 #include <Poco/AutoPtr.h>
 
-#include "../exposer/notifcenter.h"
 #include "../exposer/gamedata.h"
 #include "../exposer/exposer.h"
 #include "../exposer/exposerconfig.h"
-
-
+#include "../exposer/notification.h"
+#include "../exposer/notifhandler.h"
 
 
 struct MainArgs {
@@ -168,21 +167,20 @@ int main(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
-        //Initialize notification center for exposing game events
-        Poco::NotificationCenter nc;
-        Target target;
-//        NotifCenter::static_nc.addObserver(Observer<Target, BaseNotification>(target, &Target::handleBase));
-        nc.addObserver(Poco::Observer<Target, BaseNotification>(target, &Target::handleBase));
-//        nc.addObserver(
-//        NObserver<Target, SubNotification>(target, &Target::handleSub)
-//        );
+        //Initialize notification center for exposing game events and load the pointer
+        Poco::NotificationCenter nc_main;
+        gloB->load_notification_center(&nc_main);
+
+        NotificationHandler notif_handler;
+        gloB->notification_center->addObserver(Poco::Observer<NotificationHandler, GameEventNotification>(notif_handler, &NotificationHandler::handle));
+
 
         //Initialize an ExposerConfig object
         ExposerConfig expconfig;
         expconfig.initialize();
 
         GameData start_event_data = GameData("STARTGAME");
-        Exposer exposer_startgame = Exposer(start_event_data, &nc);
+        Exposer exposer_startgame = Exposer(start_event_data, gloB->notification_center);
         exposer_startgame.run();
 
 
@@ -192,7 +190,7 @@ int main(int argc, char* argv[])
         delete l_main;
 
         GameData end_event_data = GameData("ENDGAME");
-        Exposer exposer_endgame = Exposer(end_event_data, &nc);
+        Exposer exposer_endgame = Exposer(end_event_data, gloB->notification_center);
         exposer_endgame.run();
 
 
