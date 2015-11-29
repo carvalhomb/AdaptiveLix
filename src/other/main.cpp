@@ -176,6 +176,7 @@ int main(int argc, char* argv[])
         //create two workers to deal with the notifications
         NotificationWorker worker1(nq); // create worker threads
         NotificationWorker worker2(nq);
+        NotificationWorker worker3(nq);
 
         //make the notification queue available globally, under gloB->nq
         gloB->load_notification_queue(&nq);
@@ -184,6 +185,7 @@ int main(int argc, char* argv[])
 
         Poco::ThreadPool::defaultPool().start(worker1); // start workers
         Poco::ThreadPool::defaultPool().start(worker2);
+        Poco::ThreadPool::defaultPool().start(worker3);
 
         //Initialize an ExposerConfig object
         ExposerConfig expconfig;
@@ -205,21 +207,22 @@ int main(int argc, char* argv[])
 
         gloB->nq->enqueueNotification(new QuitNotification);
         gloB->nq->enqueueNotification(new QuitNotification);
+        gloB->nq->enqueueNotification(new QuitNotification);
 
         //Finalize workers and queue
         while (!gloB->nq->empty()) {  // wait until all work is done
         	Poco::Thread::sleep(200);
         }
 
-        Poco::Thread::sleep(500);
-
-        Poco::ThreadPool::defaultPool().joinAll();
-
         // Clean up
         useR->save();
         gloB->save();
 
         destroy_all_bitmaps();
+
+
+        Poco::Thread::sleep(200);
+        Poco::ThreadPool::defaultPool().joinAll();
 
         Network::deinitialize();
         Sound::deinitialize();
