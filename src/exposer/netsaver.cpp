@@ -110,10 +110,17 @@ void NetworkSaver::send_event_attempt(string formatted_event)
 				gloB->exposer_token = "";
 				Log::log(Log::INFO, tmpmsg.str());
 			}
+			catch(Poco::Net::NetException &ex)
+			{
+//				ostringstream tmpmsg;
+//				tmpmsg << "Server exception: " << ex.what();
+//				Log::log(Log::INFO, tmpmsg.str());
+				throw;
+			}
 			catch(std::exception &ex)
 			{
 				ostringstream tmpmsg;
-				tmpmsg << "Exception while trying to send event. Going offline. Exception: " << ex.what();
+				tmpmsg << "Unexpected exception while trying to send event. Going offline. Exception: " << ex.what();
 				gloB->exposer_offline_mode = true;
 				Log::log(Log::ERROR, tmpmsg.str());
 			}

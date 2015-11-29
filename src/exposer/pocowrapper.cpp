@@ -111,30 +111,35 @@ void PocoWrapper::execute() {
 			Log::log(Log::ERROR, tmpmsg.str());
 		}
 		else if (status==401) {
-			ostringstream tmpmsg;
-			tmpmsg << "Not Authorized by service: 401 UNAUTHORIZED";
-			Log::log(Log::ERROR, tmpmsg.str());
+//			ostringstream tmpmsg;
+//			tmpmsg << "Not Authorized by service: 401 UNAUTHORIZED";
+//			Log::log(Log::ERROR, tmpmsg.str());
+			throw Poco::Net::NotAuthenticatedException("Not authenticated.");
 		}
 		else if (status==500) {
-			ostringstream tmpmsg;
-			tmpmsg << "Error in service: 500 INTERNAL SERVER ERROR";
-			Log::log(Log::ERROR, tmpmsg.str());
+//			ostringstream tmpmsg;
+//			tmpmsg << "Error in service: 500 INTERNAL SERVER ERROR";
+//			Log::log(Log::ERROR, tmpmsg.str());
+			throw Poco::Net::NetException("Internal error in service (Error 500)");
 		}
 	}
 	catch (Poco::Net::NotAuthenticatedException& ex) {
-		ostringstream tmpmsg;
-		tmpmsg << "Not Authenticated: " << ex.what();
-		Log::log(Log::ERROR, tmpmsg.str());
+//		ostringstream tmpmsg;
+//		tmpmsg << "Not Authenticated: " << ex.what();
+//		Log::log(Log::ERROR, tmpmsg.str());
+		throw;
 	}
 	catch (Poco::Net::ConnectionRefusedException& ex) {
-		ostringstream tmpmsg;
-		tmpmsg << "POCO connection refused: " << ex.what();
-		Log::log(Log::ERROR, tmpmsg.str());
+//		ostringstream tmpmsg;
+//		tmpmsg << "POCO connection refused: " << ex.what();
+//		Log::log(Log::ERROR, tmpmsg.str());
+		throw;
 	}
 	catch (Poco::Net::NetException& ex) {
-		ostringstream tmpmsg;
-		tmpmsg << "POCO Net exception: " << ex.what();
-		Log::log(Log::ERROR, tmpmsg.str());
+//		ostringstream tmpmsg;
+//		tmpmsg << "POCO Net exception: " << ex.what();
+//		Log::log(Log::ERROR, tmpmsg.str());
+		throw;
 	}
 	catch (Poco::Exception& ex) {
 		ostringstream tmpmsg;
