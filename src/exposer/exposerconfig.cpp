@@ -55,6 +55,18 @@ void ExposerConfig::initialize() {
 	}
 }
 
+void ExposerConfig::finalize() {
+	try {
+		if (gloB->exposer_offline_mode == false) {
+			close_sessionid();
+		}
+	}
+	catch (std::exception &ex) {
+		ostringstream tmpmsg;
+		tmpmsg << "Unexpected exception: " << ex.what();
+		Log::log(Log::ERROR, tmpmsg.str());
+	}
+}
 
 
 void ExposerConfig::read_config_file() {
@@ -181,7 +193,6 @@ void ExposerConfig::get_sessionid() {
 
 		}
 	}
-
 }
 
 void ExposerConfig::get_sessionid_attempt() {
@@ -197,41 +208,36 @@ void ExposerConfig::get_sessionid_attempt() {
 	string request_url = gloB->exposer_userprofile_service_endpoint + "/" + resource;
 	string payload = payload_ss.str();
 
-	try {
-		PocoWrapper requester(Poco::Net::HTTPRequest::HTTP_POST, request_url, "", payload);
-		requester.execute();
 
-		int response_status = requester.get_response_status();
-		string response_body;
-		response_body = requester.get_response_body();
+	PocoWrapper requester(Poco::Net::HTTPRequest::HTTP_POST, request_url, "", payload);
+	requester.execute();
 
-		//HTTP 200 OK
-		if (response_status == 200) {
-			gloB->exposer_sessionid = extract_sessionid(response_body);
+	int response_status = requester.get_response_status();
+	string response_body;
+	response_body = requester.get_response_body();
 
-			if (gloB->exposer_sessionid == "") {
-				gloB->exposer_offline_mode = true;
-			}
-		}
-		//HTTP 401 UNAUTHORIZED
-		else if (response_status == 401) {
-			Log::log(Log::INFO, "Username provided in config file was not authorized to get a sessionid. Running in offline mode.");
+	//HTTP 200 OK
+	if (response_status == 200) {
+		gloB->exposer_sessionid = extract_sessionid(response_body);
+
+		if (gloB->exposer_sessionid == "") {
 			gloB->exposer_offline_mode = true;
 		}
-		else {
-			//response failed
-			ostringstream tmpmsg;
-			tmpmsg << "Failed to get sessionid. Status [user profile service]: " << response_status << ".";
-			throw Poco::Net::NetException(tmpmsg.str());
-			//Log::log(Log::INFO,  tmpmsg.str() );
-			//gloB->exposer_offline_mode = true;
-		}
 	}
-	catch (std::exception &ex) {
+	//HTTP 401 UNAUTHORIZED
+	else if (response_status == 401) {
+		Log::log(Log::INFO, "Username provided in config file was not authorized to get a sessionid. Running in offline mode.");
+		gloB->exposer_offline_mode = true;
+	}
+	else {
+		//response failed
 		ostringstream tmpmsg;
-		tmpmsg << "Unexpected exception: " << ex.what();
-		Log::log(Log::ERROR, tmpmsg.str());
+		tmpmsg << "Failed to get sessionid. Status [user profile service]: " << response_status << ".";
+		throw Poco::Net::NetException(tmpmsg.str());
+		//Log::log(Log::INFO,  tmpmsg.str() );
+		//gloB->exposer_offline_mode = true;
 	}
+
 
 }
 
@@ -427,5 +433,79 @@ string ExposerConfig::extract_token(string response_string) {
 		Log::log(Log::ERROR, tmpmsg.str());
 		return "";
 	}
+
+}
+
+void ExposerConfig::close_sessionid() {
+
+	bool success = false;
+	signed int counter = 1;
+
+	if (not gloB->exposer_offline_mode) {
+
+		while ((counter <= gloB->exposer_max_number_attempts) and (not success) and  (not gloB->exposer_offline_mode) )
+		{
+			try {
+				close_sessionid_attempt();
+				success = true;
+			}
+			catch (std::exception &ex) {
+				ostringstream tmpmsg;
+				tmpmsg << "Exception in closesessionid attempt #"<< counter <<": " << ex.what();
+				Log::log(Log::ERROR, tmpmsg.str());
+				counter++;
+				//break;
+			}
+
+		}
+	}
+}
+
+void ExposerConfig::close_sessionid_attempt() {
+
+	string resource = "sessions";
+
+	//prepare request body
+	ostringstream payload_ss;
+	payload_ss << "{\"username\" : \"" << gloB->exposer_username << "\", ";
+	payload_ss << "\"password\" : \"" << gloB->exposer_password << "\"";
+	payload_ss << "}";
+
+	string request_url = gloB->exposer_userprofile_service_endpoint + "/" + resource + "/" + gloB->exposer_sessionid ;
+	string payload = payload_ss.str();
+
+
+	PocoWrapper requester(Poco::Net::HTTPRequest::HTTP_DELETE, request_url, "", payload);
+	requester.execute();
+
+	int response_status = requester.get_response_status();
+	string response_body;
+	response_body = requester.get_response_body();
+
+	//HTTP 200 OK
+	if (response_status == 200 || response_status == 202 || response_status == 204 ) {
+		gloB->exposer_sessionid = "";
+	}
+	//HTTP 401 UNAUTHORIZED
+	else if (response_status == 401) {
+		Log::log(Log::INFO, "Not authorized to update this sessionid. Resetting sessionid.");
+		gloB->exposer_sessionid = "";
+		//gloB->exposer_offline_mode = true;
+	}
+	//HTTP 404 NOT FOUND
+	else if (response_status == 404) {
+		Log::log(Log::INFO, "Sessionid does not exist anymore. Resetting sessionid.");
+		gloB->exposer_sessionid = "";
+		//gloB->exposer_offline_mode = true;
+	}
+	else {
+		//response failed
+		ostringstream tmpmsg;
+		tmpmsg << "Failed to delete sessionid. Status [user profile service]: " << response_status << ".";
+		throw Poco::Net::NetException(tmpmsg.str());
+		//Log::log(Log::INFO,  tmpmsg.str() );
+		//gloB->exposer_offline_mode = true;
+	}
+
 
 }

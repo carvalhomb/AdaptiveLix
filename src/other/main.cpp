@@ -209,6 +209,8 @@ int main(int argc, char* argv[])
         gloB->nq->enqueueNotification(new QuitNotification);
         gloB->nq->enqueueNotification(new QuitNotification);
 
+        expconfig.finalize();
+
         //Finalize workers and queue
         while (!gloB->nq->empty()) {  // wait until all work is done
         	Poco::Thread::sleep(200);

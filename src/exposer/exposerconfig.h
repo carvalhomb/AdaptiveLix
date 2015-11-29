@@ -16,6 +16,7 @@ public:
 	ExposerConfig();
 	~ExposerConfig();
 	void initialize();
+	void finalize();
 private:
 	void read_config_file();
 	void update_globals();
@@ -28,5 +29,6 @@ private:
 	void ping(std::string url);
 	std::string extract_sessionid(std::string json_string);
 	std::string extract_token(std::string json_string);
-
+	void close_sessionid();
+	void close_sessionid_attempt();
 };
