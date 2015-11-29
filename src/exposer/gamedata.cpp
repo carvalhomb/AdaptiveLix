@@ -152,7 +152,7 @@ string GameData::to_xml()
 
 	ostringstream data_sstr;
 
-	data_sstr << "<event>";
+	data_sstr << "\"<event>";
 	data_sstr << "<timestamp>" << timestamp << "</timestamp>";
 	data_sstr << "<action>" << action << "</action>";
 	data_sstr << "<level>" << level << "</level>";
@@ -169,7 +169,7 @@ string GameData::to_xml()
 		data_sstr << "</element>";
 	}
 	data_sstr << "</result>";
-	data_sstr << "</event>";
+	data_sstr << "</event>\"";
 	return data_sstr.str();
 }
 

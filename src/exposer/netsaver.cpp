@@ -41,8 +41,8 @@ void NetworkSaver::send_event(GameData data, signed int number_of_attempts) {
 
 	//Format data
 	std::string formatted_event_data;
-	//formatted_event_data = data.to_json();
-	formatted_event_data = data.to_xml();
+	formatted_event_data = data.to_json();
+	//formatted_event_data = data.to_xml();
 
 	if (not gloB->exposer_offline_mode) {
 		while ((counter <= number_of_attempts) and (not success) and (not gloB->exposer_offline_mode))
