@@ -16,7 +16,9 @@ bin/test*
 # exclude the user data, log and config files, user translations in data/
 /data/user/*.txt
 /data/*.txt
-**/local_log.csv
+/data/*.csv
+# But include sample config file
+!/data/netevents_config-sample.txt
 
 # exclude replays, but track replay/ and replay/auto/ via a dummy file
 replays/*
@@ -41,4 +43,4 @@ BuildMinGW/*
 #Eclipse prefs
 *.prefs
 
-**/local_log.csv
+

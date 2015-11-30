@@ -11,8 +11,10 @@
 #include "../other/hardware.h"
 #include "../other/help.h"
 
-#include "../network/gameevents.h"
-#include "../other/file/log.h"
+//Expose game data
+#include <Poco/NotificationQueue.h>
+#include "../exposer/exposer.h"
+#include "../exposer/gamedata.h"
 
 // Statische Konstanten initialisieren
 const int Gameplay::block_s = 14; // Blocker-Abstand zur Seite
@@ -75,8 +77,12 @@ Gameplay::Gameplay(
     window_gameplay   (0),
     special           (Object::MAX)
 {
-    if (rep) replay = *rep;
-    else     replay.set_level_filename(filename);
+    if (rep) {
+    	replay = *rep;
+    }
+    else {
+    	replay.set_level_filename(filename);
+    }
 
     prepare_players(rep);
     prepare_level();
@@ -90,11 +96,11 @@ Gameplay::Gameplay(
         // keyboard during calcing the panel.
     }
 
+    //Submit start level
+    GameData start_level_event_data = GameData("STARTLEVEL", level);
+    Exposer exposer = Exposer(start_level_event_data, gloB->nq);
+    exposer.run();
 
-    GameEvents::Data start_level_event_data = GameEvents::Data();
-    start_level_event_data.action = "STARTLEVEL";
-    start_level_event_data.level = level.level_filename;
-    GameEvents::send_event(start_level_event_data);
 }
 
 
@@ -497,8 +503,26 @@ void Gameplay::on_hint_change_callback(void* v, const int hint_cur)
 {
     Gameplay& g = *static_cast <Gameplay*> (v);
     const std::vector <std::string>& hint_vec = g.level.get_hints();
-    if (hint_vec.empty()) g.chat.set_hint("");
-    else                  g.chat.set_hint(hint_vec[hint_cur]);
+    if (hint_vec.empty()) {
+    	g.chat.set_hint("");
+    }
+    else {
+    	g.chat.set_hint(hint_vec[hint_cur]);
+    }
+
+    if (not hint_vec.empty() && hint_cur != 0 && hint_cur != int(hint_vec.size()))
+    {
+    	//Initialize local notification center
+    	//nc_hints = new Poco::NotificationCenter;
+    	//NotificationHandler nc_hints;
+    	//nc_gameplay->addObserver(Poco::Observer<NotificationHandler, GameEventNotification>(nc_hints, &NotificationHandler::handle));
+
+    	GameData event_data = GameData("REQUESTHINT", g.level);
+    	Exposer exposer = Exposer(event_data, gloB->nq);
+    	exposer.run();
+    }
+
+
 }
 
 
@@ -507,7 +531,6 @@ Result Gameplay::get_result()
 {
     // a Result will save the spent updates, not the current updates.
     // The main menu will convert the spent updates into seconds again.
-	//Log::log(Log::INFO, "Debug::: Gameplay::get_result() line 501");
     return Result(level.built, trlo->lix_saved, trlo->skills_used,
         trlo->update_saved > 0
         ? trlo->update_saved - state_manager.get_zero().update
@@ -534,11 +557,16 @@ void Gameplay::save_result()
     	Result result;
     	result = get_result();
 
-    	//Load data in the object
-    	GameEvents::Data end_level_event_data = GameEvents::Data();
-    	end_level_event_data.load_result_data(result, level);
-    	GameEvents::send_event(end_level_event_data);
+    	//End the level
+    	GameData endlevel_data = GameData("ENDLEVEL", level);
+    	Exposer exposer_endlevel = Exposer(endlevel_data, gloB->nq);
+    	exposer_endlevel.run();
 
+    	//Load result data in the object
+    	GameData result_data = GameData("RESULT", level);
+    	result_data.load_result_data(result);
+    	Exposer exposer = Exposer(result_data, gloB->nq);
+    	exposer.run();
 
     	useR->set_level_result_carefully(filename,result,level.required);
         useR->save();

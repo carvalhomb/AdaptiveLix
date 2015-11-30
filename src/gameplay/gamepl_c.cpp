@@ -13,7 +13,9 @@
 #include "../api/manager.h"
 #include "../other/user.h"
 
-#include "../network/gameevents.h"
+#include "../exposer/exposer.h"
+#include "../exposer/gamedata.h"
+
 
 void Gameplay::calc()
 {
@@ -42,6 +44,9 @@ void Gameplay::calc_window()
 
     Api::WindowGameplay::ExitWith exit_with = window_gameplay->get_exit_with();
     if (exit_with != Api::WindowGameplay::NOTHING) {
+
+
+
         switch (exit_with)
         {
         case Api::WindowGameplay::RESUME:
@@ -131,9 +136,10 @@ void Gameplay::check_skill_buttons() {
                 if (hardware.get_ml()) {
                     Sound::play_loud(Sound::PANEL_EMPTY);
 
-                    GameEvents::Data event_data = GameEvents::Data();
-                    event_data.prepare_event_data("EMPTYSKILL", cs.update, level.level_filename);
-                    GameEvents::send_event(event_data);
+                    GameData event_data = GameData("EMPTYSKILL", level, cs.update);
+                    Exposer exposer = Exposer(event_data, gloB->nq);
+                    exposer.run();
+
 
                 }
                 // else play no sound -- we're holding the mouse button
@@ -306,9 +312,9 @@ void Gameplay::calc_self()
             state_manager.save_user(cs, replay);
             Sound::play_loud(Sound::DISKSAVE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("SAVESTATE", cs.update, level.level_filename);
-            GameEvents::send_event(event_data);
+            GameData event_data = GameData("SAVESTATE", level, cs.update);
+            Exposer exposer = Exposer(event_data, gloB->nq);
+            exposer.run();
 
 
         }
@@ -330,9 +336,10 @@ void Gameplay::calc_self()
                     pan.set_speed(GameplayPanel::SPEED_NORMAL);
                 load_state(sta);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("LOADSTATE", cs.update, level.level_filename);
-                GameEvents::send_event(event_data);
+                GameData event_data = GameData("LOADSTATE", level, cs.update);
+                Exposer exposer = Exposer(event_data, gloB->nq);
+                exposer.run();
+
 
             }
         }
@@ -343,17 +350,18 @@ void Gameplay::calc_self()
             {
                  pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
-                 GameEvents::Data event_data = GameEvents::Data();
-                 event_data.prepare_event_data("RESUME", cs.update, level.level_filename);
-                 GameEvents::send_event(event_data);
+                 GameData event_data = GameData("RESUME", level, cs.update);
+                 Exposer exposer = Exposer(event_data, gloB->nq);
+                 exposer.run();
+
             }
             else
             {
             	pan.set_speed(GameplayPanel::SPEED_PAUSE);
+            	GameData event_data = GameData("PAUSE", level, cs.update);
+            	Exposer exposer = Exposer(event_data, gloB->nq);
+            	exposer.run();
 
-            	GameEvents::Data event_data = GameEvents::Data();
-            	event_data.prepare_event_data("PAUSE", cs.update, level.level_filename);
-            	GameEvents::send_event(event_data);
             }
         }
         // Zoom
@@ -361,9 +369,10 @@ void Gameplay::calc_self()
             pan.zoom.set_on(!pan.zoom.get_on());
             map.set_zoom(pan.zoom.get_on());
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("ZOOM", cs.update, level.level_filename);
-            GameEvents::send_event(event_data);
+            GameData event_data = GameData("ZOOM", level, cs.update);
+            Exposer exposer = Exposer(event_data, gloB->nq);
+            exposer.run();
+
 
         }
         // Speed. On some executions, update
@@ -371,9 +380,10 @@ void Gameplay::calc_self()
             go_back_updates(1);
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("MINUS1FRAME", cs.update, level.level_filename);
-            GameEvents::send_event(event_data);
+            GameData event_data = GameData("MINUS1FRAME", level, cs.update);
+            Exposer exposer = Exposer(event_data, gloB->nq);
+            exposer.run();
+
 
         }
         else if (pan.speed_back.get_execute_right()) {
@@ -382,17 +392,19 @@ void Gameplay::calc_self()
                           / timer_ticks_for_update_normal);
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("MINUS1SECOND", cs.update, level.level_filename);
-            GameEvents::send_event(event_data);
+            GameData event_data = GameData("MINUS1SECOND", level, cs.update);
+            Exposer exposer = Exposer(event_data, gloB->nq);
+            exposer.run();
+
 
         }
         else if (pan.speed_ahead.get_execute_left()) {
             pan.set_speed(GameplayPanel::SPEED_PAUSE);
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("PLUS1FRAME", cs.update, level.level_filename);
-            GameEvents::send_event(event_data);
+            GameData event_data = GameData("PLUS1FRAME", level, cs.update);
+            Exposer exposer = Exposer(event_data, gloB->nq);
+            exposer.run();
+
 
             // do a single logic update even though the game is paused
             update();
@@ -405,9 +417,10 @@ void Gameplay::calc_self()
                                  / timer_ticks_for_update_normal; ++i)
                 update();
 
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("PLUS1SECOND", startupdate, level.level_filename);
-            GameEvents::send_event(event_data);
+            GameData event_data = GameData("PLUS1SECOND", level, startupdate);
+            Exposer exposer = Exposer(event_data, gloB->nq);
+            exposer.run();
+
 
         }
         else if (pan.speed_fast.get_execute_left()) {
@@ -415,18 +428,20 @@ void Gameplay::calc_self()
             {
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("NORMALSPEED", cs.update, level.level_filename);
-                GameEvents::send_event(event_data);
+                GameData event_data = GameData("NORMALSPEED", level, cs.update);
+                Exposer exposer = Exposer(event_data, gloB->nq);
+                exposer.run();
+
 
             }
             else
             {
                 pan.set_speed(GameplayPanel::SPEED_FAST);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("FASTSPEED", cs.update, level.level_filename);
-                GameEvents::send_event(event_data);
+                GameData event_data = GameData("FASTSPEED", level, cs.update);
+                Exposer exposer = Exposer(event_data, gloB->nq);
+                exposer.run();
+
 
             }
         }
@@ -439,28 +454,25 @@ void Gameplay::calc_self()
             ) {
                 pan.set_speed(GameplayPanel::SPEED_NORMAL);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("NORMALSPEED", cs.update, level.level_filename);
-                GameEvents::send_event(event_data);
+                GameData event_data = GameData("NORMALSPEED", level, cs.update);
+                Exposer exposer = Exposer(event_data, gloB->nq);
+                exposer.run();
+
 
             }
             else {
                 pan.set_speed(GameplayPanel::SPEED_TURBO);
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.prepare_event_data("TURBOSPEED", cs.update, level.level_filename);
-                GameEvents::send_event(event_data);
+                GameData event_data = GameData("TURBOSPEED", level, cs.update);
+                Exposer exposer = Exposer(event_data, gloB->nq);
+                exposer.run();
+
 
             }
         }
         // Neustart
         else if (pan.restart.get_clicked()) {
             restart_level();
-
-            GameEvents::Data event_data = GameEvents::Data();
-            event_data.prepare_event_data("RESTARTLEVEL", cs.update, level.level_filename);
-            GameEvents::send_event(event_data);
-
         }
 
         // Switch the spectator's panel to a different tribe's skillset
@@ -501,7 +513,12 @@ void Gameplay::calc_self()
          && !window_gameplay) {
             window_gameplay = new Api::WindowGameplay(&replay, &level,
                                                       cs.tribes.size());
+            GameData event_data = GameData("LEVELMENU", level, cs.update);
+            Exposer exposer = Exposer(event_data, gloB->nq);
+            exposer.run();
+
             Api::Manager::add_focus(window_gameplay);
+
             return;
         }
     }
@@ -608,6 +625,12 @@ void Gameplay::load_state(const GameState& state)
         effect.delete_after(cs.update);
         for (HatchIt i = hatches.begin(); i != hatches.end(); ++i)
          i->animate(effect, cs.update);
+
+
+        GameData event_data = GameData("STARTLEVEL", level);
+        Exposer exposer = Exposer(event_data, gloB->nq);
+        exposer.run();
+
     }
 }
 

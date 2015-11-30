@@ -13,6 +13,9 @@
 
 #pragma once
 
+//#include <Poco/NotificationCenter.h>
+#include <Poco/NotificationQueue.h>
+
 #include "./file/filename.h"
 
 // At the end of this file, a pointer to a Globals called gloB
@@ -28,6 +31,8 @@ public:
 
     void load();
     void save();
+
+    void load_notification_queue(Poco::NotificationQueue* nq_ptr);
 
     // version is the current version. version_min is the oldest version
     // featuring the same game mechanics as the current one, so it's the
@@ -374,6 +379,28 @@ public:
 
         file_replay_auto_single,
         file_replay_auto_multi;
+
+
+    //Events exposer variables
+    	const Filename exposer_local_output;
+    	const Filename exposer_config;
+
+        std::string exposer_gameevents_service_endpoint;
+        std::string exposer_clientid;
+        std::string exposer_apikey;
+        std::string exposer_token;
+        std::string exposer_sessionid;
+        std::string exposer_userprofile_service_endpoint;
+        std::string exposer_username;
+        std::string exposer_password;
+
+        signed int exposer_max_number_attempts;
+        bool exposer_connection_is_setup;
+        bool exposer_record_local_file;
+        bool exposer_offline_mode;
+
+        //Pointer to Notification queue
+        Poco::NotificationQueue* nq;
 
 private:
 

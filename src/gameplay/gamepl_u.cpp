@@ -11,7 +11,9 @@
 #include "../graphic/sound.h"
 #include "../other/user.h"
 
-#include "../network/gameevents.h"
+#include "../exposer/gamedata.h"
+#include "../exposer/exposer.h"
+//#include "../other/file/log.h"
 
 
 void Gameplay::update()
@@ -30,9 +32,11 @@ void Gameplay::update()
         data.action       = Replay::SPAWNINT;
         data.what         = trlo->spawnint;
 
-        GameEvents::Data event_data = GameEvents::Data();
-        event_data.load_event_data(data, level.level_filename);
-        GameEvents::send_event(event_data);
+        GameData event_data = GameData("", level);
+        event_data.load_replay_data(data);
+        Exposer exposer = Exposer(event_data, gloB->nq);
+        exposer.run();
+
 
         replay.add(data);
         Network::send_replay_data(data);

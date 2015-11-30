@@ -7,6 +7,9 @@
 
 #include <fstream>
 
+//#include <Poco/NotificationCenter.h>
+#include <Poco/NotificationQueue.h>
+
 #include "globals.h"
 #include "file/io.h"
 #include "../network/net_t.h" // for updates_per_second and default port
@@ -363,7 +366,28 @@ Globals::Globals()
     file_bitmap_font_sml         (dir_data_bitmap.get_dir_rootless() + "font_sml.I.tga"),
 
     file_replay_auto_single      (dir_replay_auto.get_dir_rootless() + "s"),
-    file_replay_auto_multi       (dir_replay_auto.get_dir_rootless() + "m")
+    file_replay_auto_multi       (dir_replay_auto.get_dir_rootless() + "m"),
+
+	//Exposer files
+	exposer_local_output         (dir_data.get_dir_rootless() + "netevents_output.csv"),
+	exposer_config		 		 (dir_data.get_dir_rootless() + "netevents_config.txt"),
+
+	//Game events service info
+	exposer_gameevents_service_endpoint(""),
+	exposer_clientid(""),
+	exposer_apikey(""),
+	exposer_token(""),
+	exposer_sessionid(""),
+
+	//Userprofile service info
+	exposer_userprofile_service_endpoint(""),
+	exposer_username(""),
+	exposer_password(""),
+
+	exposer_connection_is_setup(false),
+	exposer_offline_mode(false),
+	exposer_record_local_file(true),
+	exposer_max_number_attempts(3)
 {
 }
 
@@ -473,3 +497,8 @@ void Globals::save()
     file.close();
 }
 // Ende save_config_file
+
+void Globals::load_notification_queue(Poco::NotificationQueue* nq_ptr)
+{
+	nq = nq_ptr;
+}

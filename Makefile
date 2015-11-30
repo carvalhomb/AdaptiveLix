@@ -35,6 +35,7 @@ CLIENT_CSRC = $(wildcard src/graphic/png/*.c)
 CLIENT_SRCS = $(wildcard src/api/*.cpp) \
               $(wildcard src/api/button/*.cpp) \
               $(wildcard src/editor/*.cpp) \
+              $(wildcard src/exposer/*.cpp) \
               $(wildcard src/gameplay/gui/*.cpp) \
               $(wildcard src/gameplay/*.cpp) \
               $(wildcard src/graphic/*.cpp) \

@@ -9,8 +9,12 @@
 
 #include "gameplay.h"
 #include "../other/user.h"
+#include "../other/file/log.h"
 
-#include "../network/gameevents.h"
+#include "../exposer/exposer.h"
+#include "../exposer/gamedata.h"
+
+#include <sstream>
 
 Replay::Data Gameplay::new_replay_data()
 {
@@ -70,9 +74,10 @@ void Gameplay::calc_active()
         Replay::Data data = new_replay_data();
         data.action       = Replay::NUKE;
 
-        GameEvents::Data event_data = GameEvents::Data();
-        event_data.load_event_data(data, level.level_filename);
-        GameEvents::send_event(event_data);
+        GameData event_data = GameData("NUKE", level);
+        event_data.load_replay_data(data);
+        Exposer exposer = Exposer(event_data, gloB->nq);
+        exposer.run();
 
         replay.add(data);
         Network::send_replay_data(data);
@@ -112,9 +117,17 @@ void Gameplay::calc_active()
         // Maustaste (selectable in the options) waehlt man dagegen die letzte
         // Lix mit der niedrigsten Priorit�t. Auch hier haben naeher liegende
         // Lixen Vorrang.
+        /*
+         * The list of Lixen is run and the priority is calculated each Lix.
+         * If a Higher priority than the currently highest found, LixIt target changes.
+         * In the same priority have Lixen, the closer to the mouse cursor, first!
+         * With the right mouse button (selectable in the options) to choose the other
+         * hand, the last Lix with the lowest priority. Again in greater detail
+         * have lying Lixen precedence.
+         */
         LixIt  target = trlo->lixvec.end(); // Klickbar mit Prioritaet
         LixIt  tarinf = trlo->lixvec.end(); // Nicht unb. klickbar mit Prior.
-        int    tarcnt = 0; // Anzahl Lixen unter Cursor
+        int    tarcnt = 0; // Anzahl Lixen unter Cursor. Number Lixen under cursor
         int    target_priority = 0;
         int    target_prio_min = 100000; // if (< target_prio) => tooltip
         int    tarinf_priority = 0;
@@ -132,102 +145,107 @@ void Gameplay::calc_active()
         // find current skill of the local player via the GUI
         GameplayPanel::SkBIt skill_visible = pan.skill.begin();
         while (skill_visible != pan.skill.end()
-            && (! skill_visible->get_on()
-                // panel has reordered skills. trlo and the replay don't
-                || trlo->skills.find(skill_visible->get_skill()) ==
-                   trlo->skills.end()
-                || trlo->skills[skill_visible->get_skill()] == 0
-                || skill_visible->get_number() == 0))
-            ++skill_visible;
+        		&& (! skill_visible->get_on()
+        				// panel has reordered skills. trlo and the replay don't
+        				|| trlo->skills.find(skill_visible->get_skill()) ==
+        						trlo->skills.end()
+								|| trlo->skills[skill_visible->get_skill()] == 0
+								|| skill_visible->get_number() == 0))
+        	++skill_visible;
 
         if (skill_visible != pan.skill.end())
-            for (LixIt i =  --trlo->lixvec.end();
-                       i != --trlo->lixvec.begin(); --i)
-        {
-            // (skill_visible) is now a skill with (trlo has != 0 of it).
-            // In particular, it appears in trlo->skills as a key.
+        	for (LixIt i =  --trlo->lixvec.end();
+        			i != --trlo->lixvec.begin(); --i)
+        	{
+        		// (skill_visible) is now a skill with (trlo has != 0 of it).
+        		// In particular, it appears in trlo->skills as a key.
 
-            if (   map.distance_x(i->get_ex(), mx) <=  mmld_x
-                && map.distance_x(i->get_ex(), mx) >= -mmld_x
-                && map.distance_y(i->get_ey(), my) <=  mmld_d
-                && map.distance_y(i->get_ey(), my) >= -mmld_u
-            ) {
-                // Hypot geht von (ex|ey+etwas) aus
-                // true = Beachte persoenliche Einschraenkungen wie !MultBuild
-                int priority
-                    = i->get_priority(skill_visible->get_skill(), true);
+        		if (   map.distance_x(i->get_ex(), mx) <=  mmld_x
+        				&& map.distance_x(i->get_ex(), mx) >= -mmld_x
+						&& map.distance_y(i->get_ey(), my) <=  mmld_d
+						&& map.distance_y(i->get_ey(), my) >= -mmld_u
+        		) {
+        			// Hypot geht von (ex|ey+etwas) aus
+        			// true = Beachte persoenliche Einschraenkungen wie !MultBuild
+        			int priority
+					= i->get_priority(skill_visible->get_skill(), true);
 
-                // Invert priority if a corresponding mouse button is held
-                if ((hardware.get_mrh() && useR->prioinv_right)
-                 || (hardware.get_mmh() && useR->prioinv_middle)
-                 ||  hardware.key_hold(useR->key_priority)) {
-                    priority = 100000 - priority;
-                }
-                double hypot = map.hypot(mx, my, i->get_ex(),
-                                          i->get_ey() + ((mmld_d - mmld_u)/2)
-                                          );
-                if (priority > 0 && priority < 100000) {
-// This is horrible code. 9 indentation levels imply a severe problem,
-// we should use more functions. Will fix this in the D port.
 
-// Die Anforderungen den offenen Mauscursur
-// und das Schreiben des Strings auf die Info...
-++tarcnt;
-if (priority >  tarinf_priority
- ||(priority == tarinf_priority && hypot < tarinf_hypot)) {
-    tarinf = i;
-    tarinf_priority = priority;
-    tarinf_hypot    = hypot;
-}
-// ...sind geringer als die f�r Anklick-Inbetrachtnahme!
-if (priority > 1 && priority < 99999) {
-    if (!(only_dir_l && i->get_dir() ==  1)
-     && !(only_dir_r && i->get_dir() == -1)) {
-        // consider this clickable and eligible for tooltip
-        if  (priority >  target_priority
-         || (priority == target_priority && hypot < target_hypot)) {
-            if (target_priority != 0
-             && target_priority < priority)
-                pan.suggest_tooltip_priority();
-            target          = i;
-            target_priority = priority;
-            target_hypot    = hypot;
-            if (priority < target_prio_min)
-                target_prio_min = priority;
-        }
-        else if (priority <  target_prio_min
-             || (priority == target_prio_min && hypot >= target_hypot)) {
-            if (target_prio_min != 100000
-             && target_prio_min > priority)
-                pan.suggest_tooltip_priority();
-            target_prio_min = priority;
-        }
-    }
-    if (i->get_dir() ==  1) tooltip_r_elig = true;
-    if (i->get_dir() == -1) tooltip_l_elig = true;
-    if (tooltip_r_elig && tooltip_l_elig)
-        pan.suggest_tooltip_force_dir();
-}
-                }
-            }
-        }
 
-        // Auswertung von tarinf
+        			// Invert priority if a corresponding mouse button is held
+        			if ((hardware.get_mrh() && useR->prioinv_right)
+        					|| (hardware.get_mmh() && useR->prioinv_middle)
+							||  hardware.key_hold(useR->key_priority)) {
+        				priority = 100000 - priority;
+        			}
+        			double hypot = map.hypot(mx, my, i->get_ex(),
+        					i->get_ey() + ((mmld_d - mmld_u)/2)
+        			);
+        			if (priority > 0 && priority < 100000) {
+        				// This is horrible code. 9 indentation levels imply a severe problem,
+        				// we should use more functions. Will fix this in the D port.
+
+        				// Die Anforderungen den offenen Mauscursur
+        				// und das Schreiben des Strings auf die Info...
+        				// The requirements to open Mauscursur
+        				// And write the string to the info ...
+        				++tarcnt;
+        				if (priority >  tarinf_priority
+        						||(priority == tarinf_priority && hypot < tarinf_hypot)) {
+        					tarinf = i;
+        					tarinf_priority = priority;
+        					tarinf_hypot    = hypot;
+        				}
+        				// ...sind geringer als die f�r Anklick-Inbetrachtnahme!
+        				// ... Are lower than the clip-on for Inbetrachtnahme!
+        				if (priority > 1 && priority < 99999) {
+        					if (!(only_dir_l && i->get_dir() ==  1)
+        							&& !(only_dir_r && i->get_dir() == -1)) {
+        						// consider this clickable and eligible for tooltip
+        						if  (priority >  target_priority
+        								|| (priority == target_priority && hypot < target_hypot)) {
+        							if (target_priority != 0
+        									&& target_priority < priority)
+        								pan.suggest_tooltip_priority();
+        							target          = i;
+        							target_priority = priority;
+        							target_hypot    = hypot;
+        							if (priority < target_prio_min)
+        								target_prio_min = priority;
+        						}
+        						else if (priority <  target_prio_min
+        								|| (priority == target_prio_min && hypot >= target_hypot)) {
+        							if (target_prio_min != 100000
+        									&& target_prio_min > priority)
+        								pan.suggest_tooltip_priority();
+        							target_prio_min = priority;
+        						}
+        					}
+        					if (i->get_dir() ==  1) tooltip_r_elig = true;
+        					if (i->get_dir() == -1) tooltip_l_elig = true;
+        					if (tooltip_r_elig && tooltip_l_elig)
+        						pan.suggest_tooltip_force_dir();
+        				}
+        			}
+        		}
+        	}
+
+        // Evaluation of tarinf
         if (tarinf != trlo->lixvec.end()) {
-            mouse_cursor.set_y_frame(1);
+        	mouse_cursor.set_y_frame(1);
         }
         pan.stats.set_tarinf(tarinf == trlo->lixvec.end() ? 0 : &*tarinf);
         pan.stats.set_tarcnt(tarcnt);
 
         // tooltips for queuing builders/platformers
         if (target != trlo->lixvec.end()
-         && skill_visible->get_number() != 0) {
-            if (target->get_ac() == LixEn::BUILDER
-             && skill_visible->get_skill() == LixEn::BUILDER)
-                pan.suggest_tooltip_builders();
-            else if (target->get_ac() == LixEn::PLATFORMER
-             && skill_visible->get_skill() == LixEn::PLATFORMER)
-                pan.suggest_tooltip_platformers();
+        		&& skill_visible->get_number() != 0) {
+        	if (target->get_ac() == LixEn::BUILDER
+        			&& skill_visible->get_skill() == LixEn::BUILDER)
+        		pan.suggest_tooltip_builders();
+        	else if (target->get_ac() == LixEn::PLATFORMER
+        			&& skill_visible->get_skill() == LixEn::PLATFORMER)
+        		pan.suggest_tooltip_platformers();
         }
 
         // Resolving target
@@ -235,43 +253,47 @@ if (priority > 1 && priority < 99999) {
         // or if skill_visible is somehow pan.skill.end(), shouldn't happen
         // we're also checking the displayed number, look at comment about the
         // visible number due to eye candy/making button seem more responsive
+
+
+
         if (target != trlo->lixvec.end() && hardware.get_ml()) {
-            if (skill_visible->get_number() != 0) {
+        	if (skill_visible->get_number() != 0) {
 
-                const int lem_id = target - trlo->lixvec.begin();
+        		const int lem_id = target - trlo->lixvec.begin();
 
-                // put sound into effect manager, so that it's not played
-                // again when the next update is computed
-                Sound::Id snd = Lixxie::get_ac_func(skill_visible
-                                ->get_skill()).sound_assign;
-                effect.add_sound(cs.update + 1, *trlo, lem_id, snd);
+        		// put sound into effect manager, so that it's not played
+        		// again when the next update is computed
+        		Sound::Id snd = Lixxie::get_ac_func(skill_visible
+        				->get_skill()).sound_assign;
+        		effect.add_sound(cs.update + 1, *trlo, lem_id, snd);
 
-                // Die sichtbare Zahl hinabsetzen geschieht nur fuer's Auge,
-                // in Wirklichkeit geschieht dies erst beim Update. Das Augen-
-                // spielzeug verabreichen wir allerdings nur, wenn nicht z.B.
-                // zweimal auf dieselbe Lix mit derselben Faehigkeit
-                // geklickt wurde.
-                if (!replay.get_on_update_lix_clicked(
-                    cs.update + 1, lem_id, skill_visible->get_skill())
-                    && skill_visible->get_number() != LixEn::infinity
-                ) {
-                    skill_visible->set_number(skill_visible->get_number() - 1);
-                    Sound::play_loud(snd);
-                }
+        		// Die sichtbare Zahl hinabsetzen geschieht nur fuer's Auge,
+        		// in Wirklichkeit geschieht dies erst beim Update. Das Augen-
+        		// spielzeug verabreichen wir allerdings nur, wenn nicht z.B.
+        		// zweimal auf dieselbe Lix mit derselben Faehigkeit
+        		// geklickt wurde.
+        		if (!replay.get_on_update_lix_clicked(
+        				cs.update + 1, lem_id, skill_visible->get_skill())
+        				&& skill_visible->get_number() != LixEn::infinity
+        		) {
+        			skill_visible->set_number(skill_visible->get_number() - 1);
+        			Sound::play_loud(snd);
+        		}
 
-                // assign
-                pan.pause.set_off();
+        		// assign
+        		pan.pause.set_off();
 
-                Replay::Data data = new_replay_data();
-                data.action       = only_dir_l ? Replay::ASSIGN_LEFT
-                                  : only_dir_r ? Replay::ASSIGN_RIGHT
-                                  : Replay::ASSIGN;
-                data.skill        = skill_visible->get_skill();
-                data.what         = lem_id;
+        		Replay::Data data = new_replay_data();
+        		data.action       = only_dir_l ? Replay::ASSIGN_LEFT
+        				: only_dir_r ? Replay::ASSIGN_RIGHT
+        						: Replay::ASSIGN;
+        		data.skill        = skill_visible->get_skill();
+        		data.what         = lem_id;
 
-                GameEvents::Data event_data = GameEvents::Data();
-                event_data.load_event_data(data, level.level_filename);
-                GameEvents::send_event(event_data);
+                GameData event_data = GameData("", level);
+                event_data.load_replay_data(data);
+                Exposer exposer = Exposer(event_data, gloB->nq);
+                exposer.run();
 
                 replay.add(data);
                 Network::send_replay_data(data);
@@ -280,6 +302,7 @@ if (priority > 1 && priority < 99999) {
                 Sound::play_loud(Sound::PANEL_EMPTY);
             }
         }
+
 
     }
     // end of: mouse in the playing field, no aiming

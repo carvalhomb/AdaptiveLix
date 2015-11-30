@@ -51,7 +51,21 @@
 #include "../lix/lix_enum.h" // initialize strings
 #include "../graphic/png/loadpng.h"
 
-#include "../network/gameevents.h"
+//Expose the game events
+//#include <Poco/NotificationCenter.h>
+#include <Poco/NotificationQueue.h>
+#include <Poco/ThreadPool.h>
+#include <Poco/Thread.h>
+//#include <Poco/Observer.h>
+//#include <Poco/NObserver.h>
+#include <Poco/AutoPtr.h>
+
+#include "../exposer/gamedata.h"
+#include "../exposer/exposer.h"
+#include "../exposer/exposerconfig.h"
+#include "../exposer/notification.h"
+#include "../exposer/notifworker.h"
+
 
 struct MainArgs {
     bool print_version_and_exit;
@@ -69,7 +83,6 @@ static MainArgs parse_main_arguments(int, char*[]);
 static void     setenv_allegro_modules();
 static void     unsetenv_allegro_modules();
 static void     print_usage();
-
 
 
 int main(int argc, char* argv[])
@@ -157,14 +170,30 @@ int main(int argc, char* argv[])
         load_all_bitmaps(GraLib::LOAD_WITH_RECOLOR_LIX);
         Network::initialize();
 
-        //Request a sessionid
+        //Initialize notification queue
+        Poco::NotificationQueue nq;
 
-        GameEvents::get_sessionid();
+        //create two workers to deal with the notifications
+        NotificationWorker worker1(nq); // create worker threads
+        NotificationWorker worker2(nq);
+        NotificationWorker worker3(nq);
 
-        GameEvents::Data start_event_data = GameEvents::Data();
-        start_event_data.action = "STARTGAME";
-        start_event_data.level = "0"; //not in a level
-        GameEvents::send_event(start_event_data);
+        //make the notification queue available globally, under gloB->nq
+        gloB->load_notification_queue(&nq);
+
+
+
+        Poco::ThreadPool::defaultPool().start(worker1); // start workers
+        Poco::ThreadPool::defaultPool().start(worker2);
+        Poco::ThreadPool::defaultPool().start(worker3);
+
+        //Initialize an ExposerConfig object
+        ExposerConfig expconfig;
+        expconfig.initialize();
+
+        GameData start_event_data = GameData("STARTGAME");
+        Exposer exposer_startgame = Exposer(start_event_data, gloB->nq);
+        exposer_startgame.run();
 
 
         // Main loop. See other/lmain.cpp for this.
@@ -172,18 +201,30 @@ int main(int argc, char* argv[])
         l_main->main_loop();
         delete l_main;
 
+        GameData end_event_data = GameData("ENDGAME");
+        Exposer exposer_endgame = Exposer(end_event_data, gloB->nq);
+        exposer_endgame.run();
 
-        GameEvents::Data end_event_data = GameEvents::Data();
-        end_event_data.action = "ENDGAME";
-        end_event_data.level = "0"; //not in a level
-        GameEvents::send_event(end_event_data);
+        gloB->nq->enqueueNotification(new QuitNotification);
+        gloB->nq->enqueueNotification(new QuitNotification);
+        gloB->nq->enqueueNotification(new QuitNotification);
 
+        expconfig.finalize();
+
+        //Finalize workers and queue
+        while (!gloB->nq->empty()) {  // wait until all work is done
+        	Poco::Thread::sleep(200);
+        }
 
         // Clean up
         useR->save();
         gloB->save();
 
         destroy_all_bitmaps();
+
+
+        Poco::Thread::sleep(200);
+        Poco::ThreadPool::defaultPool().joinAll();
 
         Network::deinitialize();
         Sound::deinitialize();
@@ -197,6 +238,7 @@ int main(int argc, char* argv[])
 
     Log::deinitialize();
     Globals::deinitialize();
+
 
     // don't call allegro_exit(), doing that causes the program
     // to not terminate in rare cases
