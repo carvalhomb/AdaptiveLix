@@ -6,9 +6,10 @@ This fork is part of a PhD project on Serious Games. You can read more about thi
 
 ## How to run AdaptiveLix
 
-- Download or clone the repository. 
-- Make sure that the file bin/config.cfg is available. 
-- If you want to run the game in online mode, change the bin/config.cfg file accordingly.
+- Download the release
+- Edit file data/netevents_config.txt:
+    - If you don't know a username and password, use the default.
+    - If you want to try the game in offline mode, change the variable "offline_mode" to "true".
 - Run the file bin/winlix.exe (in Windows) or binlin/lix (in Linux).
 
 ## Useful documentation:
