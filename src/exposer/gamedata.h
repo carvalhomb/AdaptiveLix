@@ -22,7 +22,7 @@ public:
 	int lix_required;
 	int lix_saved;
 	int skills_used;
-	int seconds_required;
+	signed long seconds_required;
 
 	GameData();
 	GameData(std::string action, Level level, signed long update=-1);
@@ -30,7 +30,7 @@ public:
 	void load_replay_data(Replay::Data data);
 	void load_result_data(Result result);
 	std::string to_csv();
-	std::string to_xml();
+//	std::string to_xml();
 	std::string to_json();
 
 private:

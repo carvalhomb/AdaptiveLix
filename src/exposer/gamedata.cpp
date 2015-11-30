@@ -22,7 +22,7 @@
 
 using namespace std;
 
-GameData::GameData(string passed_action, Level passed_level, signed long int passed_update) {
+GameData::GameData(string passed_action, Level passed_level, signed long passed_update) {
 	timestamp = GameData::get_timestamp();
 	action=passed_action;
 	which_lix=-1;
@@ -85,32 +85,32 @@ string GameData::get_timestamp(){
 }
 
 void GameData::load_replay_data(Replay::Data data) {
-	this->update = data.update;
-	signed long secs = this->update / gloB->updates_per_second;
-	this->seconds = secs;
+	update = data.update;
+	signed long secs = update / gloB->updates_per_second;
+	seconds = secs;
 
-	this->action = GameData::extract_action_word(data);
+	action = GameData::extract_action_word(data);
 
 	if (data.action == Replay::ASSIGN || data.action == Replay::ASSIGN_LEFT
 				|| data.action == Replay::ASSIGN_RIGHT) {
-			this->which_lix = data.what;
+			which_lix = data.what;
 	}
 
 }
 
 
 void GameData::load_result_data(Result result) {
-	this->action = "RESULT";
-	this->update = -1;
-	this->which_lix = -1;
+	action = "RESULT";
+	update = -1;
+	which_lix = -1;
 
-	if (this->levelobj.get_good()==true) {
-		this->lix_required = this->levelobj.required;
-		this->seconds_required=this->levelobj.seconds;
+	if (levelobj.get_good()==true) {
+		lix_required = levelobj.required;
+		seconds_required=levelobj.seconds;
 	}
 
-	this->lix_saved = result.lix_saved;
-	this->skills_used = result.skills_used;
+	lix_saved = result.lix_saved;
+	skills_used = result.skills_used;
 
 }
 
@@ -132,7 +132,7 @@ string GameData::extract_action_word(Replay::Data data)
 			|| data.action == Replay::ASSIGN_RIGHT) {
 		action_word_stream << "=";
 		action_word_stream << LixEn::ac_to_string(static_cast <LixEn::Ac> (data.skill));
-		this->which_lix = data.what;
+		which_lix = data.what;
 	}
 
 	if (data.action == Replay::SPAWNINT ) {
@@ -143,43 +143,72 @@ string GameData::extract_action_word(Replay::Data data)
 	return action_word_stream.str();
 }
 
-string GameData::to_xml()
-{
-	string which_lix_string;
-	string update_string;
-	if (which_lix == -1) which_lix_string = "";
-	if (update == -1) update_string = "";
-
-	ostringstream data_sstr;
-
-	data_sstr << "\"<event>";
-	data_sstr << "<timestamp>" << timestamp << "</timestamp>";
-	data_sstr << "<action>" << action << "</action>";
-	data_sstr << "<level>" << level << "</level>";
-	data_sstr << "<update>" << update_string << "</update>";
-	data_sstr << "<which_lix>" << which_lix_string << "</which_lix>";
-	data_sstr << "<result>";
-	if (action == "RESULT") {
-		data_sstr << "<element>";
-		data_sstr << "<lix_required>" << lix_required << "</lix_required>";
-		data_sstr << "<lix_saved>" << lix_saved << "</lix_saved>";
-		data_sstr << "<seconds_required>" << seconds_required << "</seconds_required>";
-		data_sstr << "<seconds_used>" << seconds << "</seconds_used>";
-		data_sstr << "<skills_used>" << skills_used << "</skills_used>";
-		data_sstr << "</element>";
-	}
-	data_sstr << "</result>";
-	data_sstr << "</event>\"";
-	return data_sstr.str();
-}
+//string GameData::to_xml()
+//{
+//	string which_lix_string;
+//	string update_string;
+//	if (which_lix == -1) which_lix_string = "";
+//	if (update == -1) update_string = "";
+//
+//	ostringstream data_sstr;
+//
+//	data_sstr << "\"<event>";
+//	data_sstr << "<timestamp>" << timestamp << "</timestamp>";
+//	data_sstr << "<action>" << action << "</action>";
+//	data_sstr << "<level>" << level << "</level>";
+//	data_sstr << "<update>" << update_string << "</update>";
+//	data_sstr << "<which_lix>" << which_lix_string << "</which_lix>";
+//	data_sstr << "<result>";
+//	if (action == "RESULT") {
+//		data_sstr << "<element>";
+//		data_sstr << "<lix_required>" << lix_required << "</lix_required>";
+//		data_sstr << "<lix_saved>" << lix_saved << "</lix_saved>";
+//		data_sstr << "<seconds_required>" << seconds_required << "</seconds_required>";
+//		data_sstr << "<seconds_used>" << seconds << "</seconds_used>";
+//		data_sstr << "<skills_used>" << skills_used << "</skills_used>";
+//		data_sstr << "</element>";
+//	}
+//	data_sstr << "</result>";
+//	data_sstr << "</event>\"";
+//	return data_sstr.str();
+//}
 
 string GameData::to_json()
 {
 
-	string which_lix_string;
-	string update_string;
-	if (which_lix == -1) which_lix_string = "";
-	if (update == -1) update_string = "";
+	//	string which_lix_string;
+	//	string update_string;
+	//	if (which_lix == -1) which_lix_string = "";
+	//	if (update == -1) update_string = "";
+
+	ostringstream which_lix_string;
+	ostringstream update_string;
+	ostringstream lix_saved_string;
+	ostringstream lix_required_string;
+	ostringstream seconds_required_string;
+	ostringstream skills_used_string;
+	if (which_lix == -1) {
+		which_lix_string << "";
+	} else {
+		which_lix_string << which_lix;
+	}
+
+	if (update == -1) {
+		update_string << "";
+	} else {
+		update_string << update;
+	}
+	if (action != "RESULT") {
+		lix_saved_string << "";
+		lix_required_string << "";
+		seconds_required_string << "";
+		skills_used_string << "";
+	} else {
+		lix_saved_string << lix_saved;
+		lix_required_string << lix_required;
+		seconds_required_string << seconds_required;
+		skills_used_string <<skills_used;
+	}
 
 	ostringstream data_sstr;
 
@@ -187,15 +216,15 @@ string GameData::to_json()
 	data_sstr << "\"timestamp\" : \"" << timestamp << "\",\n";
 	data_sstr << "\"action\" : \"" << action << "\",\n";
 	data_sstr <<  "\"level\" : \"" << level << "\",\n";
-	data_sstr << "\"update\" : \"" << update_string << "\",\n";
-	data_sstr << "\"which_lix\" : \"" << which_lix_string << "\",\n";
+	data_sstr << "\"update\" : \"" << update_string.str() << "\",\n";
+	data_sstr << "\"which_lix\" : \"" << which_lix_string.str() << "\",\n";
 	data_sstr << "\"result\" : [";
 	if (action=="RESULT") {
-		data_sstr << "{ \"lix_required\" : \"" << lix_required << "\",\n";
-		data_sstr << "\"lix_saved\" : \"" << lix_saved << "\",\n";
-		data_sstr << "\"seconds_required\" : \"" << seconds_required << "\",\n";
+		data_sstr << "{ \"lix_required\" : \"" << lix_required_string.str() << "\",\n";
+		data_sstr << "\"lix_saved\" : \"" << lix_saved_string.str() << "\",\n";
+		data_sstr << "\"seconds_required\" : \"" << seconds_required_string.str() << "\",\n";
 		data_sstr << "\"seconds_used\" : \"" << seconds << "\",\n";
-		data_sstr << "\"skills_used\" : \"" << skills_used << "\"}\n";
+		data_sstr << "\"skills_used\" : \"" << skills_used_string.str() << "\"}\n";
 	}
 	data_sstr << "] \n}]";
 	return data_sstr.str();
