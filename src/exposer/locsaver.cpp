@@ -48,7 +48,7 @@ void LocalSaver::save_locally(string data_in_csv) {
 			myfile.open(filename.c_str());
 			myfile << "sessionid, timestamp, action, level, update, ";
 			myfile << "which_lix, lix_required, lix_saved, ";
-			myfile << "skills_used, seconds_required \n";
+			myfile << "skills_used, seconds_required, seconds_used \n";
 			myfile << data_in_csv;
 			myfile.close();
 		}
