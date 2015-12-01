@@ -27,19 +27,19 @@ GameData::GameData(string passed_action, Level passed_level, signed long passed_
 	action=passed_action;
 	which_lix=-1;
 	update=passed_update;
-	seconds=-1;
 	lix_required=0;
 	lix_saved=0;
 	skills_used=0;
 	seconds_required=0;
+	seconds_used=0;
 
 	levelobj = passed_level;
 	level = passed_level.level_filename;
 
-	if (update>0) {
-		signed long secs = update / gloB->updates_per_second;
-		seconds = secs;
-	}
+//	if (update>0) {
+//		signed long secs = update / gloB->updates_per_second;
+//		seconds_used = secs;
+//	}
 }
 
 GameData::GameData(string passed_action) {
@@ -47,11 +47,11 @@ GameData::GameData(string passed_action) {
 	action=passed_action;
 	which_lix=-1;
 	update=-1;
-	seconds=-1;
 	lix_required=0;
 	lix_saved=0;
 	skills_used=0;
 	seconds_required=0;
+	seconds_used=0;
 	levelobj = Level();
 	level = ""; //Not in a level
 }
@@ -61,7 +61,7 @@ GameData::GameData() {
 	action="";
 	which_lix=-1;
 	update=-1;
-	seconds=-1;
+	seconds_used=0;
 	lix_required=0;
 	lix_saved=0;
 	skills_used=0;
@@ -86,8 +86,6 @@ string GameData::get_timestamp(){
 
 void GameData::load_replay_data(Replay::Data data) {
 	update = data.update;
-	signed long secs = update / gloB->updates_per_second;
-	seconds = secs;
 
 	action = GameData::extract_action_word(data);
 
@@ -107,10 +105,16 @@ void GameData::load_result_data(Result result) {
 	if (levelobj.get_good()==true) {
 		lix_required = levelobj.required;
 		seconds_required=levelobj.seconds;
+		update = result.updates_used;
 	}
 
 	lix_saved = result.lix_saved;
 	skills_used = result.skills_used;
+
+	if (update>0) {
+		signed long secs = update / gloB->updates_per_second;
+		seconds_used = secs;
+	}
 
 }
 
@@ -186,6 +190,7 @@ string GameData::to_json()
 	ostringstream lix_saved_string;
 	ostringstream lix_required_string;
 	ostringstream seconds_required_string;
+	ostringstream seconds_used_string;
 	ostringstream skills_used_string;
 	if (which_lix == -1) {
 		which_lix_string << "";
@@ -203,11 +208,13 @@ string GameData::to_json()
 		lix_required_string << "";
 		seconds_required_string << "";
 		skills_used_string << "";
+		seconds_used_string << "";
 	} else {
 		lix_saved_string << lix_saved;
 		lix_required_string << lix_required;
 		seconds_required_string << seconds_required;
 		skills_used_string <<skills_used;
+		seconds_used_string << seconds_used;
 	}
 
 	ostringstream data_sstr;
@@ -223,7 +230,7 @@ string GameData::to_json()
 		data_sstr << "{ \"lix_required\" : \"" << lix_required_string.str() << "\",\n";
 		data_sstr << "\"lix_saved\" : \"" << lix_saved_string.str() << "\",\n";
 		data_sstr << "\"seconds_required\" : \"" << seconds_required_string.str() << "\",\n";
-		data_sstr << "\"seconds_used\" : \"" << seconds << "\",\n";
+		data_sstr << "\"seconds_used\" : \"" << seconds_used_string.str() << "\",\n";
 		data_sstr << "\"skills_used\" : \"" << skills_used_string.str() << "\"}\n";
 	}
 	data_sstr << "] \n}]";
@@ -239,6 +246,7 @@ string GameData::to_csv()
 	ostringstream lix_required_string;
 	ostringstream seconds_required_string;
 	ostringstream skills_used_string;
+	ostringstream seconds_used_string;
 	if (which_lix == -1) {
 		which_lix_string << "";
 	} else {
@@ -255,11 +263,13 @@ string GameData::to_csv()
 		lix_required_string << "";
 		seconds_required_string << "";
 		skills_used_string << "";
+		seconds_used_string << "";
 	} else {
 		lix_saved_string << lix_saved;
 		lix_required_string << lix_required;
 		seconds_required_string << seconds_required;
 		skills_used_string <<skills_used;
+		seconds_used_string << seconds_used;
 	}
 
 	ostringstream data_sstr;
@@ -273,6 +283,7 @@ string GameData::to_csv()
 	data_sstr << lix_required_string.str() << ", ";
 	data_sstr << lix_saved_string.str() << ", ";
 	data_sstr << skills_used_string.str() << ", ";
-	data_sstr << seconds_required_string.str() << "\n";
+	data_sstr << seconds_required_string.str() << ", ";
+	data_sstr << seconds_used_string.str() << "\n";
 	return data_sstr.str();
 }

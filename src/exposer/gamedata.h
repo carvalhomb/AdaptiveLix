@@ -16,12 +16,12 @@ public:
 	Level levelobj;
 	std::string action;
 	signed long update;
-	signed long seconds;
 	signed long which_lix;
 	std::string timestamp;
 	int lix_required;
 	int lix_saved;
 	int skills_used;
+	signed long seconds_used;
 	signed long seconds_required;
 
 	GameData();
