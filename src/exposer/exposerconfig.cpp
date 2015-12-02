@@ -393,7 +393,7 @@ string ExposerConfig::extract_sessionid(string json_string) {
 		Poco::JSON::Parser parser;
 		Poco::Dynamic::Var result = parser.parse(json_string);
 		Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
-		string tmpsessionid = object->get("sessionid");
+		string tmpsessionid = object->get("id");
 
 		ostringstream tmpmsg;
 		tmpmsg << " ===== Got a sessionid: " << tmpsessionid;
