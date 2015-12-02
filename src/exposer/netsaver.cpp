@@ -85,7 +85,6 @@ void NetworkSaver::send_event_attempt(string formatted_event)
 			time_t timestamp = time(0);
 			ostringstream request_body_ss;
 			request_body_ss << "{";
-			request_body_ss << "\"timestamp\" : \"" << timestamp << "\", \n";
 			request_body_ss << "\"events\" : " << formatted_event ;
 			request_body_ss << "}";
 
