@@ -16,8 +16,9 @@ public:
 	void run();
 
 private:
-	GameData _data;
-	Poco::NotificationQueue* _nq;
+	GameData data;
+	Poco::NotificationQueue* nq;
+	std::string sessionid;
 };
 
 

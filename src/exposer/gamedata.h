@@ -30,7 +30,6 @@ public:
 	void load_replay_data(Replay::Data data);
 	void load_result_data(Result result);
 	std::string to_csv();
-//	std::string to_xml();
 	std::string to_json();
 
 private:

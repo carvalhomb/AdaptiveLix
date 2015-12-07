@@ -23,18 +23,20 @@
 #include "notification.h"
 
 
-Exposer::Exposer(GameData data, Poco::NotificationQueue* nq)
+Exposer::Exposer(GameData _data, Poco::NotificationQueue* _nq)
 {
-	_data = data;
-	_nq = nq;
+	data = _data;
+	nq = _nq;
+	sessionid = gloB->exposer_sessionid;
 }
 
 
 void Exposer::run()
 {
 	GameEventNotification* notification_msg = new GameEventNotification;
-	notification_msg->load(_data);
-	_nq->enqueueNotification(notification_msg);
+	notification_msg->load_data(data);
+	notification_msg->load_sessionid(sessionid);
+	nq->enqueueNotification(notification_msg);
 }
 
 

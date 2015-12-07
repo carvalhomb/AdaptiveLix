@@ -147,44 +147,9 @@ string GameData::extract_action_word(Replay::Data data)
 	return action_word_stream.str();
 }
 
-//string GameData::to_xml()
-//{
-//	string which_lix_string;
-//	string update_string;
-//	if (which_lix == -1) which_lix_string = "";
-//	if (update == -1) update_string = "";
-//
-//	ostringstream data_sstr;
-//
-//	data_sstr << "\"<event>";
-//	data_sstr << "<timestamp>" << timestamp << "</timestamp>";
-//	data_sstr << "<action>" << action << "</action>";
-//	data_sstr << "<level>" << level << "</level>";
-//	data_sstr << "<update>" << update_string << "</update>";
-//	data_sstr << "<which_lix>" << which_lix_string << "</which_lix>";
-//	data_sstr << "<result>";
-//	if (action == "RESULT") {
-//		data_sstr << "<element>";
-//		data_sstr << "<lix_required>" << lix_required << "</lix_required>";
-//		data_sstr << "<lix_saved>" << lix_saved << "</lix_saved>";
-//		data_sstr << "<seconds_required>" << seconds_required << "</seconds_required>";
-//		data_sstr << "<seconds_used>" << seconds << "</seconds_used>";
-//		data_sstr << "<skills_used>" << skills_used << "</skills_used>";
-//		data_sstr << "</element>";
-//	}
-//	data_sstr << "</result>";
-//	data_sstr << "</event>\"";
-//	return data_sstr.str();
-//}
 
 string GameData::to_json()
 {
-
-	//	string which_lix_string;
-	//	string update_string;
-	//	if (which_lix == -1) which_lix_string = "";
-	//	if (update == -1) update_string = "";
-
 	ostringstream which_lix_string;
 	ostringstream update_string;
 	ostringstream lix_saved_string;
@@ -239,7 +204,6 @@ string GameData::to_json()
 
 string GameData::to_csv()
 {
-
 	ostringstream which_lix_string;
 	ostringstream update_string;
 	ostringstream lix_saved_string;
@@ -274,7 +238,7 @@ string GameData::to_csv()
 
 	ostringstream data_sstr;
 
-	data_sstr << gloB->exposer_sessionid << ", ";
+	data_sstr << "%sessionid%, ";
 	data_sstr << timestamp << ", ";
 	data_sstr << action << ", ";
 	data_sstr << level << ", ";

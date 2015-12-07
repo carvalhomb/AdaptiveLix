@@ -10,8 +10,12 @@
 #include "notification.h"
 
 
-void GameEventNotification::load(GameData passed_data) {
-	data = passed_data;
+void GameEventNotification::load_data(GameData _data) {
+	data = _data;
+}
+
+void GameEventNotification::load_sessionid(std::string _sessionid) {
+	sessionid = _sessionid;
 }
 
 

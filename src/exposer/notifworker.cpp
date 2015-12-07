@@ -10,6 +10,7 @@
 #include <Poco/Notification.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/Thread.h>
+#include <Poco/RWLock.h>
 
 
 #include "notifworker.h"
@@ -18,30 +19,14 @@
 #include "netsaver.h"
 #include "../other/file/log.h"
 
-NotificationWorker::NotificationWorker(Poco::NotificationQueue& queue): _queue(queue) {}
+NotificationWorker::NotificationWorker(Poco::NotificationQueue* queue, Poco::RWLock* lock): _queue(queue), _lock(lock) {}
 
 void NotificationWorker::run()
 {
-//	Poco::AutoPtr<Poco::Notification> pNf(_queue.waitDequeueNotification());
-//
-//	while (pNf)
-//	{
-//		GameEventNotification* pWorkNf =
-//				dynamic_cast<GameEventNotification*>(pNf.get());
-//		if (pWorkNf)
-//		{
-//			Log::log(Log::INFO, "Received notification, yay!!!");
-//			NetworkSaver networksaver = NetworkSaver(pWorkNf->data);
-//			LocalSaver localsaver = LocalSaver(pWorkNf->data);
-//			localsaver.run();
-//			networksaver.run();
-//			Log::log(Log::INFO, "Processed everything, are we done?");
-//		}
-//		pNf = _queue.waitDequeueNotification();
-//	}
+
 	for (;;)
 	{
-		Poco::AutoPtr<Poco::Notification> pNf(_queue.waitDequeueNotification());
+		Poco::AutoPtr<Poco::Notification> pNf(_queue->waitDequeueNotification());
 		if (pNf)
 		{
 			GameEventNotification* pWorkNf = dynamic_cast<GameEventNotification*>(pNf.get());
@@ -49,8 +34,8 @@ void NotificationWorker::run()
 			{
 				{
 					//Do the work
-					NetworkSaver networksaver = NetworkSaver(pWorkNf->data);
-					LocalSaver localsaver = LocalSaver(pWorkNf->data);
+					NetworkSaver networksaver = NetworkSaver(pWorkNf->data, pWorkNf->sessionid);
+					LocalSaver localsaver = LocalSaver(pWorkNf->data, pWorkNf->sessionid, _lock);
 					localsaver.run();
 					networksaver.run();
 				}

@@ -8,8 +8,12 @@
 class GameEventNotification : public Poco::Notification
 {
 public:
-	void load(GameData passed_data);
+	void load_data(GameData data);
+	void load_sessionid(std::string sessionid);
+	std::string sessionid;
 	GameData data;
+private:
+
 };
 
 

@@ -12,12 +12,13 @@
 class NetworkSaver {
 
 public:
-	NetworkSaver(GameData passed_event_data, int passed_num_attempts = 3);
+	NetworkSaver(GameData event_data, std::string sessionid, int passed_num_attempts = 3);
 	void run();
 private:
 	void send_event(GameData event_data, signed int number_of_attempts);
 	void send_event_attempt(std::string formatted_event);
 	GameData event_data;
 	int num_attempts;
+	std::string sessionid;
 };
 

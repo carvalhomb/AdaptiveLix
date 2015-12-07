@@ -59,6 +59,7 @@
 //#include <Poco/Observer.h>
 //#include <Poco/NObserver.h>
 #include <Poco/AutoPtr.h>
+#include <Poco/RWLock.h>
 
 #include "../exposer/gamedata.h"
 #include "../exposer/exposer.h"
@@ -173,10 +174,13 @@ int main(int argc, char* argv[])
         //Initialize notification queue
         Poco::NotificationQueue nq;
 
+        //Create the readwritelock
+        Poco::RWLock lock;
+
         //create two workers to deal with the notifications
-        NotificationWorker worker1(nq); // create worker threads
-        NotificationWorker worker2(nq);
-        NotificationWorker worker3(nq);
+        NotificationWorker worker1(&nq, &lock); // create worker threads
+        NotificationWorker worker2(&nq, &lock);
+        NotificationWorker worker3(&nq, &lock);
 
         //make the notification queue available globally, under gloB->nq
         gloB->load_notification_queue(&nq);
@@ -215,6 +219,8 @@ int main(int argc, char* argv[])
         while (!gloB->nq->empty()) {  // wait until all work is done
         	Poco::Thread::sleep(200);
         }
+
+        Log::log(Log::INFO, "Closing game.");
 
         // Clean up
         useR->save();
