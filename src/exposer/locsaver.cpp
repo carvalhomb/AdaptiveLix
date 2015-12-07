@@ -11,6 +11,8 @@
 #include <sstream>
 #include <exception>
 
+#include <Poco/RWLock.h>
+
 #include "../other/file/log.h"
 #include "../other/globals.h"
 
@@ -18,8 +20,9 @@
 
 using namespace std;
 
-LocalSaver::LocalSaver(GameData passed_event_data) {
+LocalSaver::LocalSaver(GameData passed_event_data, Poco::RWLock* lock) {
 	event_data = passed_event_data;
+	_lock = lock;
 }
 
 void LocalSaver::run() {
@@ -34,6 +37,8 @@ void LocalSaver::save_locally(string data_in_csv) {
 	try {
 		string filename = gloB->exposer_local_output.get_rootful();
 		ofstream myfile;
+
+		_lock->writeLock(); //acquire lock
 
 		if (file_exists(filename)) {
 			//Log::log(Log::INFO, "File exists, appending...");
@@ -52,6 +57,8 @@ void LocalSaver::save_locally(string data_in_csv) {
 			myfile << data_in_csv;
 			myfile.close();
 		}
+
+		_lock->unlock();  //release lock
 	}
 	catch (std::exception &ex) {
 		ostringstream tmpmsg;

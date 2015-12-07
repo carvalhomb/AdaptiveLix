@@ -217,7 +217,7 @@ void ExposerConfig::get_sessionid_attempt() {
 	response_body = requester.get_response_body();
 
 	//HTTP 200 OK
-	if (response_status == 200) {
+	if (response_status == 200 || response_status == 201) {
 		gloB->exposer_sessionid = extract_sessionid(response_body);
 
 		if (gloB->exposer_sessionid == "") {
@@ -315,9 +315,9 @@ void ExposerConfig::get_gameevents_token(signed int number_of_attempts) {
 	if (gloB->exposer_connection_is_setup and not gloB->exposer_offline_mode and is_token_set == false) {
 		while ((counter <= number_of_attempts) and (not success) and (not gloB->exposer_offline_mode))
 		{
-			ostringstream tmpmsg;
-			tmpmsg << "Attempt to get token #" << counter << " of " << number_of_attempts << ".";
-			Log::log(Log::INFO, tmpmsg.str());
+			//ostringstream tmpmsg;
+			//tmpmsg << "Attempt to get token #" << counter << " of " << number_of_attempts << ".";
+			//Log::log(Log::INFO, tmpmsg.str());
 
 			try {
 				get_gameevents_token_attempt();
@@ -421,7 +421,8 @@ string ExposerConfig::extract_token(string response_string) {
 		string tmptoken = object->get("token");
 
 		ostringstream tmpmsg;
-		tmpmsg << " ===== Got a token: " << tmptoken;
+		//tmpmsg << " ===== Got a token: " << tmptoken;
+		tmpmsg << " ===== Got a token.";
 		Log::log(Log::INFO, tmpmsg.str());
 
 		return tmptoken;
