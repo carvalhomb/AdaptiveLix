@@ -13,13 +13,15 @@
 class LocalSaver {
 
 	public:
-		LocalSaver(GameData passed_event_data, Poco::RWLock* lock);
+		LocalSaver(GameData passed_event_data, std::string sessionid, Poco::RWLock* lock);
 		void run();
 
 	private:
 		GameData event_data;
+		std::string sessionid;
 		void save_locally(std::string data_in_csv);
 		static bool file_exists(std::string filename);
-		Poco::RWLock* _lock;
+		Poco::RWLock* lock;
+		bool replace(std::string& str, const std::string& from, const std::string& to);
 };
 

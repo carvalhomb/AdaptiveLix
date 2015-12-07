@@ -34,8 +34,8 @@ void NotificationWorker::run()
 			{
 				{
 					//Do the work
-					NetworkSaver networksaver = NetworkSaver(pWorkNf->data);
-					LocalSaver localsaver = LocalSaver(pWorkNf->data, _lock);
+					NetworkSaver networksaver = NetworkSaver(pWorkNf->data, pWorkNf->sessionid);
+					LocalSaver localsaver = LocalSaver(pWorkNf->data, pWorkNf->sessionid, _lock);
 					localsaver.run();
 					networksaver.run();
 				}

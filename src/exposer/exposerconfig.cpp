@@ -30,7 +30,6 @@ using namespace std;
 
 
 ExposerConfig::ExposerConfig() {
-
 }
 
 ExposerConfig::~ExposerConfig() {
@@ -57,7 +56,7 @@ void ExposerConfig::initialize() {
 
 void ExposerConfig::finalize() {
 	try {
-		if (gloB->exposer_offline_mode == false) {
+		if (gloB->exposer_offline_mode == false && gloB->exposer_sessionid != "") {
 			close_sessionid();
 		}
 	}

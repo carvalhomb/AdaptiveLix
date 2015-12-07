@@ -23,7 +23,8 @@
 
 using namespace std;
 
-NetworkSaver::NetworkSaver(GameData passed_event_data, int passed_num_attempts) {
+NetworkSaver::NetworkSaver(GameData passed_event_data, string _sessionid, int passed_num_attempts) {
+	sessionid = _sessionid;
 	event_data = passed_event_data;
 	num_attempts = passed_num_attempts;
 }
@@ -67,7 +68,7 @@ void NetworkSaver::send_event(GameData data, signed int number_of_attempts) {
 
 void NetworkSaver::send_event_attempt(string formatted_event)
 {
-	string resource = "sessions/" + gloB->exposer_sessionid + "/events";
+	string resource = "sessions/" + sessionid + "/events";
 	string current_token = gloB->exposer_token;
 
 

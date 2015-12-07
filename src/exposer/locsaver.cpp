@@ -8,6 +8,7 @@
 #include "../other/myalleg.h" //needs to come first to include the windows.h header in the beginning
 
 #include <string>
+#include <algorithm>
 #include <sstream>
 #include <exception>
 
@@ -20,15 +21,16 @@
 
 using namespace std;
 
-LocalSaver::LocalSaver(GameData passed_event_data, Poco::RWLock* lock) {
+LocalSaver::LocalSaver(GameData passed_event_data, string _sessionid, Poco::RWLock* _lock) {
 	event_data = passed_event_data;
-	_lock = lock;
+	lock = _lock;
+	sessionid = _sessionid;
 }
 
 void LocalSaver::run() {
 	if (gloB->exposer_offline_mode == true or gloB->exposer_record_local_file==true) {
 		//format data to csv
-		std::string data_in_csv = event_data.to_csv();
+		string data_in_csv = event_data.to_csv();
 		save_locally(data_in_csv);
 	}
 }
@@ -38,7 +40,10 @@ void LocalSaver::save_locally(string data_in_csv) {
 		string filename = gloB->exposer_local_output.get_rootful();
 		ofstream myfile;
 
-		_lock->writeLock(); //acquire lock
+		//Replace %sessionid% for the real sessionid
+		replace(data_in_csv, "%sessionid%", sessionid);
+
+		lock->writeLock(); //acquire lock
 
 		if (file_exists(filename)) {
 			//Log::log(Log::INFO, "File exists, appending...");
@@ -58,7 +63,7 @@ void LocalSaver::save_locally(string data_in_csv) {
 			myfile.close();
 		}
 
-		_lock->unlock();  //release lock
+		lock->unlock();  //release lock
 	}
 	catch (std::exception &ex) {
 		ostringstream tmpmsg;
@@ -72,4 +77,10 @@ bool LocalSaver::file_exists(std::string filename) {
     return !f.fail(); // using good() could fail on empty files
 }
 
-
+bool LocalSaver::replace(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = str.find(from);
+    if(start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
