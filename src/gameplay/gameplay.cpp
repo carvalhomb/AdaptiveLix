@@ -96,10 +96,12 @@ Gameplay::Gameplay(
         // keyboard during calcing the panel.
     }
 
-    //Submit start level
-    GameData start_level_event_data = GameData("STARTLEVEL", level);
-    Exposer exposer = Exposer(start_level_event_data, gloB->nq);
-    exposer.run();
+    if (verify_mode == INTERACTIVE_MODE) {
+		//Submit start level
+		GameData start_level_event_data = GameData("STARTLEVEL", level);
+		Exposer exposer = Exposer(start_level_event_data, gloB->nq);
+		exposer.run();
+    }
 
 }
 
@@ -512,10 +514,6 @@ void Gameplay::on_hint_change_callback(void* v, const int hint_cur)
 
     if (not hint_vec.empty() && hint_cur != 0 && hint_cur != int(hint_vec.size()))
     {
-    	//Initialize local notification center
-    	//nc_hints = new Poco::NotificationCenter;
-    	//NotificationHandler nc_hints;
-    	//nc_gameplay->addObserver(Poco::Observer<NotificationHandler, GameEventNotification>(nc_hints, &NotificationHandler::handle));
 
     	GameData event_data = GameData("REQUESTHINT", g.level);
     	Exposer exposer = Exposer(event_data, gloB->nq);
@@ -557,16 +555,18 @@ void Gameplay::save_result()
     	Result result;
     	result = get_result();
 
-    	//End the level
-    	GameData endlevel_data = GameData("ENDLEVEL", level);
-    	Exposer exposer_endlevel = Exposer(endlevel_data, gloB->nq);
-    	exposer_endlevel.run();
+    	if (verify_mode == INTERACTIVE_MODE) {
+			//End the level
+			GameData endlevel_data = GameData("ENDLEVEL", level);
+			Exposer exposer_endlevel = Exposer(endlevel_data, gloB->nq);
+			exposer_endlevel.run();
 
-    	//Load result data in the object
-    	GameData result_data = GameData("RESULT", level);
-    	result_data.load_result_data(result);
-    	Exposer exposer = Exposer(result_data, gloB->nq);
-    	exposer.run();
+			//Load result data in the object
+			GameData result_data = GameData("RESULT", level);
+			result_data.load_result_data(result);
+			Exposer exposer = Exposer(result_data, gloB->nq);
+			exposer.run();
+    	}
 
     	useR->set_level_result_carefully(filename,result,level.required);
         useR->save();

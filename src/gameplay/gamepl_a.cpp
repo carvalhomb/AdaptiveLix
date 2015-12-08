@@ -290,10 +290,12 @@ void Gameplay::calc_active()
         		data.skill        = skill_visible->get_skill();
         		data.what         = lem_id;
 
-                GameData event_data = GameData("", level);
-                event_data.load_replay_data(data);
-                Exposer exposer = Exposer(event_data, gloB->nq);
-                exposer.run();
+        		if (verify_mode == INTERACTIVE_MODE) {
+					GameData event_data = GameData("", level);
+					event_data.load_replay_data(data);
+					Exposer exposer = Exposer(event_data, gloB->nq);
+					exposer.run();
+        		}
 
                 replay.add(data);
                 Network::send_replay_data(data);

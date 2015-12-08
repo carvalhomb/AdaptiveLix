@@ -119,11 +119,12 @@ WIN_CXXFLAGS = -Wall -W -nostdinc -D__NO_INLINE__ -O3
 WIN_INCLUDES = -I$(WIN_MINGDIR)/include -I$(WIN_MINGDIR_ARCH)/include/c++ -I$(WIN_MINGDIR_ARCH)/include/c++/mingw32 -I$(WIN_MINGDIR_ARCH)/include/c++/backward -I$(WIN_MINGDIR_ARCH)/include -I$(WIN_MINGDIR_ARCH)/include-fixed -I$(WIN_MINGDIR)/mingw32/include 
 #WIN_LIBS = -L$(WIN_MINGDIR)/lib -lalleg44 -mwindows -lenet -lpng -lz -lwinmm -lPocoNet -lPocoJSON -lPocoUtil -lPocoFoundation -liphlpapi -lws2_32 -lconfig++
 WIN_LIBS = -lalleg44 -mwindows -lenet -lpng -lz -lwinmm -lPocoNet -lPocoJSON -lPocoUtil -lPocoFoundation -liphlpapi -lws2_32 -lconfig++
+#WIN_LIBS = -lalleg44 -lenet -lpng -lz -lwinmm -lPocoNet -lPocoJSON -lPocoUtil -lPocoFoundation -liphlpapi -lws2_32 -lconfig++
 
 WIN_OBJDIR   = obj
 WIN_BINDIR   = bin
 
-WIN_CLIENT_BIN  = $(WIN_BINDIR)/winlix.exe
+WIN_CLIENT_BIN  = $(WIN_BINDIR)/winlix-console.exe
 
 WIN_ICON_SRC    = $(SRCDIR)/icon.rc
 

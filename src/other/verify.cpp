@@ -111,19 +111,16 @@ void Verifier::verify_filename(const Filename& f)
 {
     const std::string f_str = f.get_rootless();
     Replay r(f);
-
     if (r.get_file_not_found()) {
         ++nr_not_found;
         std::cout << "(NO-REP)," << f_str << std::endl;
         return;
     }
-
     if (f == r.get_level_filename()) {
         ++nr_not_naming_level;
         std::cout << "(NO-PTR)," << f_str << std::endl;
         return;
     }
-
     Level l(r.get_level_filename());
     if (l.get_status() == Level::BAD_FILE_NOT_FOUND) {
         ++nr_level_not_found;
@@ -143,16 +140,12 @@ void Verifier::verify_filename(const Filename& f)
                   << std::endl;
         return;
     }
-
     Gameplay* gameplay = new Gameplay(Gameplay::VERIFY_MODE, &r);
-
     while (! gameplay->get_exit() && ! gameplay->will_run_forever()) {
         gameplay->calc();
     }
-
     const Result result(gameplay->get_result());
     const int saved = result.lix_saved;
-
     if (saved >= l.required) {
         ++nr_level_ok_solving;
         std::cout << "(OK),";

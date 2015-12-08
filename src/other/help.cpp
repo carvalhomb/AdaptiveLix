@@ -341,7 +341,7 @@ void find_files(
     if (al_findfirst(search_for.c_str(), &info,
      FA_RDONLY | FA_HIDDEN | FA_LABEL | FA_ARCH) == 0) {
         do {
-            // Gefundene Datei zum Vektor hinzufügen
+            // Gefundene Datei zum Vektor hinzufï¿½gen
             Filename fn_result(where + info.name);
             dostr(fn_result, from);
         } while (al_findnext(&info) == 0);
@@ -361,7 +361,7 @@ void find_dirs(const Filename& fn_where, DoStr dostr, void* from)
     if (al_findfirst(where.c_str(), &info,
      FA_RDONLY | FA_HIDDEN | FA_LABEL | FA_DIREC | FA_ARCH) == 0) {
         do {
-            // Gefundenes Verzeichnis hinzufügen
+            // Gefundenes Verzeichnis hinzufï¿½gen
             if ((info.attrib & FA_DIREC) == FA_DIREC && info.name[0] != '.') {
                 std::string s = where;
                 s.resize(s.size() -1 ); // * von der Maske abschnibbeln
@@ -389,7 +389,7 @@ void find_tree
     if (al_findfirst(search_for.c_str(), &info,
      FA_RDONLY | FA_HIDDEN | FA_LABEL | FA_DIREC | FA_ARCH) == 0) {
         do {
-            // Dies nur für jedes Verzeichnis außer . und .. ausführen:
+            // Dies nur fï¿½r jedes Verzeichnis auï¿½er . und .. ausfï¿½hren:
             // Neue Suche mit gleichem Vektor im gefundenen Verzeichnis
             if ((info.attrib & FA_DIREC) == FA_DIREC && info.name[0] != '.') {
                 Filename fn_recurs(where + info.name + '/');
@@ -402,7 +402,7 @@ void find_tree
     Filename fn_where_with_slash(where);
     find_files(fn_where_with_slash, what, dostr, from);
 }
-// Ende der Unterverzeichnis-einschließenden Dateisuche
+// Ende der Unterverzeichnis-einschlieï¿½enden Dateisuche
 
 
 
