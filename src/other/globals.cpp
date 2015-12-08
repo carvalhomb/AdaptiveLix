@@ -369,7 +369,7 @@ Globals::Globals()
     file_replay_auto_multi       (dir_replay_auto.get_dir_rootless() + "m"),
 
 	//Exposer files
-	exposer_local_output         (dir_data.get_dir_rootless() + "netevents_output.csv"),
+	exposer_local_output_dir         (dir_data.get_dir_rootless()),
 	exposer_config		 		 (dir_data.get_dir_rootless() + "netevents_config.txt"),
 
 	//Game events service info

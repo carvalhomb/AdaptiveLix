@@ -238,16 +238,16 @@ string GameData::to_csv()
 
 	ostringstream data_sstr;
 
-	data_sstr << "%sessionid%, ";
-	data_sstr << timestamp << ", ";
-	data_sstr << action << ", ";
-	data_sstr << level << ", ";
-	data_sstr << update_string.str() << ", ";
-	data_sstr << which_lix_string.str() << ", ";
-	data_sstr << lix_required_string.str() << ", ";
-	data_sstr << lix_saved_string.str() << ", ";
-	data_sstr << skills_used_string.str() << ", ";
-	data_sstr << seconds_required_string.str() << ", ";
+	//data_sstr << "%sessionid%, ";
+	data_sstr << timestamp << ",";
+	data_sstr << action << ",";
+	data_sstr << level << ",";
+	data_sstr << update_string.str() << ",";
+	data_sstr << which_lix_string.str() << ",";
+	data_sstr << lix_required_string.str() << ",";
+	data_sstr << lix_saved_string.str() << ",";
+	data_sstr << skills_used_string.str() << ",";
+	data_sstr << seconds_required_string.str() << ",";
 	data_sstr << seconds_used_string.str() << "\n";
 	return data_sstr.str();
 }
