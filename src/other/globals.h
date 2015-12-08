@@ -382,7 +382,7 @@ public:
 
 
     //Events exposer variables
-    	const Filename exposer_local_output;
+    	const Filename exposer_local_output_dir;
     	const Filename exposer_config;
 
         std::string exposer_gameevents_service_endpoint;

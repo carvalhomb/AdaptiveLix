@@ -37,7 +37,9 @@ void LocalSaver::run() {
 
 void LocalSaver::save_locally(string data_in_csv) {
 	try {
-		string filename = gloB->exposer_local_output.get_rootful();
+		string outputdir = gloB->exposer_local_output_dir.get_rootful();
+		string username = gloB->user_name;
+		string output_filename = outputdir + "events_log_" + username + ".csv";
 		ofstream myfile;
 
 		//Replace %sessionid% for the real sessionid
@@ -45,9 +47,9 @@ void LocalSaver::save_locally(string data_in_csv) {
 
 		lock->writeLock(); //acquire lock
 
-		if (file_exists(filename)) {
+		if (file_exists(output_filename)) {
 			//Log::log(Log::INFO, "File exists, appending...");
-			myfile.open(filename.c_str(), std::ios_base::app);
+			myfile.open(output_filename.c_str(), std::ios_base::app);
 			myfile << data_in_csv;
 			myfile.close();
 		}
@@ -55,7 +57,7 @@ void LocalSaver::save_locally(string data_in_csv) {
 			//Log::log(Log::INFO, "File does NOT exists, creating it and preparing header...");
 
 			//create file and write first line, then the formatted line
-			myfile.open(filename.c_str());
+			myfile.open(output_filename.c_str());
 			myfile << "timestamp,action,level,update,";
 			myfile << "which_lix,lix_required,lix_saved,";
 			myfile << "skills_used,seconds_required,seconds_used \n";

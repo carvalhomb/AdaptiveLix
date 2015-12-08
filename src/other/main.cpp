@@ -195,9 +195,9 @@ int main(int argc, char* argv[])
         ExposerConfig expconfig;
         expconfig.initialize();
 
-        GameData start_event_data = GameData("STARTGAME");
-        Exposer exposer_startgame = Exposer(start_event_data, gloB->nq);
-        exposer_startgame.run();
+        //GameData start_event_data = GameData("STARTGAME");
+        //Exposer exposer_startgame = Exposer(start_event_data, gloB->nq);
+        //exposer_startgame.run();
 
 
         // Main loop. See other/lmain.cpp for this.
