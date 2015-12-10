@@ -627,10 +627,11 @@ void Gameplay::load_state(const GameState& state)
         for (HatchIt i = hatches.begin(); i != hatches.end(); ++i)
          i->animate(effect, cs.update);
 
-
-        GameData event_data = GameData("STARTLEVEL", level);
-        Exposer exposer = Exposer(event_data, gloB->nq);
-        exposer.run();
+        if (cs.update == Gameplay::updates_to_skip_singleplayer) {
+			GameData event_data = GameData("STARTLEVEL", level);
+			Exposer exposer = Exposer(event_data, gloB->nq);
+			exposer.run();
+        }
 
     }
 }
