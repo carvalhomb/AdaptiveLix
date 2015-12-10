@@ -245,7 +245,8 @@ void Gameplay::calc_self()
         const int  max = replay.get_max_updates();
         const int& fff = turbo_times_faster_than_fast;
 
-        bool abort_replay = false;
+        //bool abort_replay = false;
+        bool abort_replay = true;
 
         if (csu >= max || max == 0) abort_replay = true;
         if (hardware.get_ml() && abort_replay == false) {
@@ -626,10 +627,11 @@ void Gameplay::load_state(const GameState& state)
         for (HatchIt i = hatches.begin(); i != hatches.end(); ++i)
          i->animate(effect, cs.update);
 
-
-        GameData event_data = GameData("STARTLEVEL", level);
-        Exposer exposer = Exposer(event_data, gloB->nq);
-        exposer.run();
+        if (cs.update == Gameplay::updates_to_skip_singleplayer) {
+			GameData event_data = GameData("STARTLEVEL", level);
+			Exposer exposer = Exposer(event_data, gloB->nq);
+			exposer.run();
+        }
 
     }
 }

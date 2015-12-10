@@ -124,7 +124,7 @@ WIN_LIBS = -lalleg44 -mwindows -lenet -lpng -lz -lwinmm -lPocoNet -lPocoJSON -lP
 WIN_OBJDIR   = obj
 WIN_BINDIR   = bin
 
-WIN_CLIENT_BIN  = $(WIN_BINDIR)/winlix-console.exe
+WIN_CLIENT_BIN  = $(WIN_BINDIR)/winlix.exe
 
 WIN_ICON_SRC    = $(SRCDIR)/icon.rc
 
