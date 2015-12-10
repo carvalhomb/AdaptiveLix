@@ -245,7 +245,8 @@ void Gameplay::calc_self()
         const int  max = replay.get_max_updates();
         const int& fff = turbo_times_faster_than_fast;
 
-        bool abort_replay = false;
+        //bool abort_replay = false;
+        bool abort_replay = true;
 
         if (csu >= max || max == 0) abort_replay = true;
         if (hardware.get_ml() && abort_replay == false) {
